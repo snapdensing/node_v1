@@ -1,0 +1,1 @@
+"./config_routines.obj" "./main.obj" "./parse_routines.obj" "./sense_routines.obj" "./transmit_routines.obj" "../lnk_msp430f2132.cmd" -l"libc.a" 
