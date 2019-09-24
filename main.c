@@ -37,7 +37,8 @@ int state;
 
 /** Constant Addresses **/
 char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
-char unicast_addr[]   = "\x00\x13\xA2\x00\x40\xB7\xF2\x9C"; //unicast address (test)
+//char unicast_addr[]   = "\x00\x13\xA2\x00\x40\xB7\xF2\x9C"; //unicast address (test)
+char unicast_addr[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
 //char unicast_addr[]   = "\x00\x13\xA2\x00\x40\xBF\x1F\x51"; //unicast address (deployed system)
 
 

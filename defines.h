@@ -15,6 +15,9 @@
 //#define SLEEP_UC
 //#define SLEEP_XBEE
 
+/* Broadcast */
+//#define BROADCAST
+
 /* State encoding */
 
 #define	S_RTS1		10
