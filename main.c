@@ -343,7 +343,8 @@ int main(void) {
     			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     			//state = S_WINDOW;
-    			state = S_SENSE;
+    			//state = S_SENSE;
+    			state = NS_SENSE;
 
     			/* Assemble Packet Data */
     			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}

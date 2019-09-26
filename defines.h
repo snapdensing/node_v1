@@ -35,6 +35,9 @@
 #define S_TRACE2	8
 #define S_WINDOW	9
 
+/* Next state assignment */
+#define NS_SENSE	S_SENSE
+
 /* Timer-relative periods */
 /** Sensing Period **/
 #define SAMPLE_PERIOD	10
