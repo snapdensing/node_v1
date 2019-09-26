@@ -5,6 +5,8 @@
  *      Author: Snap
  */
 
+#define MODE_DEBUG
+
 /* Sensor Configuration */
 //#define SENSOR_BATT
 #define SENSOR_TEMPINT
@@ -35,8 +37,23 @@
 #define S_TRACE2	8
 #define S_WINDOW	9
 
+#define S_DEBUG		12
+#define S_DBRD		13
+#define S_DUNI		14
+
+
 /* Next state assignment */
 #define NS_SENSE	S_SENSE
+
+#ifdef MODE_DEBUG
+#define NS_DEBUG1	S_DBRD
+#define NS_DEBUG2	S_DUNI
+#define NS_DBRDLOOP	S_DBRD
+#define NS_DBRDBRK	S_DEBUG
+#define NS_DUNILOOP S_DUNI
+#define NS_DUNIBRK	S_DEBUG
+
+#endif
 
 /* Timer-relative periods */
 /** Sensing Period **/

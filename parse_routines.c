@@ -6,6 +6,7 @@
  */
 
 #include <msp430.h>
+#include "defines.h"
 
 /* Parse AT Command Response
  * Currently supported AT command responses
@@ -102,4 +103,32 @@ int parse_stop(char *packet, int length){
 
 	return success;
 }
+
+#ifdef MODE_DEBUG
+/* Parse Debug mode broadcast signal
+ *
+ */
+int parse_debugpacket(char *packet, int length, int *txmax){
+	int success = 0;
+
+	// Check frame type
+	if (packet[3]==0x90){
+
+		// Check data
+		if ((packet[15] == 'D') && (length == 15)){
+			// Check if Broadcast or Unicast
+			if (packet[16] == 'B')
+				success = 1; // Broadcast
+			else
+				success = 2; // Unicast
+
+			// Extract number of debug transmits
+			*txmax = (int)packet[17];
+		}
+	}
+
+	return success;
+
+}
+#endif
 

@@ -11,6 +11,10 @@ int parse_ack(char *packet, int length, char *base_addr);
 int parse_start(char *packet, int length, int *sample_period);
 int parse_stop(char *packet, int length);
 
+#ifdef MODE_DEBUG
+int parse_debugpacket(char *packet, int length, int *txmax);
+#endif
+
 int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count);
 
 void atcom_shsl(int sel);
@@ -57,6 +61,9 @@ int main(void) {
 	/** Transmit buffer **/
 	char tx_data[73];
 	int tx_count;
+#ifdef MODE_DEBUG
+	int txmax;
+#endif
 
 	/** Configuration and flags **/
 	int sample_period;
@@ -116,6 +123,9 @@ int main(void) {
 
     /** Tx Buffer **/
     tx_count = 0;
+#ifdef MODE_DEBUG
+    txmax = 0;
+#endif
 
     /** Check sensors **/
     sensor_flag = detect_sensor();
@@ -220,8 +230,12 @@ int main(void) {
 
     				j = parse_atres('S','L',node_address,rxbuf,rxpsize);
     				if (j == 1){
+#ifdef MODE_DEBUG
+    					state = S_DEBUG;
+#else
     					//state = S_INIT;
     					state = S_SENSE;
+#endif
     				}
 
     				// Reset buffer
@@ -289,7 +303,7 @@ int main(void) {
     				rxctr = 0;
     				rxheader_flag = 0;
     				rxpsize = 0;
-    				P3OUT &= 0xbf;	// nRTS to 1 (UART enable)
+    				P3OUT &= 0xbf;	// nRTS to 0 (UART enable)
 
     			}
     		}
@@ -404,9 +418,94 @@ int main(void) {
     		}
     		break;
 
+#ifdef MODE_DEBUG
+    	/** State: Debug mode entrypoint **/
+    	case S_DEBUG:
+
+    		if (rxheader_flag == 0){
+    			parse_header();
+
+    		}else{
+
+    			if (rxctr >= (rxpsize + 4)){ // Entire packet received
+
+    				j = parse_debugpacket(rxbuf, rxpsize, &txmax);
+
+    				if (j != 0){
+    					timer_flag = 0; // Reset timer flag
+    					tx_count = 0;
+    					if (j == 1)
+    						state = NS_DEBUG1;
+    					else if (j == 2)
+    						state = NS_DEBUG2;
+    				}
+
+    				// Reset buffer
+    				rxctr = 0;
+    				rxheader_flag = 0;
+    				rxpsize = 0;
+    				P3OUT &= 0xbf; // nRTS to 1 (UART enable)
+    			}
+
+    		}
+    		break;
+
+    	/** State: Debug mode Broadcast **/
+    	case S_DBRD:
+    		if (timer_flag > SAMPLE_PERIOD){
+
+    			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+
+    			/* Update Transmit Counter */
+    			tx_count++;
+    			if (tx_count < txmax){
+    				state = NS_DBRDLOOP;
+    			}else{
+    				state = NS_DBRDBRK;
+    			}
+
+    			/* Assemble Packet Data */
+    			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+
+    			/* Transmit */
+    			transmitreq(tx_data, j, broadcast_addr);
+
+    			/* Reset Timer flag */
+    			timer_flag = 0;
+
+    			P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    		}
+    		break;
+
+    	/** State: Debug mode Unicast **/
+    	case S_DUNI:
+    		if (timer_flag > SAMPLE_PERIOD){
+
+    		    P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+
+    		    /* Update Transmit Counter */
+    		    tx_count++;
+    		    if (tx_count < txmax){
+    		    	state = NS_DBRDLOOP;
+    		    }else{
+    		    	state = NS_DBRDBRK;
+    		    }
+
+    		    /* Assemble Packet Data */
+    		    j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+
+    		    /* Transmit */
+    		    transmitreq(tx_data, j, unicast_addr);
+
+    		    /* Reset Timer flag */
+    		    timer_flag = 0;
+
+    		    P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    		}
+    		break;
+#endif
     	}
     }
-
 }
 
 /* Interrupts */
