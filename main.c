@@ -131,7 +131,8 @@ int main(void) {
     sensor_flag = detect_sensor();
 
     /** Base station sent configuration **/
-    sample_period = 2;
+    //sample_period = 2;
+    sample_period = SAMPLE_PERIOD;
 
     /* Start */
 
@@ -438,6 +439,10 @@ int main(void) {
     						state = NS_DEBUG1;
     					else if (j == 2)
     						state = NS_DEBUG2;
+    					else if (j == 3){
+    						state = NS_DEBUG3;
+    						sample_period = txmax;
+    					}
     				}
 
     				// Reset buffer
@@ -452,7 +457,7 @@ int main(void) {
 
     	/** State: Debug mode Broadcast **/
     	case S_DBRD:
-    		if (timer_flag > SAMPLE_PERIOD){
+    		if (timer_flag > sample_period){
 
     			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
@@ -479,16 +484,16 @@ int main(void) {
 
     	/** State: Debug mode Unicast **/
     	case S_DUNI:
-    		if (timer_flag > SAMPLE_PERIOD){
+    		if (timer_flag > sample_period){
 
     		    P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		    /* Update Transmit Counter */
     		    tx_count++;
     		    if (tx_count < txmax){
-    		    	state = NS_DBRDLOOP;
+    		    	state = NS_DUNILOOP;
     		    }else{
-    		    	state = NS_DBRDBRK;
+    		    	state = NS_DUNIBRK;
     		    }
 
     		    /* Assemble Packet Data */

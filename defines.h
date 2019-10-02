@@ -48,6 +48,7 @@
 #ifdef MODE_DEBUG
 #define NS_DEBUG1	S_DBRD
 #define NS_DEBUG2	S_DUNI
+#define NS_DEBUG3	S_DEBUG
 #define NS_DBRDLOOP	S_DBRD
 #define NS_DBRDBRK	S_DEBUG
 #define NS_DUNILOOP S_DUNI

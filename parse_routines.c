@@ -108,7 +108,7 @@ int parse_stop(char *packet, int length){
 /* Parse Debug mode broadcast signal
  *
  */
-int parse_debugpacket(char *packet, int length, int *txmax){
+int parse_debugpacket(char *packet, int length, int *num){
 	int success = 0;
 
 	// Check frame type
@@ -119,11 +119,13 @@ int parse_debugpacket(char *packet, int length, int *txmax){
 			// Check if Broadcast or Unicast
 			if (packet[16] == 'B')
 				success = 1; // Broadcast
-			else
+			else if (packet[16] == 'U')
 				success = 2; // Unicast
+			else if (packet[16] == 'P')
+				success = 3; // Change sampling period
 
-			// Extract number of debug transmits
-			*txmax = (int)packet[17];
+			// Extract additional argument
+			*num = (int)packet[17];
 		}
 	}
 
