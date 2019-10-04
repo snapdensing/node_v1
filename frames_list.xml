@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <loop>false</loop>
+  <repeat_times>1</repeat_times>
+  <repeat_period>500</repeat_period>
+  <frames_list>
+    <frame name="debug_broadcast_10">
+      <payload>7E001110010013A20040BF1F4AFFFE000044420A44</payload>
+    </frame>
+    <frame name="debug_period_20">
+      <payload>7E001110010013A20040BF1F4AFFFE000044541428</payload>
+    </frame>
+    <frame name="atcom_query_PL">
+      <payload>7E00040801504C5A</payload>
+    </frame>
+    <frame name="atcom_set_PL_01">
+      <payload>7E00050801504C0159</payload>
+    </frame>
+    <frame name="atcom_set_PL_04">
+      <payload>7E00050801504C0456</payload>
+    </frame>
+    <frame name="debug_plset_1">
+      <payload>7E001110010013A20040BF1F4AFFFE00004450013F</payload>
+    </frame>
+    <frame name="debug_plset_4">
+      <payload>7E001110010013A20040BF1F4AFFFE00004450043C</payload>
+    </frame>
+    <frame name="debug_broadcast_5">
+      <payload>7E001110010013A20040BF1F4AFFFE000044420549</payload>
+    </frame>
+    <frame name="debug_chset_0x0e">
+      <payload>7E001110010013A20040BF1F4AFFFE000044430E3F</payload>
+    </frame>
+    <frame name="debug_chset_0x0d">
+      <payload>7E001110010013A20040BF1F4AFFFE000044430D40</payload>
+    </frame>
+    <frame name="atcom_set_CH_0x0e">
+      <payload>7E0005080143480E5D</payload>
+    </frame>
+    <frame name="atcom_set_CH_0x0d">
+      <payload>7E0005080143480D5E</payload>
+    </frame>
+  </frames_list>
+</data>
