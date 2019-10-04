@@ -14,6 +14,7 @@
  * - SL (Lower address)
  * - D6
  * - PL
+ * - CH
  */
 int parse_atres(char com0, char com1, char *returndata, char *packet, int length){
 	int j;
@@ -48,6 +49,14 @@ int parse_atres(char com0, char com1, char *returndata, char *packet, int length
 			// Parameter PL
 			else if ((com0 == 'P') && (com1 == 'L')){
 				// Extract PL parameter value
+				returndata[0] = packet[7];
+				//*returndata = packet[7];
+				return 1;
+			}
+
+			// Parameter CH
+			else if ((com0 == 'C') && (com1 == 'H')){
+				// Extract CH parameter value
 				returndata[0] = packet[7];
 				return 1;
 			}
@@ -133,6 +142,8 @@ int parse_debugpacket(char *packet, int length, int *num){
 				success = 3; // Change sampling period
 			else if (packet[16] == 'P')
 				success = 4; // Change power level
+			else if (packet[16] == 'C')
+				success = 5; // Change channel
 			// Extract additional argument
 			*num = (int)packet[17];
 		}

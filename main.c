@@ -21,6 +21,7 @@ void atcom_shsl(int sel);
 void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc);
 void atcom_enrts(void);
 void atcom_pl_set(int val);
+void atcom_ch_set(int val);
 
 int check_sensor(int sensor_id);
 unsigned int detect_sensor(void);
@@ -64,7 +65,7 @@ int main(void) {
 	int tx_count;
 #ifdef MODE_DEBUG
 	int txmax;
-	char power_level;
+	char atres_status;
 #endif
 
 
@@ -452,6 +453,12 @@ int main(void) {
     			    		atcom_pl_set(txmax);
     			    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     					}
+    					else if (j == 5){
+    						state = NS_DEBUG5;
+    						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+							atcom_ch_set(txmax);
+							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    					}
     				}
 
     				// Reset buffer
@@ -526,7 +533,7 @@ int main(void) {
     		}else{
     			if (rxctr >= (rxpsize + 4)){
 
-    				j = parse_atres('P','L',&power_level,rxbuf,rxpsize);
+    				j = parse_atres('P','L',&atres_status,rxbuf,rxpsize);
     				if (j == 1){
     					state = NS_DPLRES;
     				}
@@ -539,6 +546,28 @@ int main(void) {
     			}
     		}
     		break;
+
+		/* State: Debug wait for CH AT command response */
+		case S_DCHRES:
+
+			if (rxheader_flag == 0){
+				parse_header();
+			}else{
+				if (rxctr >= (rxpsize + 4)){
+
+					j = parse_atres('C','H',&atres_status,rxbuf,rxpsize);
+					if (j == 1){
+						state = NS_DCHRES;
+					}
+
+					// Reset buffer
+					rxctr = 0;
+					rxheader_flag = 0;
+					rxpsize = 0;
+					P3OUT &= 0xbf; // nRTS to 0 (UART Rx enable)
+				}
+			}
+			break;
 #endif
     	}
     }

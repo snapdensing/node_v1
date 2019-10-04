@@ -232,3 +232,53 @@ void atcom_pl_set(int val){
 	while (!(IFG2&UCA0TXIFG));
 
 }
+
+/* Set AT Command CH
+ */
+void atcom_ch_set(int val){
+	int checksum;
+	char checksum_c;
+
+	// Wait for empty buffer
+	while (!(IFG2&UCA0TXIFG));
+
+	// Start Delimiter
+	UCA0TXBUF = 0x7e;
+	while (!(IFG2&UCA0TXIFG));
+
+	// Length
+	UCA0TXBUF = 0x00; // upper byte
+	while (!(IFG2&UCA0TXIFG));
+	UCA0TXBUF = 0x05; // lower byte
+	while (!(IFG2&UCA0TXIFG));
+
+	// Frame Type
+	UCA0TXBUF = 0x08;
+	checksum = 0x08;
+	while (!(IFG2&UCA0TXIFG));
+
+	// Frame ID
+	UCA0TXBUF = 0x01;
+	checksum += 0x01;
+	while (!(IFG2&UCA0TXIFG));
+
+	// AT Command: CH
+	UCA0TXBUF = 'C';
+	checksum += (int)'C';
+	while (!(IFG2&UCA0TXIFG));
+	UCA0TXBUF = 'H';
+	checksum += (int)'H';
+	while (!(IFG2&UCA0TXIFG));
+
+	// Parameter value
+	UCA0TXBUF = (char)val;
+	checksum += val;
+	while (!(IFG2&UCA0TXIFG));
+
+	// Checksum
+	checksum_c = (char)checksum;
+	checksum_c = 0xff - checksum_c;
+	UCA0TXBUF = checksum_c;
+	while (!(IFG2&UCA0TXIFG));
+
+}

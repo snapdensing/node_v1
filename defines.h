@@ -41,6 +41,7 @@
 #define S_DBRD		13
 #define S_DUNI		14
 #define S_DPLRES	15
+#define S_DCHRES	16
 
 
 /* Next state assignment */
@@ -51,11 +52,13 @@
 #define NS_DEBUG2	S_DUNI
 #define NS_DEBUG3	S_DEBUG
 #define NS_DEBUG4	S_DPLRES
+#define NS_DEBUG5	S_DCHRES
 #define NS_DBRDLOOP	S_DBRD
 #define NS_DBRDBRK	S_DEBUG
 #define NS_DUNILOOP S_DUNI
 #define NS_DUNIBRK	S_DEBUG
 #define NS_DPLRES	S_DEBUG
+#define NS_DCHRES	S_DEBUG
 
 #endif
 
