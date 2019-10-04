@@ -182,3 +182,53 @@ void atcom_enrts(void){
 
 }
 
+/* Set AT Command PL
+ * - make sure val is within 1 byte representation (no error correction yet)
+ */
+void atcom_pl_set(int val){
+	int checksum;
+	char checksum_c;
+
+	// Wait for empty buffer
+	while (!(IFG2&UCA0TXIFG));
+
+	// Start Delimiter
+	UCA0TXBUF = 0x7e;
+	while (!(IFG2&UCA0TXIFG));
+
+	// Length
+	UCA0TXBUF = 0x00; // upper byte
+	while (!(IFG2&UCA0TXIFG));
+	UCA0TXBUF = 0x05; // lower byte
+	while (!(IFG2&UCA0TXIFG));
+
+	// Frame Type
+	UCA0TXBUF = 0x08;
+	checksum = 0x08;
+	while (!(IFG2&UCA0TXIFG));
+
+	// Frame ID
+	UCA0TXBUF = 0x01;
+	checksum += 0x01;
+	while (!(IFG2&UCA0TXIFG));
+
+	// AT Command: PL
+	UCA0TXBUF = 'P';
+	checksum += (int)'P';
+	while (!(IFG2&UCA0TXIFG));
+	UCA0TXBUF = 'L';
+	checksum += (int)'L';
+	while (!(IFG2&UCA0TXIFG));
+
+	// Parameter value
+	UCA0TXBUF = (char)val;
+	checksum += val;
+	while (!(IFG2&UCA0TXIFG));
+
+	// Checksum
+	checksum_c = (char)checksum;
+	checksum_c = 0xff - checksum_c;
+	UCA0TXBUF = checksum_c;
+	while (!(IFG2&UCA0TXIFG));
+
+}
