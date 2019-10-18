@@ -1,0 +1,27 @@
+== How to Program Nodes ==
+
+1. Clone from github repo:
+   - URL: https://github.com/snapdensing/node_v1.git
+   - Repository is set to private. You must have a github account and you must inform Snap and ask for permissions
+
+2. New CCS Project
+   - Target: MSP430x2xx Family - MSP430F2132
+   - Empty Project
+   - Location: Directory where you cloned
+
+3. Debug to program
+
+== Node configuration == 
+
+All configuration must be done on compile. You only need to edit two files for this:
+  - defines.h
+  - main.c
+
+To make the node broadcast instead of unicast (to an aggregator):
+  - Make sure #define BROADCAST line is uncommented in defines.h
+
+To edit attached sensors (and packet information):
+  - Uncomment desired sensors in "Sensor Configuration" section of defines.h
+
+To change unicast address:
+  - Look for the "Constant Addresses" section in main.c and edit the value of string "unicast_addr" 
