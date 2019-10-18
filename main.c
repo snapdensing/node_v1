@@ -357,7 +357,8 @@ int main(void) {
 #endif
 
 #else
-    		if (timer_flag > SAMPLE_PERIOD){
+    		//if (timer_flag > SAMPLE_PERIOD){
+   		    if (timer_flag > sample_period){
 
     			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
@@ -458,6 +459,10 @@ int main(void) {
     						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 							atcom_ch_set(txmax);
 							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    					}
+    					else if (j == 6){
+    						state = S_SENSE;
+    						sample_period = txmax;
     					}
     				}
 

@@ -132,6 +132,7 @@ int parse_debugpacket(char *packet, int length, int *num){
 	if (packet[3]==0x90){
 
 		// Check data
+		// Debug mode commands
 		if ((packet[15] == 'D') && (length == 15)){
 			// Check if Broadcast or Unicast
 			if (packet[16] == 'B')
@@ -146,6 +147,14 @@ int parse_debugpacket(char *packet, int length, int *num){
 				success = 5; // Change channel
 			// Extract additional argument
 			*num = (int)packet[17];
+		}
+		// Start normal operation
+		else if (packet[15] == 'S') {
+			success = parse_start(packet,length,num);
+			if (success)
+				success = 6; // Start normal sensing
+			else
+				success = 0;
 		}
 	}
 
