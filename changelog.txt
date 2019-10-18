@@ -1,0 +1,6 @@
+Branch v1.3
+(18 Oct 2019)
+- Allowed entry to normal sensing mode (continuous sensing until stopped) from
+the debug state (by sending a start packet)
+- Re-enabled window state to receive stop signal. Upon receiving the stop
+signal, node returns to debug state
