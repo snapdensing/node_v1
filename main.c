@@ -403,24 +403,26 @@ int main(void) {
     				}else{
     					if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
-    						j = parse_stop(rxbuf, rxpsize);
-    						stop_flag = j;
+    						stop_flag = parse_stop(rxbuf, rxpsize);
+    						//stop_flag = j;
 
     						// Reset buffer
     						rxctr = 0;
     						rxheader_flag = 0;
     						rxpsize = 0;
-    						//P3OUT &= 0xbf;	// nRTS to 1 (UART enable)
+    						P3OUT &= 0xbf;	// nRTS to 1 (UART enable)
     					}
     				}
     			}
     		}
 
-    		if (j == 1){
-    			state = S_READY;
+    		if (stop_flag == 1){
+    			//state = S_DEBUG;
+    			state = NS_WINBRK;
     		}else{
     			timer_flag = 0; // Reset timer flag
-    			state = S_SENSE;
+    			//state = S_SENSE;
+    			state = NS_WINLOOP;
     		}
     		break;
 

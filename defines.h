@@ -45,7 +45,9 @@
 
 
 /* Next state assignment */
-#define NS_SENSE	S_SENSE
+#define NS_SENSE	S_WINDOW
+#define NS_WINLOOP	S_SENSE
+#define NS_WINBRK	S_DEBUG
 
 #ifdef MODE_DEBUG
 #define NS_DEBUG1	S_DBRD
