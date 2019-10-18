@@ -36,6 +36,7 @@
 #define S_TRACE1	7
 #define S_TRACE2	8
 #define S_WINDOW	9
+#define S_STOP		17
 
 #define S_DEBUG		12
 #define S_DBRD		13
@@ -47,7 +48,8 @@
 /* Next state assignment */
 #define NS_SENSE	S_WINDOW
 #define NS_WINLOOP	S_SENSE
-#define NS_WINBRK	S_DEBUG
+#define NS_WINBRK	S_STOP
+#define NS_STOP		S_DEBUG
 
 #ifdef MODE_DEBUG
 #define NS_DEBUG1	S_DBRD

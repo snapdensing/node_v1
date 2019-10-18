@@ -47,6 +47,9 @@ char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
 char unicast_addr[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
 //char unicast_addr[]   = "\x00\x13\xA2\x00\x40\xBF\x1F\x51"; //unicast address (deployed system)
 
+/** Constant messages **/
+char stopACK[] = "XA"; // Stop command acknowledge
+
 
 /* Main */
 int main(void) {
@@ -63,6 +66,7 @@ int main(void) {
 	/** Transmit buffer **/
 	char tx_data[73];
 	int tx_count;
+	int checksum;
 #ifdef MODE_DEBUG
 	int txmax;
 	char atres_status;
@@ -425,6 +429,26 @@ int main(void) {
     			//state = S_SENSE;
     			state = NS_WINLOOP;
     		}
+    		break;
+
+    	/** State: Stop signal acknowledge **/
+    	case S_STOP:
+    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+
+    		state = NS_STOP;
+
+    		/* Assemble Packet Data */
+    		//tx_data[0] = stopACK[0];
+    		//tx_data[1] = stopACK[1];
+
+    		/* Transmit */
+   			transmitreq(stopACK, 2, unicast_addr);
+
+    		/* Reset Timer flag */
+    		//timer_flag = 0;
+
+    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+
     		break;
 
 #ifdef MODE_DEBUG
