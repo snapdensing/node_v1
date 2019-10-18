@@ -4,3 +4,6 @@ Branch v1.3
 the debug state (by sending a start packet)
 - Re-enabled window state to receive stop signal. Upon receiving the stop
 signal, node returns to debug state
+- Added stop acknowlege state and packet (b'XA'). After issuing a stop
+command, node should transmit a stop acknowledge to unicast address
+(handshake)
