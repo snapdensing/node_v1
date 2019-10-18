@@ -358,7 +358,7 @@ int main(void) {
 
 #else
     		//if (timer_flag > SAMPLE_PERIOD){
-   		    if (timer_flag > sample_period){
+   		    //if (timer_flag > sample_period){
 
     			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
@@ -388,7 +388,7 @@ int main(void) {
     			/* Reset Stop flag for Stop Window state */
 				stop_flag = 0;
 
-    		}
+    		//}
     		break;
 #endif
 
@@ -397,7 +397,8 @@ int main(void) {
 
     		// Wait for stop signal
     		if (stop_flag == 0){
-    			while (timer_flag < STOP_PERIOD){
+    			//while (timer_flag < STOP_PERIOD){
+    			while (timer_flag < sample_period){
     				if (rxheader_flag == 0){
     					parse_header();
     				}else{
