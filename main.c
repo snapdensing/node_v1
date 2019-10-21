@@ -43,9 +43,7 @@ int state;
 
 /** Constant Addresses **/
 char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
-//char unicast_addr[]   = "\x00\x13\xA2\x00\x40\xB7\xF2\x9C"; //unicast address (test)
-char unicast_addr[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
-//char unicast_addr[]   = "\x00\x13\xA2\x00\x40\xBF\x1F\x51"; //unicast address (deployed system)
+char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
 
 /** Constant messages **/
 char stopACK[] = "XA"; // Stop command acknowledge
@@ -61,7 +59,7 @@ int main(void) {
 
 	/** Address Storage **/
 	char node_address[8]; // Node XBee address
-	char base_address[8]; // Base station address
+	char unicast_addr[8]; // Base station address
 	char origin_addr[8]; //
 
 	/** Transmit buffer **/
@@ -142,6 +140,10 @@ int main(void) {
     /** Base station sent configuration **/
     //sample_period = 2;
     sample_period = SAMPLE_PERIOD;
+
+    /** Initialize Default unicast address **/
+    for (i=0; i<8; i++)
+    	unicast_addr[i] = unicast_addr_default[i];
 
     /* Start */
 
@@ -279,7 +281,7 @@ int main(void) {
     	    else{
     	    	if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
-    	    		j = parse_ack(rxbuf,rxpsize,base_address);
+    	    		j = parse_ack(rxbuf,rxpsize,unicast_addr);
 
     	    		if (j == 1){
     	    			state = S_READY;
