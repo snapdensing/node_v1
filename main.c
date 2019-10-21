@@ -14,6 +14,7 @@ int parse_stop(char *packet, int length, char *origin);
 #ifdef MODE_DEBUG
 int parse_debugpacket(char *packet, int length, int *num);
 void parse_setaddr(char *packet, char *address);
+void parse_srcaddr(char *packet, char *address);
 #endif
 
 int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count);
@@ -143,8 +144,10 @@ int main(void) {
     sample_period = SAMPLE_PERIOD;
 
     /** Initialize Default unicast address **/
-    for (i=0; i<8; i++)
+    for (i=0; i<8; i++){
+    	origin_addr[i] = unicast_addr_default[i];
     	unicast_addr[i] = unicast_addr_default[i];
+    }
 
     /* Start */
 
@@ -471,26 +474,34 @@ int main(void) {
     				if (j != 0){
     					timer_flag = 0; // Reset timer flag
     					tx_count = 0;
+    					// Debug Broadcast
     					if (j == 1)
     						state = NS_DEBUG1;
-    					else if (j == 2)
+    					// Debug Unicast
+    					else if (j == 2){
     						state = NS_DEBUG2;
+    						parse_srcaddr(rxbuf,origin_addr);
+    					}
+    					// Change Period
     					else if (j == 3){
     						state = NS_DEBUG3;
     						sample_period = txmax;
     					}
+    					// Change PL
     					else if (j == 4){
     						state = NS_DEBUG4;
     			    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
     			    		atcom_pl_set(txmax);
     			    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     					}
+    					// Change CH
     					else if (j == 5){
     						state = NS_DEBUG5;
     						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 							atcom_ch_set(txmax);
 							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     					}
+    					// Start sensing
     					else if (j == 6){
     						state = S_SENSE;
     						sample_period = txmax;
@@ -557,7 +568,7 @@ int main(void) {
     		    j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 
     		    /* Transmit */
-    		    transmitreq(tx_data, j, unicast_addr);
+    		    transmitreq(tx_data, j, origin_addr);
 
     		    /* Reset Timer flag */
     		    timer_flag = 0;

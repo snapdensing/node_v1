@@ -180,13 +180,23 @@ int parse_debugpacket(char *packet, int length, int *num){
 
 }
 
-/* Change 8-bit address string
+/* Change 64-bit address string
  */
 void parse_setaddr(char *packet, char *address){
 	int i;
 
 	for (i=0; i<8; i++){
 		address[i] = packet[i+17];
+	}
+}
+
+/* Get 64-bit source address field
+ */
+void parse_srcaddr(char *packet, char *address){
+	int i;
+
+	for (i=0; i<8; i++){
+		address[i] = packet[i+4];
 	}
 }
 #endif
