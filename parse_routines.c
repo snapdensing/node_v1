@@ -160,6 +160,12 @@ int parse_debugpacket(char *packet, int length, int *num){
 			// Extract additional argument
 			*num = (int)packet[17];
 		}
+		// Change Unicast address
+		else if ((packet[15] == 'D') && (length == 22)){
+			if (packet[16] == 'A'){
+				success = 7;
+			}
+		}
 		// Start normal operation
 		else if (packet[15] == 'S') {
 			success = parse_start(packet,length,num);
@@ -172,6 +178,16 @@ int parse_debugpacket(char *packet, int length, int *num){
 
 	return success;
 
+}
+
+/* Change 8-bit address string
+ */
+void parse_setaddr(char *packet, char *address){
+	int i;
+
+	for (i=0; i<8; i++){
+		address[i] = packet[i+17];
+	}
 }
 #endif
 

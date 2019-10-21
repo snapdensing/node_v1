@@ -12,7 +12,8 @@ int parse_start(char *packet, int length, int *sample_period);
 int parse_stop(char *packet, int length, char *origin);
 
 #ifdef MODE_DEBUG
-int parse_debugpacket(char *packet, int length, int *txmax);
+int parse_debugpacket(char *packet, int length, int *num);
+void parse_setaddr(char *packet, char *address);
 #endif
 
 int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count);
@@ -493,6 +494,11 @@ int main(void) {
     					else if (j == 6){
     						state = S_SENSE;
     						sample_period = txmax;
+    					}
+    					// Change unicast address
+    					else if (j == 7){
+    						state = S_DEBUG;
+    						parse_setaddr(rxbuf,unicast_addr);
     					}
     				}
 
