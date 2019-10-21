@@ -106,8 +106,9 @@ int parse_start(char *packet, int length, int *sample_period){
 /* Parse (Sensing) stop signal from base station
  * - Does not authenticate stop signal yet
  */
-int parse_stop(char *packet, int length){
+int parse_stop(char *packet, int length, char *origin){
 	int success = 0;
+	int i;
 
 	// Check frame type
 	if (packet[3]==0x90){
@@ -115,6 +116,17 @@ int parse_stop(char *packet, int length){
 		// Check data
 		if ((packet[15] == 'X') && (length == 13)){
 			success = 1;
+		}
+	}
+
+	// Extract origin (sender)
+	if (success){
+		for (i=0; i<8; i++){
+			origin[i] = packet[i+4];
+		}
+	}else{
+		for (i=0; i<8; i++){
+			origin[i] = 0x00;
 		}
 	}
 

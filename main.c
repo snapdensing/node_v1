@@ -9,7 +9,7 @@ int parse_atres(char com0, char com1, char *returndata, char *packet, int length
 
 int parse_ack(char *packet, int length, char *base_addr);
 int parse_start(char *packet, int length, int *sample_period);
-int parse_stop(char *packet, int length);
+int parse_stop(char *packet, int length, char *origin);
 
 #ifdef MODE_DEBUG
 int parse_debugpacket(char *packet, int length, int *txmax);
@@ -62,6 +62,7 @@ int main(void) {
 	/** Address Storage **/
 	char node_address[8]; // Node XBee address
 	char base_address[8]; // Base station address
+	char origin_addr[8]; //
 
 	/** Transmit buffer **/
 	char tx_data[73];
@@ -408,7 +409,7 @@ int main(void) {
     				}else{
     					if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
-    						stop_flag = parse_stop(rxbuf, rxpsize);
+    						stop_flag = parse_stop(rxbuf, rxpsize, origin_addr);
     						//stop_flag = j;
 
     						// Reset buffer
@@ -442,7 +443,7 @@ int main(void) {
     		//tx_data[1] = stopACK[1];
 
     		/* Transmit */
-   			transmitreq(stopACK, 2, unicast_addr);
+   			transmitreq(stopACK, 2, origin_addr);
 
     		/* Reset Timer flag */
     		//timer_flag = 0;
