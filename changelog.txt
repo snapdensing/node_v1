@@ -1,4 +1,7 @@
 Branch v1.3
+(21 Oct 2019)
+- Added capability to change aggregator(unicast) address.
+
 (18 Oct 2019)
 - Allowed entry to normal sensing mode (continuous sensing until stopped) from
 the debug state (by sending a start packet)
