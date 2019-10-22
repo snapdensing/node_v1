@@ -1,6 +1,7 @@
 Branch v1.4
 (22 Oct 2019)
-- Added Remote query capability to power level ('PL')
+- Added remote query: unicast addr (tx: 'QA', rx: 'QA[val]'  
+- Added remote query: power level (tx: 'QP', rx: 'QPL[val]'
 
 Branch v1.3
 (21 Oct 2019)
