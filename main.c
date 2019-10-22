@@ -15,6 +15,7 @@ int parse_stop(char *packet, int length, char *origin);
 int parse_debugpacket(char *packet, int length, int *num);
 void parse_setaddr(char *packet, char *address);
 void parse_srcaddr(char *packet, char *address);
+int parse_atcom_query(char *packet, int length, int parameter, char *parsedparam);
 #endif
 
 int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count);
@@ -24,6 +25,7 @@ void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc);
 void atcom_enrts(void);
 void atcom_pl_set(int val);
 void atcom_ch_set(int val);
+void atcom_query(int param);
 
 int check_sensor(int sensor_id);
 unsigned int detect_sensor(void);
@@ -71,6 +73,8 @@ int main(void) {
 #ifdef MODE_DEBUG
 	int txmax;
 	char atres_status;
+	int parameter = 0;
+	char parsedparam[8];
 #endif
 
 
@@ -511,6 +515,12 @@ int main(void) {
     						state = S_DEBUG;
     						parse_setaddr(rxbuf,unicast_addr);
     					}
+    					// Query power level
+    					else if (j == 8){
+    						state = S_DQRES1;
+    						parameter = PARAM_PL;
+    						parse_srcaddr(rxbuf,origin_addr);
+    					}
     				}
 
     				// Reset buffer
@@ -620,6 +630,61 @@ int main(void) {
 				}
 			}
 			break;
+
+		/* State: Debug Query parameter */
+		case S_DQRES1:
+		    P3OUT |= 0x40; // UART Rx disable
+		    atcom_query(parameter);
+		    P3OUT &= 0xbf; // UART Rx enable
+		    state = S_DQRES2;
+		    break;
+
+		/* State: Debug Query parameter response */
+		case S_DQRES2:
+		    if (rxheader_flag == 0){
+		        parse_header();
+		    }
+		    else{
+		        if (rxctr >= (rxpsize + 4)){
+
+		            P3OUT |= 0x40; // UART Rx disable
+
+		            j = parse_atcom_query(rxbuf, rxpsize, parameter, parsedparam); // j is parsed parameter length
+		            if (j > 0){
+		                tx_data[0] = 'Q';
+		                switch(parameter){
+		                case PARAM_PL:
+		                    tx_data[1] = 'P';
+		                    tx_data[2] = 'L';
+		                    tx_data[3] = parsedparam[0];
+		                    j = 4; // length of tx_data
+	                        state = S_DQRES3;
+		                    break;
+
+		                default:
+		                    state = S_DEBUG;
+		                    break;
+		                }
+		            }else{
+		                state = S_DEBUG;
+		            }
+
+		            // Reset buffer
+		            rxctr = 0;
+		            rxheader_flag = 0;
+		            rxpsize = 0;
+		            P3OUT &= 0xbf; // UART Rx enable
+		        }
+		    }
+		    break;
+
+	    /* State: Debug Transmit Query parameter response */
+	    case S_DQRES3:
+	        P3OUT |= 0x40; // UART Rx disable
+	        transmitreq(tx_data, j, origin_addr);
+	        P3OUT &= 0xbf; // UART Rx enable
+	        state = S_DEBUG;
+	        break;
 #endif
     	}
     }

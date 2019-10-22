@@ -6,6 +6,7 @@
  */
 
 #include <msp430.h>
+#include "defines.h"
 
 /* AT Command: SH/SL
  * -> 1: SH
@@ -281,4 +282,76 @@ void atcom_ch_set(int val){
 	UCA0TXBUF = checksum_c;
 	while (!(IFG2&UCA0TXIFG));
 
+}
+
+/* AT command query
+ * - Query local AT command parameter value
+ */
+void atcom_query(int param){
+    int checksum;
+    char checksum_c;
+    char atparam[2];
+
+    // Wait for empty buffer
+    while (!(IFG2&UCA0TXIFG));
+
+    // Start Delimiter
+    UCA0TXBUF = 0x7e;
+    while (!(IFG2&UCA0TXIFG));
+
+    // Length
+    UCA0TXBUF = 0x00; //upper
+    while (!(IFG2&UCA0TXIFG));
+    UCA0TXBUF = 0x04; //lower
+    while (!(IFG2&UCA0TXIFG));
+
+    // Frame type
+    UCA0TXBUF = 0x08;
+    checksum = 0x08;
+    while (!(IFG2&UCA0TXIFG));
+
+    // Frame ID
+    UCA0TXBUF = 0x01;
+    checksum += 0x01;
+    while (!(IFG2&UCA0TXIFG));
+
+    // AT Command
+    switch (param){
+    case PARAM_PL:
+        atparam[0] = 'P';
+        atparam[1] = 'L';
+        break;
+
+    default:
+        atparam[0] = 0x00;
+        atparam[1] = 0x00;
+        break;
+    }
+
+    UCA0TXBUF = atparam[0];
+    checksum += (int)atparam[0];
+    while (!(IFG2&UCA0TXIFG));
+    UCA0TXBUF = atparam[1];
+    checksum += (int)atparam[1];
+    while (!(IFG2&UCA0TXIFG));
+
+    // Checksum
+    checksum_c = (char)checksum;
+    checksum_c = 0xff - checksum_c;
+    UCA0TXBUF = checksum_c;
+    while (!(IFG2&UCA0TXIFG));
+
+}
+
+/* Debug Query parameter build response
+ */
+void buildQueryResponse(int param, char *txdata, char *value){
+    txdata[0] = 'Q';
+    switch(param){
+    case PARAM_PL:
+        txdata[1] = 'P';
+        txdata[2] = 'L';
+        txdata[3] = value[0];
+        break;
+    }
 }

@@ -174,6 +174,12 @@ int parse_debugpacket(char *packet, int length, int *num){
 			else
 				success = 0;
 		}
+		// Query parameters
+		else if ((packet[15] == 'Q') && (length == 14)){
+			// Power level
+			if (packet[16] == 'P')
+				success = 8;
+		}
 	}
 
 	return success;
@@ -198,6 +204,29 @@ void parse_srcaddr(char *packet, char *address){
 	for (i=0; i<8; i++){
 		address[i] = packet[i+4];
 	}
+}
+
+/* Parse AT Command Query response
+ */
+int parse_atcom_query(char *packet, int length, int parameter, char *parsedparam){
+    int paramlen = 0;
+
+    // Check frame type
+    if ((packet[3] == 0x88) && (length >= 5)){
+
+        // Check AT parameter
+        // - packet[8] onwards
+        switch(parameter){
+        case PARAM_PL:
+            if ((packet[5] == 'P') && (packet[6] == 'L')){
+                parsedparam[0] = packet[8];
+                paramlen = 1;
+            }
+            break;
+        }
+    }
+
+    return paramlen;
 }
 #endif
 

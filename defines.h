@@ -43,6 +43,9 @@
 #define S_DUNI		14
 #define S_DPLRES	15
 #define S_DCHRES	16
+#define S_DQRES1	18
+#define S_DQRES2    19
+#define S_DQRES3    20
 
 
 /* Next state assignment */
@@ -63,7 +66,6 @@
 #define NS_DUNIBRK	S_DEBUG
 #define NS_DPLRES	S_DEBUG
 #define NS_DCHRES	S_DEBUG
-
 #endif
 
 /* Timer-relative periods */
@@ -78,3 +80,5 @@
 #define NODELIST_MAX	20
 #define RXBUF_MAX		100
 #define TRACE_TIMEOUT	100
+
+#define PARAM_PL	0
