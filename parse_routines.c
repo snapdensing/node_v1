@@ -179,6 +179,13 @@ int parse_debugpacket(char *packet, int length, int *num){
 			// Power level
 			if (packet[16] == 'P')
 				success = 8;
+			// Unicast address
+			else if (packet[16] == 'A')
+			    success = 9;
+			// Sampling period
+			else if (packet[16] == 'T')
+			    success = 10;
+
 		}
 	}
 

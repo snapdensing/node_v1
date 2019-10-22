@@ -521,6 +521,26 @@ int main(void) {
     						parameter = PARAM_PL;
     						parse_srcaddr(rxbuf,origin_addr);
     					}
+    					// Query unicast address
+    					else if (j == 9){
+    					    state = S_DQRES3;
+    					    parse_srcaddr(rxbuf,origin_addr);
+    					    tx_data[0] = 'Q';
+    					    tx_data[1] = 'A';
+    					    for (i=0; i<8; i++)
+    					        tx_data[i+2] = unicast_addr[i];
+    					    j = 10; // tx_data length
+    					}
+    					// Query sampling period
+    					else if (j == 10){
+    					    state = S_DQRES3;
+    					    parse_srcaddr(rxbuf,origin_addr);
+    					    tx_data[0] = 'Q';
+    					    tx_data[1] = 'T';
+    					    tx_data[2] = (char)sample_period; //assumes period is only 8-bits
+    					    j = 3; // tx_data length
+
+    					}
     				}
 
     				// Reset buffer
