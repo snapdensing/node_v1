@@ -83,5 +83,10 @@
 
 #define PARAM_PL	0
 
-#define BATT_VTHLO 0x2e0
-#define BATT_VTHHI 0x346
+//#define BATT_VTHLO 0x02e0 // 3.6V
+#define BATT_VTHLO 0x0327 // test low
+//#define BATT_VTHLO 768 // test low (0x300)
+//#define BATT_VTHHI 0x0346 // 4.1V
+//#define BATT_VTHHI 832 // test high (0x340)
+#define BATT_VTHHI 0x0330 // test hi
+

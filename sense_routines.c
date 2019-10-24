@@ -12,20 +12,20 @@
 /* Function Prototypes */
 int tempSense();
 int senseDHT(unsigned char *p);
-int Battery_supply_nonreg(void);
+unsigned int Battery_supply_nonreg(void);
 
 /* Sensor data packet assembly
  * Returns length of data packet
  */
 
 #ifdef SENSOR_BATT
-int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count, int batt){
+int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count, unsigned int *batt_out){
 #else
 int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count){
 #endif
 
-	//int temp_int;
-	//int batt;
+	int temp_int;
+	int batt;
 	int dht11_rh,dht11_temp;
 	char dht22_rh[2];
 	char dht22_temp[2];
@@ -33,7 +33,7 @@ int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count){
 
 	/* Temperature (Internal) */
 #ifdef SENSOR_TEMPINT
-	int temp_int = tempSense();
+	temp_int = tempSense();
 #endif
 
 	/* Unregulated battery voltage */
@@ -141,14 +141,16 @@ int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count){
 			tx_data[i++] = current[j];
 	}
 
+	*batt_out = batt;
+
 	return i; //return tx_data length
 }
 
 /* Unregulated battery voltage (Joy) */
 #ifdef SENSOR_BATT
-int Battery_supply_nonreg(void)
+unsigned int Battery_supply_nonreg(void)
 {
-    int value=0;
+    unsigned int value=0;
     ADC10CTL1 = INCH_2 + ADC10SSEL_2;
     ADC10CTL0 = SREF_1 + ADC10SHT_3 + ADC10ON + REFON + REF2_5V;
     ADC10AE0 |= BIT2; //A2 ADC input
@@ -157,7 +159,7 @@ int Battery_supply_nonreg(void)
     while(ADC10CTL1 & ADC10BUSY);
     value = ADC10MEM;
     ADC10CTL0 &= ~(ENC + ADC10ON);
-    return (int) value;
+    return value;
 }
 #endif
 

@@ -19,7 +19,7 @@ int parse_atcom_query(char *packet, int length, int parameter, char *parsedparam
 #endif
 
 #ifdef SENSOR_BATT
-int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count, int batt);
+int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count, unsigned int *batt_out);
 #else
 int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count);
 #endif
@@ -130,7 +130,9 @@ int main(void) {
     //P1OUT |= 0x20; // Set P1.5 to enable charging
     P1OUT &= 0xdf; // Reset P1.5 to disable charging
     int charge_flag = 0; // Set to 1 if node is in charging mode
-    int batt; // Battery voltage
+    unsigned int batt; // Battery voltage
+    unsigned int batt_hi = BATT_VTHHI;
+    unsigned int batt_lo = BATT_VTHLO;
 
 
     /* Initialization */
@@ -356,24 +358,32 @@ int main(void) {
 
    			/* Assemble Packet Data */
 #ifdef SENSOR_BATT
-   			j = buildSense(tx_data,sensor_flag,tx_count,batt); //10-byte data: {'D', tx_count, 8-byte data}
+   			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
+
+   			/* Append charge_flag to packet */
+   			tx_data[j] = (char)(charge_flag & 0x00ff);
+   			j++;
 #else
    			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
 
+#ifdef SENSOR_BATT
             /* Charging state */
             if (charge_flag == 0){ // Discharging
-                if (batt <= BATT_VTHLO){
+                //if (batt < BATT_VTHLO){
+                if (batt < batt_lo){
                     charge_flag = 1;
                     P1OUT |= 0x20; // Set P1.5 to enable charging
                 }
             }
             else{ // Charging
-                if (batt >= BATT_VTHHI){
+                //if (batt > BATT_VTHHI){
+                if (batt > batt_hi){
                     charge_flag = 0;
                     P1OUT &= 0xdf; // Reset P1.5 to disable charging
                 }
             }
+#endif
 
    			/* Transmit */
 #ifdef BROADCAST
