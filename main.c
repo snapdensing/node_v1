@@ -18,7 +18,11 @@ void parse_srcaddr(char *packet, char *address);
 int parse_atcom_query(char *packet, int length, int parameter, char *parsedparam);
 #endif
 
+#ifdef SENSOR_BATT
+int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count, int batt);
+#else
 int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count);
+#endif
 
 void atcom_shsl(int sel);
 void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc);
@@ -119,6 +123,15 @@ int main(void) {
     P1DIR &= 0xfd; // set P1.2 to input (XBEE ON/SLEEP indicator)
     P3DIR |= 0x80; // set P3.7 to output (XBEE SLEEP_RQ)
     P3OUT &= 0x7f; // set P3.7 output to 0 (XBEE awake)
+
+    /** Charger **/
+    P1SEL &= 0xdf; // Set P1.5 as GPIO
+    P1DIR |= 0x20; // Set P1.5 as output
+    //P1OUT |= 0x20; // Set P1.5 to enable charging
+    P1OUT &= 0xdf; // Reset P1.5 to disable charging
+    int charge_flag = 0; // Set to 1 if node is in charging mode
+    int batt; // Battery voltage
+
 
     /* Initialization */
 
@@ -336,76 +349,51 @@ int main(void) {
     		 * - use constant SAMPLE_PERIOD if hardcoded period in defines.h
     		 * - use variable sample_period if base station configured period
     		 */
-#ifdef SLEEP_UC
-    		P3OUT |= 0x40; // nRTS to 1 (UART Rx disable)
 
-    		/* Assemble Packet Data */
-    		j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+   			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
-    		/* Transmit */
+   			state = NS_SENSE;
+
+   			/* Assemble Packet Data */
+#ifdef SENSOR_BATT
+   			j = buildSense(tx_data,sensor_flag,tx_count,batt); //10-byte data: {'D', tx_count, 8-byte data}
+#else
+   			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+#endif
+
+            /* Charging state */
+            if (charge_flag == 0){ // Discharging
+                if (batt <= BATT_VTHLO){
+                    charge_flag = 1;
+                    P1OUT |= 0x20; // Set P1.5 to enable charging
+                }
+            }
+            else{ // Charging
+                if (batt >= BATT_VTHHI){
+                    charge_flag = 0;
+                    P1OUT &= 0xdf; // Reset P1.5 to disable charging
+                }
+            }
+
+   			/* Transmit */
 #ifdef BROADCAST
    			transmitreq(tx_data, j, broadcast_addr);
 #else
-   			//transmitreq(tx_data, j, base_address);
    			transmitreq(tx_data, j, unicast_addr);
 #endif
 
    			/* Update Transmit Counter */
-   			tx_count++;
-
-   			/* Sleep XBEE */
-#ifdef SLEEP_XBEE
-   		    P3OUT |= 0x80; // set P3.7 output to 1 (XBEE sleep)
-#endif
+    		tx_count++;
 
    			/* Reset Timer flag */
-   			timer_flag = 0;
+    		//timer_flag = 0;
 
-   		    /* Sleep MSP */
-   		    while (timer_flag < SAMPLE_PERIOD){
-   		    	_BIS_SR(LPM0_bits + GIE); // Enter LPM0 w/interrupt
-   		    }
+   			P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
-   		    /* Wake XBEE */
-#ifdef SLEEP_XBEE
-   		    P3OUT &= 0x7f; // set P3.7 output to 0 (XBEE awake)
-#endif
+   			/* Reset Stop flag for Stop Window state */
+			stop_flag = 0;
 
-#else
-    		//if (timer_flag > SAMPLE_PERIOD){
-   		    //if (timer_flag > sample_period){
-
-    			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-
-    			//state = S_WINDOW;
-    			//state = S_SENSE;
-    			state = NS_SENSE;
-
-    			/* Assemble Packet Data */
-    			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
-
-    			/* Transmit */
-#ifdef BROADCAST
-    			transmitreq(tx_data, j, broadcast_addr);
-#else
-    			//transmitreq(tx_data, j, base_address);
-    			transmitreq(tx_data, j, unicast_addr);
-#endif
-
-    			/* Update Transmit Counter */
-    			tx_count++;
-
-    			/* Reset Timer flag */
-    			timer_flag = 0;
-
-    			P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
-
-    			/* Reset Stop flag for Stop Window state */
-				stop_flag = 0;
-
-    		//}
     		break;
-#endif
 
     	/** State: Window for stopping node sensing **/
     	case S_WINDOW:
@@ -568,7 +556,11 @@ int main(void) {
     			}
 
     			/* Assemble Packet Data */
-    			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+#ifdef SENSOR_BATT
+    			j = buildSense(tx_data,sensor_flag,tx_count,batt); //10-byte data: {'D', tx_count, 8-byte data}
+#else
+                j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+#endif
 
     			/* Transmit */
     			transmitreq(tx_data, j, broadcast_addr);
@@ -595,7 +587,11 @@ int main(void) {
     		    }
 
     		    /* Assemble Packet Data */
+#ifdef SENSOR_BATT
+    		    j = buildSense(tx_data,sensor_flag,tx_count,batt); //10-byte data: {'D', tx_count, 8-byte data}
+#else
     		    j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+#endif
 
     		    /* Transmit */
     		    transmitreq(tx_data, j, origin_addr);

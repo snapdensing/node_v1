@@ -17,10 +17,15 @@ int Battery_supply_nonreg(void);
 /* Sensor data packet assembly
  * Returns length of data packet
  */
-int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count){
 
-	int temp_int;
-	int batt;
+#ifdef SENSOR_BATT
+int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count, int batt){
+#else
+int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count){
+#endif
+
+	//int temp_int;
+	//int batt;
 	int dht11_rh,dht11_temp;
 	char dht22_rh[2];
 	char dht22_temp[2];
@@ -28,7 +33,7 @@ int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count){
 
 	/* Temperature (Internal) */
 #ifdef SENSOR_TEMPINT
-	temp_int = tempSense();
+	int temp_int = tempSense();
 #endif
 
 	/* Unregulated battery voltage */

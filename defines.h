@@ -8,7 +8,7 @@
 #define MODE_DEBUG
 
 /* Sensor Configuration */
-//#define SENSOR_BATT
+#define SENSOR_BATT
 #define SENSOR_TEMPINT
 //#define SENSOR_DHT11
 //#define SENSOR_DHT22
@@ -82,3 +82,6 @@
 #define TRACE_TIMEOUT	100
 
 #define PARAM_PL	0
+
+#define BATT_VTHLO 0x2e0
+#define BATT_VTHHI 0x346
