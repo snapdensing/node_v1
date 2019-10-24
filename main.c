@@ -361,8 +361,9 @@ int main(void) {
    			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 
    			/* Append charge_flag to packet */
-   			tx_data[j] = (char)(charge_flag & 0x00ff);
-   			j++;
+   			//tx_data[j] = (char)(charge_flag & 0x00ff);
+   			//j++;
+
 #else
    			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
