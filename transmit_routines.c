@@ -186,7 +186,7 @@ void atcom_enrts(void){
 /* Set AT Command PL
  * - make sure val is within 1 byte representation (no error correction yet)
  */
-void atcom_pl_set(int val){
+void atcom_pl_set(unsigned int val){
 	int checksum;
 	char checksum_c;
 
@@ -236,7 +236,7 @@ void atcom_pl_set(int val){
 
 /* Set AT Command CH
  */
-void atcom_ch_set(int val){
+void atcom_ch_set(unsigned int val){
 	int checksum;
 	char checksum_c;
 

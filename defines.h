@@ -75,6 +75,8 @@
 #define PRES_PERIOD		2
 /** Stop window Period **/
 #define STOP_PERIOD		5
+/** Debug state battery sample period **/
+#define STANDBY_SAMPLEBATT 255
 
 #define MAC_ACK_TIMEOUT	10
 #define NODELIST_MAX	20

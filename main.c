@@ -5,23 +5,23 @@
 
 int parse_header(void);
 
-int parse_atres(char com0, char com1, char *returndata, char *packet, int length);
+int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length);
 
-int parse_ack(char *packet, int length, char *base_addr);
-int parse_start(char *packet, int length, int *sample_period);
-int parse_stop(char *packet, int length, char *origin);
+int parse_ack(char *packet, unsigned int length, char *base_addr);
+int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
+int parse_stop(char *packet, unsigned int length, char *origin);
 
 #ifdef MODE_DEBUG
-int parse_debugpacket(char *packet, int length, int *num);
+int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
 void parse_setaddr(char *packet, char *address);
 void parse_srcaddr(char *packet, char *address);
-int parse_atcom_query(char *packet, int length, int parameter, char *parsedparam);
+int parse_atcom_query(char *packet, unsigned int length, int parameter, char *parsedparam);
 #endif
 
 #ifdef SENSOR_BATT
-int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count, unsigned int *batt_out);
+int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
 #else
-int buildSense(char *tx_data, unsigned int sensor_flag, int tx_count);
+int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 #endif
 
 void atcom_shsl(int sel);
@@ -38,13 +38,13 @@ unsigned int detect_sensor(void);
 
 /** Receive Buffer **/
 char rxbuf[RXBUF_MAX];	//receive shift register
-int rxctr;				//received bytes counter
-int rxpsize;			//received packet size
+unsigned int rxctr;		//received bytes counter
+unsigned int rxpsize;	//received packet size
 int rxheader_flag;		//receiving frame headers flag (1 when done)
 int rxbuf_overflow;
 
 /** Timer **/
-int timer_flag;
+unsigned int timer_flag;
 
 /** State Encoding **/
 int state;
@@ -72,18 +72,20 @@ int main(void) {
 
 	/** Transmit buffer **/
 	char tx_data[73];
-	int tx_count;
+	unsigned int tx_count;
 	int checksum;
 #ifdef MODE_DEBUG
-	int txmax;
+	unsigned int txmax;
 	char atres_status;
 	int parameter = 0;
 	char parsedparam[8];
+
+	unsigned int standby_sample = STANDBY_SAMPLEBATT; // Standby (Debug state) battery sample period
 #endif
 
 
 	/** Configuration and flags **/
-	int sample_period;
+	unsigned int sample_period;
 	int stop_flag;
 	unsigned int sensor_flag;
 
@@ -568,7 +570,7 @@ int main(void) {
 
     			/* Assemble Packet Data */
 #ifdef SENSOR_BATT
-    			j = buildSense(tx_data,sensor_flag,tx_count,batt); //10-byte data: {'D', tx_count, 8-byte data}
+    			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 #else
                 j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
@@ -599,7 +601,7 @@ int main(void) {
 
     		    /* Assemble Packet Data */
 #ifdef SENSOR_BATT
-    		    j = buildSense(tx_data,sensor_flag,tx_count,batt); //10-byte data: {'D', tx_count, 8-byte data}
+    		    j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 #else
     		    j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
@@ -761,8 +763,8 @@ __interrupt void Timer_A0 (void) {
 // Parse frame packet header (0x7e,size)
 int parse_header(void){
 	if (rxctr >= 3){
-		rxpsize = (int) rxbuf[2];
-		rxpsize += ((int) rxbuf[1]) << 8;
+		rxpsize = (unsigned int) rxbuf[2];
+		rxpsize += ((unsigned int) rxbuf[1]) << 8;
 		rxheader_flag = 1; // done fetching header
 		return 1;
 	}else{

@@ -16,7 +16,7 @@
  * - PL
  * - CH
  */
-int parse_atres(char com0, char com1, char *returndata, char *packet, int length){
+int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length){
 	int j;
 	if (packet[3]==0x88){
 
@@ -66,7 +66,7 @@ int parse_atres(char com0, char com1, char *returndata, char *packet, int length
 }
 
 // Parse Acknowledge signal from base station
-int parse_ack(char *packet, int length, char *base_addr){
+int parse_ack(char *packet, unsigned int length, char *base_addr){
 	int success = 0;
 	int j;
 
@@ -87,7 +87,7 @@ int parse_ack(char *packet, int length, char *base_addr){
 }
 
 // Parse (Sensing) start signal from base station
-int parse_start(char *packet, int length, int *sample_period){
+int parse_start(char *packet, unsigned int length, unsigned int *sample_period){
 	int success = 0;
 
 	// Check frame type
@@ -96,7 +96,7 @@ int parse_start(char *packet, int length, int *sample_period){
 		// Check data
 		if ((packet[15] == 'S') && (length == 14)){
 			success = 1;
-			*sample_period = (int) packet[16]; // 1-byte sample period
+			*sample_period = (unsigned int) packet[16]; // 1-byte sample period
 		}
 	}
 
@@ -106,7 +106,7 @@ int parse_start(char *packet, int length, int *sample_period){
 /* Parse (Sensing) stop signal from base station
  * - Does not authenticate stop signal yet
  */
-int parse_stop(char *packet, int length, char *origin){
+int parse_stop(char *packet, unsigned int length, char *origin){
 	int success = 0;
 	int i;
 
@@ -137,7 +137,7 @@ int parse_stop(char *packet, int length, char *origin){
 /* Parse Debug mode broadcast signal
  *
  */
-int parse_debugpacket(char *packet, int length, int *num){
+int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 	int success = 0;
 
 	// Check frame type
@@ -158,7 +158,7 @@ int parse_debugpacket(char *packet, int length, int *num){
 			else if (packet[16] == 'C')
 				success = 5; // Change channel
 			// Extract additional argument
-			*num = (int)packet[17];
+			*num = (unsigned int)packet[17];
 		}
 		// Change Unicast address
 		else if ((packet[15] == 'D') && (length == 22)){
@@ -215,7 +215,7 @@ void parse_srcaddr(char *packet, char *address){
 
 /* Parse AT Command Query response
  */
-int parse_atcom_query(char *packet, int length, int parameter, char *parsedparam){
+int parse_atcom_query(char *packet, unsigned int length, int parameter, char *parsedparam){
     int paramlen = 0;
 
     // Check frame type
