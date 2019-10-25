@@ -1,5 +1,6 @@
 #include <msp430.h> 
 #include "defines.h"
+#include "defines_id.h"
 
 /* Function Prototypes */
 
@@ -363,9 +364,27 @@ int main(void) {
 #ifdef SENSOR_BATT
    			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 
+
+
+   			/* Append node_id */
+   			for (i=0; i<node_id_len; i++){
+   			    tx_data[j] = node_id[i];
+   			    j++;
+   			}
+   			tx_data[j] = ':';
+   			j++;
+
+   			/* Append node_loc */
+   			for (i=0; i<node_loc_len; i++){
+   			    tx_data[j] = node_loc[i];
+   			    j++;
+   			}
+
+#ifdef DEBUG_CHARGING
    			/* Append charge_flag to packet */
-   			//tx_data[j] = (char)(charge_flag & 0x00ff);
-   			//j++;
+   			tx_data[j] = (char)(charge_flag & 0x00ff);
+   			j++;
+#endif
 
 #else
    			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
@@ -600,6 +619,20 @@ int main(void) {
                 j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
 
+                /* Append node_id */
+                for (i=0; i<node_id_len; i++){
+                    tx_data[j] = node_id[i];
+                    j++;
+                }
+                tx_data[j] = ':';
+                j++;
+
+                /* Append node_loc */
+                for (i=0; i<node_loc_len; i++){
+                    tx_data[j] = node_loc[i];
+                    j++;
+                }
+
     			/* Transmit */
     			transmitreq(tx_data, j, broadcast_addr);
 
@@ -630,6 +663,20 @@ int main(void) {
 #else
     		    j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
+
+                /* Append node_id */
+                for (i=0; i<node_id_len; i++){
+                    tx_data[j] = node_id[i];
+                    j++;
+                }
+                tx_data[j] = ':';
+                j++;
+
+                /* Append node_loc */
+                for (i=0; i<node_loc_len; i++){
+                    tx_data[j] = node_loc[i];
+                    j++;
+                }
 
     		    /* Transmit */
     		    transmitreq(tx_data, j, origin_addr);
