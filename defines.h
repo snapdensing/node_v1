@@ -76,7 +76,7 @@
 /** Stop window Period **/
 #define STOP_PERIOD		5
 /** Debug state battery sample period **/
-#define STANDBY_SAMPLEBATT 255
+#define STANDBY_SAMPLEBATT 1000
 
 #define MAC_ACK_TIMEOUT	10
 #define NODELIST_MAX	20

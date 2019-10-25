@@ -20,6 +20,7 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
 
 #ifdef SENSOR_BATT
 int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
+unsigned int Battery_supply_nonreg(void);
 #else
 int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 #endif
@@ -467,6 +468,27 @@ int main(void) {
     	/** State: Debug mode entrypoint **/
     	case S_DEBUG:
 
+#ifdef SENSOR_BATT
+    		/* Standby battery monitoring */
+    		if (timer_flag > standby_sample){
+    			batt = Battery_supply_nonreg();
+    			timer_flag = 0; // Reset timer flag
+    		}
+    		if (charge_flag == 0){ // Discharging
+    		    if (batt < batt_lo){
+    		        charge_flag = 1;
+    		        P1OUT |= 0x20; // Set P1.5 to enable charging
+    		    }
+    		}
+    		else{ // Charging
+    		    if (batt > batt_hi){
+    		        charge_flag = 0;
+    		        P1OUT &= 0xdf; // Reset P1.5 to disable charging
+    		    }
+    		}
+#endif
+
+    		/* Process packet received */
     		if (rxheader_flag == 0){
     			parse_header();
 
@@ -477,13 +499,16 @@ int main(void) {
     				j = parse_debugpacket(rxbuf, rxpsize, &txmax);
 
     				if (j != 0){
-    					timer_flag = 0; // Reset timer flag
+    					//timer_flag = 0; // Reset timer flag
     					tx_count = 0;
     					// Debug Broadcast
-    					if (j == 1)
+    					if (j == 1){
+    						timer_flag = 0; // Reset timer flag
     						state = NS_DEBUG1;
+    					}
     					// Debug Unicast
     					else if (j == 2){
+    						timer_flag = 0; // Reset timer flag
     						state = NS_DEBUG2;
     						parse_srcaddr(rxbuf,origin_addr);
     					}
