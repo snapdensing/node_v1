@@ -12,7 +12,7 @@
 #define SENSOR_BATT
 #define SENSOR_TEMPINT
 //#define SENSOR_DHT11
-//#define SENSOR_DHT22
+#define SENSOR_DHT22
 //#define SENSOR_CURRENT
 
 //#define SLEEP_UC
@@ -87,7 +87,7 @@
 #define PARAM_PL	0
 
 /** Battery charging thresholds **/
-//#define BATT_VTHLO 0x02e0 // 3.6V
-//#define BATT_VTHHI 0x0346 // 4.1V
-#define BATT_VTHLO 0x0300
-#define BATT_VTHHI 0x0310
+#define BATT_VTHLO 0x02e0 // 3.6V
+#define BATT_VTHHI 0x0346 // 4.1V
+//#define BATT_VTHLO 0x02f0
+//#define BATT_VTHHI 0x0310

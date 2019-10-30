@@ -5,7 +5,7 @@
  *      Author: Snap
  */
 
-const char *node_id = "Percival";
-const char *node_loc = "SaPusoMo";
-unsigned int node_id_len = 8;
-unsigned int node_loc_len = 8;
+const char *node_id = "Name";
+const char *node_loc = "Location";
+unsigned int node_id_len = 4; // length of node_id string
+unsigned int node_loc_len = 8; // lenght of node_loc string
