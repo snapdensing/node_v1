@@ -584,7 +584,12 @@ int main(void) {
     					    tx_data[1] = 'T';
     					    tx_data[2] = (char)sample_period; //assumes period is only 8-bits
     					    j = 3; // tx_data length
-
+    					}
+    					// Commit radio settings to NVM
+    					else if (j == 11){
+    					    state = S_DQRES1;
+    					    parameter = PARAM_WR;
+    					    parse_srcaddr(rxbuf,origin_addr);
     					}
     				}
 
@@ -760,6 +765,14 @@ int main(void) {
 		                    tx_data[3] = parsedparam[0];
 		                    j = 4; // length of tx_data
 	                        state = S_DQRES3;
+		                    break;
+
+		                case PARAM_WR:
+		                    tx_data[1] = 'W';
+		                    tx_data[2] = 'R';
+		                    tx_data[3] = parsedparam[0];
+		                    j = 4;
+		                    state = S_DQRES3;
 		                    break;
 
 		                default:

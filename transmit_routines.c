@@ -322,6 +322,11 @@ void atcom_query(int param){
         atparam[1] = 'L';
         break;
 
+    case PARAM_WR:
+        atparam[0] = 'W';
+        atparam[1] = 'R';
+        break;
+
     default:
         atparam[0] = 0x00;
         atparam[1] = 0x00;

@@ -1,3 +1,7 @@
+Branch v1.5
+(30 Oct 2019)
+- Added commit radio settings to XBee NVM (tx: 'DW', rx: 'QWR')
+
 Branch v1.4
 (22 Oct 2019)
 - Added remote query: unicast addr (tx: 'QA', rx: 'QA[val]'  

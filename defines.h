@@ -85,6 +85,7 @@
 #define TRACE_TIMEOUT	100
 
 #define PARAM_PL	0
+#define PARAM_WR    1
 
 /** Battery charging thresholds **/
 #define BATT_VTHLO 0x02e0 // 3.6V

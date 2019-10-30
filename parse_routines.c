@@ -187,6 +187,11 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 			    success = 10;
 
 		}
+		// Commit radio settings to NVM
+		else if ((packet[15] == 'D') && (length == 14)){
+		    if (packet[16] == 'W')
+		        success = 11;
+		}
 	}
 
 	return success;
@@ -230,6 +235,11 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
                 paramlen = 1;
             }
             break;
+        case PARAM_WR:
+            if ((packet[5] == 'W') && (packet[6] == 'R')){
+                parsedparam[0] = packet[7]; //command status
+                paramlen = 1;
+            }
         }
     }
 
