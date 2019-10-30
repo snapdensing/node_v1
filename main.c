@@ -17,6 +17,7 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
 void parse_setaddr(char *packet, char *address);
 void parse_srcaddr(char *packet, char *address);
 int parse_atcom_query(char *packet, unsigned int length, int parameter, char *parsedparam);
+unsigned int parse_setnodeid(char *packet, char *node_id);
 #endif
 
 #ifdef SENSOR_BATT
@@ -71,6 +72,16 @@ int main(void) {
 	char node_address[8]; // Node XBee address
 	char unicast_addr[8]; // Base station address
 	char origin_addr[8]; //
+
+	/** Node ID **/
+	char node_id[MAXIDLEN];
+	char node_loc[MAXLOCLEN];
+	int node_id_len = node_id_len_default;
+	int node_loc_len = node_loc_len_default;
+	for (i=0; i<node_id_len_default; i++)
+	    node_id[i] = node_id_default[i];
+	for (i=0; i<node_loc_len_default; i++)
+	    node_loc[i] = node_loc_default[i];
 
 	/** Transmit buffer **/
 	char tx_data[73];
@@ -364,8 +375,8 @@ int main(void) {
 #ifdef SENSOR_BATT
    			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 
-
-
+   			tx_data[j] = 0x07;
+   			j++;
    			/* Append node_id */
    			for (i=0; i<node_id_len; i++){
    			    tx_data[j] = node_id[i];
@@ -591,6 +602,16 @@ int main(void) {
     					    parameter = PARAM_WR;
     					    parse_srcaddr(rxbuf,origin_addr);
     					}
+    					// Change node ID
+    					else if (j == 12){
+    					    state = S_DEBUG;
+    					    node_id_len = parse_setnodeid(rxbuf,node_id);
+    					}
+    					// Change node loc
+    					else if (j == 13){
+    					    state = S_DEBUG;
+    					    node_loc_len = parse_setnodeid(rxbuf,node_loc);
+    					}
     				}
 
     				// Reset buffer
@@ -625,6 +646,8 @@ int main(void) {
 #endif
 
                 /* Append node_id */
+                tx_data[j] = 0x07;
+                j++;
                 for (i=0; i<node_id_len; i++){
                     tx_data[j] = node_id[i];
                     j++;
@@ -670,6 +693,8 @@ int main(void) {
 #endif
 
                 /* Append node_id */
+    		    tx_data[j] = 0x07;
+    		    j++;
                 for (i=0; i<node_id_len; i++){
                     tx_data[j] = node_id[i];
                     j++;

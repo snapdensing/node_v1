@@ -92,3 +92,7 @@
 #define BATT_VTHHI 0x0346 // 4.1V
 //#define BATT_VTHLO 0x02f0
 //#define BATT_VTHHI 0x0310
+
+/** Node ID maximum length **/
+#define MAXIDLEN 20
+#define MAXLOCLEN 20

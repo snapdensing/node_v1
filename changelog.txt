@@ -1,5 +1,8 @@
 Branch v1.5
 (30 Oct 2019)
+- Added change node_id/node_loc
+-- Node ID (tx: 'DI'[len][node_id])
+-- Node loc (tx: 'DL'[len][node_loc])
 - Added commit radio settings to XBee NVM (tx: 'DW', rx: 'QWR')
 
 Branch v1.4

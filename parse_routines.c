@@ -192,6 +192,16 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 		    if (packet[16] == 'W')
 		        success = 11;
 		}
+
+		// Change node ID or node loc
+		else if (packet[15] == 'D'){
+		    if (packet[16] == 'I'){ // Change node ID
+		        success = 12;
+		    }
+		    else if (packet[16] == 'L'){ // Change node loc
+		        success = 13;
+		    }
+		}
 	}
 
 	return success;
@@ -216,6 +226,22 @@ void parse_srcaddr(char *packet, char *address){
 	for (i=0; i<8; i++){
 		address[i] = packet[i+4];
 	}
+}
+
+/* Get new node ID from packet and set
+ */
+unsigned int parse_setnodeid(char *packet, char *node_id){
+    unsigned int i, length;
+
+    /* first byte: length */
+    length = (unsigned int) packet[17];
+
+    /* succeeding bytes: parameter value */
+    for (i=0; i<length; i++){
+        node_id[i] = packet[i+18];
+    }
+
+    return length;
 }
 
 /* Parse AT Command Query response
