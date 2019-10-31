@@ -6,7 +6,7 @@
  */
 
 #define MODE_DEBUG
-#define DEBUG_CHARGING
+//#define DEBUG_CHARGING
 
 /* Sensor Configuration */
 #define SENSOR_BATT
