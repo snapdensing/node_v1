@@ -48,6 +48,9 @@
 #define S_DQRES2    19
 #define S_DQRES3    20
 
+#define S_BOOTUP1   21
+#define S_BOOTUP2   22
+
 
 /* Next state assignment */
 #define NS_SENSE	S_WINDOW
@@ -86,6 +89,8 @@
 
 #define PARAM_PL	0
 #define PARAM_WR    1
+#define PARAM_ID    2
+#define PARAM_CH    3
 
 /** Battery charging thresholds **/
 #define BATT_VTHLO 0x02e0 // 3.6V

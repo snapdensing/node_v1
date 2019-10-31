@@ -1,4 +1,8 @@
 Branch v1.5
+(31 Oct 2019)
+- Added bootup state to set XBee ID parameter
+-- Default parameter defined in defines_id.h (currently set to 0x7fff)
+
 (30 Oct 2019)
 - Added change node_id/node_loc
 -- Node ID (tx: 'DI'[len][node_id])

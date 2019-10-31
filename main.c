@@ -33,6 +33,8 @@ void atcom_enrts(void);
 void atcom_pl_set(int val);
 void atcom_ch_set(int val);
 void atcom_query(int param);
+void atcom_set(int param, char *value); //buggy
+void atcom_id_set(unsigned int val);
 
 int check_sensor(int sensor_id);
 unsigned int detect_sensor(void);
@@ -86,11 +88,10 @@ int main(void) {
 	/** Transmit buffer **/
 	char tx_data[73];
 	unsigned int tx_count;
-	int checksum;
 #ifdef MODE_DEBUG
 	unsigned int txmax;
 	char atres_status;
-	int parameter = 0;
+	int parameter;
 	char parsedparam[8];
 
 	unsigned int standby_sample = STANDBY_SAMPLEBATT; // Standby (Debug state) battery sample period
@@ -244,6 +245,8 @@ int main(void) {
     		}else{
     			if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
+    			    P3OUT |= 0x40; // UART Rx disable
+
     				j = parse_atres('S','H',node_address,rxbuf,rxpsize);
     				if (j == 1){
     					state = S_ADDR3;
@@ -278,10 +281,13 @@ int main(void) {
     		else{
     			if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
+    			    P3OUT |= 0x40; // UART Rx disable
+
     				j = parse_atres('S','L',node_address,rxbuf,rxpsize);
     				if (j == 1){
 #ifdef MODE_DEBUG
-    					state = S_DEBUG;
+    					//state = S_DEBUG;
+    				    state = S_BOOTUP1;
 #else
     					//state = S_INIT;
     					state = S_SENSE;
@@ -296,6 +302,49 @@ int main(void) {
     			}
     		}
     		break;
+
+    	/** State: Bootup - set ID **/
+    	case S_BOOTUP1:
+    	    P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
+
+    	    state = S_BOOTUP2;
+    	    //parameter = PARAM_ID;
+    	    //atcom_set(parameter,default_id);
+    	    txmax = XBEE_ID
+    	    atcom_id_set(txmax);
+
+    	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
+    	    break;
+
+    	/** State: Bootup - set ID response **/
+    	case S_BOOTUP2:
+            if (rxheader_flag == 0){
+                parse_header();
+            }
+            else{
+                if (rxctr >= (rxpsize + 4)){
+
+                    P3OUT |= 0x40; // UART Rx disable
+
+                    /*j = parse_atcom_query(rxbuf, rxpsize, PARAM_ID, parsedparam); // j is parsed parameter length
+                    if (j == 2){
+                        if ((parsedparam[0]==default_id[0]) && (parsedparam[1]==default_id[1])){
+                            state = S_DEBUG;
+                        }
+                    }*/
+                    j = parse_atres('I','D',node_address,rxbuf,rxpsize);
+                    if (j == 1){
+                        state = S_DEBUG;
+                    }
+
+                    // Reset buffer
+                    rxctr = 0;
+                    rxheader_flag = 0;
+                    rxpsize = 0;
+                    P3OUT &= 0xbf; // UART Rx enable
+                }
+            }
+            break;
 
     	/** State: Initialization - Broadcast presence to base station **/
     	case S_INIT:

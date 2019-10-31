@@ -360,3 +360,163 @@ void buildQueryResponse(int param, char *txdata, char *value){
         break;
     }
 }
+
+/* AT command set
+ * - Query local AT command parameter value
+ */
+void atcom_set(int param, char *value){
+    int checksum;
+    char checksum_c;
+    char atparam[2];
+    char length[2];
+
+    length[0] = 0x00;
+    length[1] = 0x00;
+
+    // Wait for empty buffer
+    while (!(IFG2&UCA0TXIFG));
+
+    // Start Delimiter
+    UCA0TXBUF = 0x7e;
+    while (!(IFG2&UCA0TXIFG));
+
+    // Length
+    //UCA0TXBUF = 0x00; //upper
+    //while (!(IFG2&UCA0TXIFG));
+    //UCA0TXBUF = 0x04; //lower
+    //while (!(IFG2&UCA0TXIFG));
+    switch (param){
+
+    case PARAM_ID:
+        length[0] = 0x00;
+        length[1] = 0x06;
+        break;
+
+    /*case PARAM_CH:
+        length[0] = 0x00;
+        length[1] = 0x05;
+
+    default:
+        length[0] = 0x00;
+        length[1] = 0x04;
+        break;*/
+    }
+    UCA0TXBUF = length[0];
+    while (!(IFG2&UCA0TXIFG))
+    UCA0TXBUF = length[1];
+    while (!(IFG2&UCA0TXIFG))
+
+    // Frame type (1 byte)
+    UCA0TXBUF = 0x08;
+    checksum = 0x08;
+    while (!(IFG2&UCA0TXIFG));
+
+    // Frame ID (1 byte)
+    UCA0TXBUF = 0x01;
+    checksum += 0x01;
+    while (!(IFG2&UCA0TXIFG));
+
+    // AT Command (2 bytes)
+    switch (param){
+    case PARAM_ID:
+        atparam[0] = 'I';
+        atparam[1] = 'D';
+        break;
+
+   /* case PARAM_CH:
+        atparam[0] = 'C';
+        atparam[1] = 'H';
+        break;
+
+    default:
+        atparam[0] = 0x00;
+        atparam[1] = 0x00;
+        break;*/
+    }
+    UCA0TXBUF = atparam[0];
+    checksum += (int)atparam[0];
+    while (!(IFG2&UCA0TXIFG));
+    UCA0TXBUF = atparam[1];
+    checksum += (int)atparam[1];
+    while (!(IFG2&UCA0TXIFG));
+
+    // Parameter value
+    switch(param){
+
+    case PARAM_ID: // ID (2 bytes)
+        UCA0TXBUF = value[0];
+        checksum += (int)value[0];
+        while (!(IFG2&UCA0TXIFG));
+        UCA0TXBUF = value[1];
+        checksum += (int)value[1];
+        while (!(IFG2&UCA0TXIFG));
+        break;
+
+    /*case PARAM_CH: // CH (1 byte)
+        UCA0TXBUF = value[0];
+        checksum += (int)value[0];
+        while (!(IFG2&UCA0TXIFG));
+        break;*/
+
+    }
+
+    // Checksum
+    checksum_c = (char) checksum;
+    checksum_c = 0xff - checksum_c;
+    UCA0TXBUF = checksum_c;
+    while (!(IFG2&UCA0TXIFG));
+
+}
+
+/* Set AT Command ID
+ */
+void atcom_id_set(unsigned int val){
+    int checksum;
+    char checksum_c;
+
+    // Wait for empty buffer
+    while (!(IFG2&UCA0TXIFG));
+
+    // Start Delimiter
+    UCA0TXBUF = 0x7e;
+    while (!(IFG2&UCA0TXIFG));
+
+    // Length
+    UCA0TXBUF = 0x00; // upper byte
+    while (!(IFG2&UCA0TXIFG));
+    UCA0TXBUF = 0x06; // lower byte
+    while (!(IFG2&UCA0TXIFG));
+
+    // Frame Type
+    UCA0TXBUF = 0x08;
+    checksum = 0x08;
+    while (!(IFG2&UCA0TXIFG));
+
+    // Frame ID
+    UCA0TXBUF = 0x01;
+    checksum += 0x01;
+    while (!(IFG2&UCA0TXIFG));
+
+    // AT Command: ID
+    UCA0TXBUF = 'I';
+    checksum += (int)'I';
+    while (!(IFG2&UCA0TXIFG));
+    UCA0TXBUF = 'D';
+    checksum += (int)'D';
+    while (!(IFG2&UCA0TXIFG));
+
+    // Parameter value
+    UCA0TXBUF = (char)(val >> 8);
+    checksum += (char)(val >> 8);
+    while (!(IFG2&UCA0TXIFG));
+    UCA0TXBUF = (char)(val & 0x00ff);
+    checksum += (char)(val & 0x00ff);
+    while (!(IFG2&UCA0TXIFG));
+
+    // Checksum
+    checksum_c = (char)checksum;
+    checksum_c = 0xff - checksum_c;
+    UCA0TXBUF = checksum_c;
+    while (!(IFG2&UCA0TXIFG));
+
+}

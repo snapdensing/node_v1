@@ -60,6 +60,11 @@ int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned i
 				returndata[0] = packet[7];
 				return 1;
 			}
+
+			// Parameter ID
+			else if ((com0 == 'I') && (com1 == 'D')){
+			    return 1;
+			}
 		}
 	}
 	return 0;
@@ -261,10 +266,19 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
                 paramlen = 1;
             }
             break;
+
         case PARAM_WR:
             if ((packet[5] == 'W') && (packet[6] == 'R')){
                 parsedparam[0] = packet[7]; //command status
                 paramlen = 1;
+            }
+            break;
+
+        case PARAM_ID:
+            if ((packet[5] == 'I') && (packet[6] == 'D')){
+                parsedparam[0] = packet[8];
+                parsedparam[1] = packet[9];
+                paramlen = 2;
             }
         }
     }
