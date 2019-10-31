@@ -50,6 +50,8 @@
 
 #define S_BOOTUP1   21
 #define S_BOOTUP2   22
+#define S_BOOTUP3   23
+#define S_BOOTUP4   24
 
 
 /* Next state assignment */

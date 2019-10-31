@@ -334,6 +334,41 @@ int main(void) {
                     }*/
                     j = parse_atres('I','D',node_address,rxbuf,rxpsize);
                     if (j == 1){
+                        state = S_BOOTUP3;
+                    }
+
+                    // Reset buffer
+                    rxctr = 0;
+                    rxheader_flag = 0;
+                    rxpsize = 0;
+                    P3OUT &= 0xbf; // UART Rx enable
+                }
+            }
+            break;
+
+        /** State: Bootup - set CH **/
+        case S_BOOTUP3:
+            P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
+
+            state = S_BOOTUP4;
+            txmax = XBEE_CH
+            atcom_ch_set(txmax);
+
+            P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
+            break;
+
+        /** State: Bootup - set CH response **/
+        case S_BOOTUP4:
+            if (rxheader_flag == 0){
+                parse_header();
+            }
+            else{
+                if (rxctr >= (rxpsize + 4)){
+
+                    P3OUT |= 0x40; // UART Rx disable
+
+                    j = parse_atres('C','H',node_address,rxbuf,rxpsize);
+                    if (j == 1){
                         state = S_DEBUG;
                     }
 

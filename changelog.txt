@@ -1,7 +1,9 @@
 Branch v1.5
 (31 Oct 2019)
-- Added bootup state to set XBee ID parameter
+- Added bootup states to set XBee ID parameter
 -- Default parameter defined in defines_id.h (currently set to 0x7fff)
+- Added bootup states to set XBee CH parameter
+-- Default parameter defined in defines_id.h (currently set to 0x1a)
 
 (30 Oct 2019)
 - Added change node_id/node_loc
