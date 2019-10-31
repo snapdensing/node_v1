@@ -85,6 +85,9 @@ int main(void) {
 	for (i=0; i<node_loc_len_default; i++)
 	    node_loc[i] = node_loc_default[i];
 
+	/** Sleep mode **/
+	unsigned int sleep_time;
+
 	/** Transmit buffer **/
 	char tx_data[73];
 	unsigned int tx_count;
@@ -696,13 +699,20 @@ int main(void) {
     					    state = S_DEBUG;
     					    node_loc_len = parse_setnodeid(rxbuf,node_loc);
     					}
+    					// Enter timed sleep
+    					else if (j == 14){
+    					    state = S_SLEEP1;
+    					    sleep_time = txmax;
+    					    timer_flag = 0;
+    					    P3OUT |= 0x80; // high to sleep XBee
+    					}
     				}
 
     				// Reset buffer
     				rxctr = 0;
     				rxheader_flag = 0;
     				rxpsize = 0;
-    				P3OUT &= 0xbf; // nRTS to 1 (UART enable)
+    				P3OUT &= 0xbf; // nRTS to 0 (UART enable)
     			}
 
     		}
@@ -908,9 +918,17 @@ int main(void) {
 	        P3OUT &= 0xbf; // UART Rx enable
 	        state = S_DEBUG;
 	        break;
+
+	    /* State: Timed sleep */
+	    case S_SLEEP1:
+	        if (timer_flag > sleep_time ){ //exit sleep
+	            state = S_DEBUG;
+	            P3OUT &= 0x7f; // low to wakeup XBee
+	        break;
 #endif
     	}
     }
+}
 }
 
 /* Interrupts */

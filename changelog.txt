@@ -1,5 +1,8 @@
 Branch v1.5
 (31 Oct 2019)
+- Added sleep on timer state (tx: 'Z'[time_hi][time_lo])
+-- Still need to implement boot-up setting of SM parameter (to 1 for pin
+sleep)
 - Added bootup states to set XBee ID parameter
 -- Default parameter defined in defines_id.h (currently set to 0x7fff)
 - Added bootup states to set XBee CH parameter

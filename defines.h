@@ -53,6 +53,8 @@
 #define S_BOOTUP3   23
 #define S_BOOTUP4   24
 
+#define S_SLEEP1    25
+
 
 /* Next state assignment */
 #define NS_SENSE	S_WINDOW

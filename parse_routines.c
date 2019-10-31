@@ -207,6 +207,13 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 		        success = 13;
 		    }
 		}
+
+		// Enter sleep mode (timed)
+		else if ((packet[15] == 'Z') && (length == 15)){
+		    // Extract sleep period
+		    *num = (unsigned int)(packet[16] << 8) + (unsigned int)packet[17];
+		    success = 14;
+		}
 	}
 
 	return success;
