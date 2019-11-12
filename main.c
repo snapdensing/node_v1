@@ -187,6 +187,48 @@ int main(void) {
     	unicast_addr[i] = unicast_addr_default[i];
     }
 
+    /*** FLASH WRITE TEST ***/
+    char *base_addr = (char *)0x1080; //segment B
+    char *addr;
+    char flash_segB_data[64];
+    for (i=0; i<64; i++){
+        flash_segB_data[i] = 0xff;
+    }
+    // Copy node_id
+    flash_segB_data[0] = (char)(node_id_len & 0x00ff);
+    for (i=0; i<node_id_len; i++){
+        if (i < 31){
+            flash_segB_data[i+1] = node_id[i];
+        }
+    }
+    // Erase segment B
+    while (BUSY & FCTL3); // wait until not busy
+    FCTL2 = FWKEY | FSSEL_2 | FN1; // SMCLK / 3 (1MHz / 3)
+    FCTL3 = FWKEY; // Clear LOCK
+    FCTL1 = FWKEY | ERASE; // Enable segment erase
+    *base_addr = 0; // Dummy write to initiate segment erase
+    FCTL3 = FWKEY | LOCK; // Set LOCK
+
+    // Block write to segment B
+    while (BUSY & FCTL3); // wait until not busy
+    FCTL2 = FWKEY | FSSEL_2 | FN1; // SMCLK / 3 (1MHz / 3)
+    FCTL3 = FWKEY; // Clear LOCK
+    //FCTL1 = FWKEY | BLKWRT | WRT; // Enable block write
+    addr = base_addr;
+    for (i=0; i<64; i++){
+        FCTL1 = FWKEY | WRT; // Enable write
+        *addr = flash_segB_data[i]; // Copy byte data
+        while (!(WAIT & FCTL3)); // Wait for WAIT to become set
+        FCTL1 = FWKEY; // Clear WRT
+        while (BUSY & FCTL3); // wait until not busy
+        addr++;
+    }
+    //FCTL1 = FWKEY; // Clear WRT, BLKWRT
+    while (BUSY & FCTL3); // wait until not busy
+    FCTL3 = FWKEY | LOCK; // Set LOCK
+
+    /*** END OF FLASH WRITE TEST ***/
+
     /* Start */
 
     /** Enable Interrupts **/
