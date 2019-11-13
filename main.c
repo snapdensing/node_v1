@@ -42,6 +42,7 @@ unsigned int detect_sensor(void);
 void flash_erase(char *addr);
 void segment_wr(char *base_addr, char *data);
 void flash_assemble_segD(char *data, char *node_id, int node_id_len, char *node_loc, int node_loc_len);
+void read_segD(char *node_id, int *node_id_lenp, char *node_loc, int *node_loc_lenp);
 
 /* Global Variables */
 
@@ -192,51 +193,27 @@ int main(void) {
     }
 
     /*** FLASH WRITE TEST ***/
-    /*char *base_addr = (char *)0x1080; //segment B
-    char *addr;
-    char flash_segB_data[64];
-    for (i=0; i<64; i++){
-        flash_segB_data[i] = 0xff;
-    }
-    // Copy node_id
-    flash_segB_data[0] = (char)(node_id_len & 0x00ff);
-    for (i=0; i<node_id_len; i++){
-        if (i < 31){
-            flash_segB_data[i+1] = node_id[i];
-        }
-    }*/
-    // Erase segment B
-    /*while (BUSY & FCTL3); // wait until not busy
-    FCTL2 = FWKEY | FSSEL_2 | FN1; // SMCLK / 3 (1MHz / 3)
-    FCTL3 = FWKEY; // Clear LOCK
-    FCTL1 = FWKEY | ERASE; // Enable segment erase
-    *base_addr = 0; // Dummy write to initiate segment erase
-    FCTL3 = FWKEY | LOCK; // Set LOCK*/
+
+    /*char data_segD[64];
     char *base_addr = (char *)SEG_D;
-    char data_segD[64];
     flash_erase(base_addr);
     flash_assemble_segD(data_segD,node_id,node_id_len,node_loc,node_loc_len);
     segment_wr(base_addr,data_segD);
 
-    // Block write to segment B
-    /*while (BUSY & FCTL3); // wait until not busy
-    FCTL2 = FWKEY | FSSEL_2 | FN1; // SMCLK / 3 (1MHz / 3)
-    FCTL3 = FWKEY; // Clear LOCK
-    //FCTL1 = FWKEY | BLKWRT | WRT; // Enable block write
-    addr = base_addr;
+    char test_str[64];
     for (i=0; i<64; i++){
-        FCTL1 = FWKEY | WRT; // Enable write
-        *addr = flash_segB_data[i]; // Copy byte data
-        while (!(WAIT & FCTL3)); // Wait for WAIT to become set
-        FCTL1 = FWKEY; // Clear WRT
-        while (BUSY & FCTL3); // wait until not busy
-        addr++;
-    }
-    //FCTL1 = FWKEY; // Clear WRT, BLKWRT
-    while (BUSY & FCTL3); // wait until not busy
-    FCTL3 = FWKEY | LOCK; // Set LOCK*/
+        test_str[i] = base_addr[i];
+    }*/
 
     /*** END OF FLASH WRITE TEST ***/
+
+    /*** FLASH READ TEST ***/
+
+    unsigned int test_id_len,test_loc_len;
+    char test_id[31], test_loc[31];
+    read_segD(test_id, &test_id_len, test_loc, &test_loc_len);
+
+    /*** END OF FLASH READ TEST ***/
 
     /* Start */
 

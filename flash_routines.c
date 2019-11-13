@@ -26,7 +26,7 @@ void flash_erase(char *addr){
  */
 void segment_wr(char *base_addr, char *data){
     char *addr;
-    int i;
+    unsigned int i;
 
     while (BUSY & FCTL3); // wait until not busy
     FCTL2 = FWKEY | FSSEL_2 | FN1; // SMCLK / 3 (1MHz / 3)
@@ -53,7 +53,7 @@ void segment_wr(char *base_addr, char *data){
  */
 void flash_assemble_segD(char *data, char *node_id, int node_id_len, char *node_loc, int node_loc_len){
 
-    int i;
+    unsigned int i;
 
     /* Initialize data */
     for (i=1; i<64; i++){
@@ -68,5 +68,30 @@ void flash_assemble_segD(char *data, char *node_id, int node_id_len, char *node_
     data[32] = (char)(node_loc_len & 0x00ff);
     for (i=0; i<node_loc_len; i++){
         data[i+33] = node_loc[i];
+    }
+}
+
+/* Read segment D data
+ * Copy flash contents to:
+ * - node_id,
+ * - node_id_len,
+ * - node_loc,
+ * - node_loc_len
+ */
+void read_segD(char *node_id, int *node_id_lenp, char *node_loc, int *node_loc_lenp){
+    unsigned int i, node_id_len, node_loc_len;
+
+    char *data = (char *)SEG_D;
+
+    node_id_len = (unsigned int)data[0];
+    *node_id_lenp = node_id_len;
+    for (i=0; i<node_id_len; i++){
+        node_id[i] = data[i+1];
+    }
+
+    node_loc_len = (unsigned int)data[32];
+    *node_loc_lenp = node_loc_len;
+    for (i=0; i<node_loc_len; i++){
+        node_loc[i] = data[i+33];
     }
 }
