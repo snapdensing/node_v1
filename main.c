@@ -41,8 +41,8 @@ unsigned int detect_sensor(void);
 
 void flash_erase(char *addr);
 void segment_wr(char *base_addr, char *data);
-void flash_assemble_segD(char *data, char *node_id, int node_id_len, char *node_loc, int node_loc_len);
-void read_segD(char *node_id, int *node_id_lenp, char *node_loc, int *node_loc_lenp);
+void flash_assemble_segD(char *data, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len);
+void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsigned int *node_loc_lenp);
 
 /* Global Variables */
 
@@ -83,12 +83,8 @@ int main(void) {
 	/** Node ID **/
 	char node_id[MAXIDLEN];
 	char node_loc[MAXLOCLEN];
-	int node_id_len = node_id_len_default;
-	int node_loc_len = node_loc_len_default;
-	for (i=0; i<node_id_len_default; i++)
-	    node_id[i] = node_id_default[i];
-	for (i=0; i<node_loc_len_default; i++)
-	    node_loc[i] = node_loc_default[i];
+	unsigned int node_id_len, node_loc_len;
+
 
 	/** Sleep mode **/
 	unsigned int sleep_time;
@@ -103,6 +99,10 @@ int main(void) {
 	char parsedparam[8];
 
 	unsigned int standby_sample = STANDBY_SAMPLEBATT; // Standby (Debug state) battery sample period
+
+	/** Flash data buffer **/
+	char flash_data[64];
+	char *flash_addr;
 #endif
 
 
@@ -207,13 +207,32 @@ int main(void) {
 
     /*** END OF FLASH WRITE TEST ***/
 
-    /*** FLASH READ TEST ***/
 
-    unsigned int test_id_len,test_loc_len;
+    /* Initialize Node ID/Loc */
+    unsigned int test_id_len;
+    unsigned int test_loc_len;
     char test_id[31], test_loc[31];
     read_segD(test_id, &test_id_len, test_loc, &test_loc_len);
-
-    /*** END OF FLASH READ TEST ***/
+    // Node ID
+    if (test_id_len < MAXIDLEN){ // Get from flash
+        node_id_len = test_id_len;
+        for (i=0; i<node_id_len; i++)
+            node_id[i] = test_id[i];
+    }else{ // Use programming defaults
+        node_id_len = node_id_len_default;
+        for (i=0; i<node_id_len_default; i++)
+            node_id[i] = node_id_default[i];
+    }
+    // Node Loc
+    if (test_loc_len < MAXLOCLEN){ // Get from flash
+        node_loc_len = test_loc_len;
+        for (i=0; i<node_loc_len; i++)
+            node_loc[i] = test_loc[i];
+    }else{
+        node_loc_len = node_loc_len_default;
+        for (i=0; i<node_loc_len_default; i++)
+            node_loc[i] = node_loc_default[i];
+    }
 
     /* Start */
 
@@ -944,7 +963,17 @@ int main(void) {
 	        P3OUT |= 0x40; // UART Rx disable
 	        transmitreq(tx_data, j, origin_addr);
 	        P3OUT &= 0xbf; // UART Rx enable
+
 	        state = S_DEBUG;
+
+	        // Save MSP Parameters to flash
+	        if (parameter == PARAM_WR){
+	            flash_assemble_segD(flash_data, node_id, node_id_len, node_loc, node_loc_len);
+	            flash_addr = (char *)SEG_D;
+	            flash_erase(flash_addr);
+	            segment_wr(flash_addr, flash_data);
+	        }
+
 	        break;
 
 	    /* State: Timed sleep */

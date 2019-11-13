@@ -51,7 +51,7 @@ void segment_wr(char *base_addr, char *data){
  *   node_loc_len (1 byte)
  *   node_loc     (31 bytes)
  */
-void flash_assemble_segD(char *data, char *node_id, int node_id_len, char *node_loc, int node_loc_len){
+void flash_assemble_segD(char *data, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len){
 
     unsigned int i;
 
@@ -78,7 +78,7 @@ void flash_assemble_segD(char *data, char *node_id, int node_id_len, char *node_
  * - node_loc,
  * - node_loc_len
  */
-void read_segD(char *node_id, int *node_id_lenp, char *node_loc, int *node_loc_lenp){
+void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsigned int *node_loc_lenp){
     unsigned int i, node_id_len, node_loc_len;
 
     char *data = (char *)SEG_D;
