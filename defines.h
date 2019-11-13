@@ -103,5 +103,10 @@
 //#define BATT_VTHHI 0x0310
 
 /** Node ID maximum length **/
-#define MAXIDLEN 20
-#define MAXLOCLEN 20
+#define MAXIDLEN 31
+#define MAXLOCLEN 31
+
+/** Flash **/
+#define SEG_D 0x1000
+#define SEG_C 0x1040
+#define SEG_B 0x1080

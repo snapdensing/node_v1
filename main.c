@@ -39,6 +39,10 @@ void atcom_id_set(unsigned int val);
 int check_sensor(int sensor_id);
 unsigned int detect_sensor(void);
 
+void flash_erase(char *addr);
+void segment_wr(char *base_addr, char *data);
+void flash_assemble_segD(char *data, char *node_id, int node_id_len, char *node_loc, int node_loc_len);
+
 /* Global Variables */
 
 /** Receive Buffer **/
@@ -188,7 +192,7 @@ int main(void) {
     }
 
     /*** FLASH WRITE TEST ***/
-    char *base_addr = (char *)0x1080; //segment B
+    /*char *base_addr = (char *)0x1080; //segment B
     char *addr;
     char flash_segB_data[64];
     for (i=0; i<64; i++){
@@ -200,17 +204,22 @@ int main(void) {
         if (i < 31){
             flash_segB_data[i+1] = node_id[i];
         }
-    }
+    }*/
     // Erase segment B
-    while (BUSY & FCTL3); // wait until not busy
+    /*while (BUSY & FCTL3); // wait until not busy
     FCTL2 = FWKEY | FSSEL_2 | FN1; // SMCLK / 3 (1MHz / 3)
     FCTL3 = FWKEY; // Clear LOCK
     FCTL1 = FWKEY | ERASE; // Enable segment erase
     *base_addr = 0; // Dummy write to initiate segment erase
-    FCTL3 = FWKEY | LOCK; // Set LOCK
+    FCTL3 = FWKEY | LOCK; // Set LOCK*/
+    char *base_addr = (char *)SEG_D;
+    char data_segD[64];
+    flash_erase(base_addr);
+    flash_assemble_segD(data_segD,node_id,node_id_len,node_loc,node_loc_len);
+    segment_wr(base_addr,data_segD);
 
     // Block write to segment B
-    while (BUSY & FCTL3); // wait until not busy
+    /*while (BUSY & FCTL3); // wait until not busy
     FCTL2 = FWKEY | FSSEL_2 | FN1; // SMCLK / 3 (1MHz / 3)
     FCTL3 = FWKEY; // Clear LOCK
     //FCTL1 = FWKEY | BLKWRT | WRT; // Enable block write
@@ -225,7 +234,7 @@ int main(void) {
     }
     //FCTL1 = FWKEY; // Clear WRT, BLKWRT
     while (BUSY & FCTL3); // wait until not busy
-    FCTL3 = FWKEY | LOCK; // Set LOCK
+    FCTL3 = FWKEY | LOCK; // Set LOCK*/
 
     /*** END OF FLASH WRITE TEST ***/
 
