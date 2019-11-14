@@ -43,6 +43,7 @@ void flash_erase(char *addr);
 void segment_wr(char *base_addr, char *data);
 void flash_assemble_segD(char *data, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len);
 void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsigned int *node_loc_lenp);
+void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling);
 
 /* Global Variables */
 
@@ -97,6 +98,8 @@ int main(void) {
 	char atres_status;
 	int parameter;
 	char parsedparam[8];
+	char channel; // XBee channel
+	char panid[2]; // XBee ID
 
 	unsigned int standby_sample = STANDBY_SAMPLEBATT; // Standby (Debug state) battery sample period
 
@@ -360,7 +363,9 @@ int main(void) {
     	    state = S_BOOTUP2;
     	    //parameter = PARAM_ID;
     	    //atcom_set(parameter,default_id);
-    	    txmax = XBEE_ID
+    	    txmax = XBEE_ID;
+    	    panid[0] = (char)(txmax >> 8);
+    	    panid[1] = (char)(txmax & 0x00ff);
     	    atcom_id_set(txmax);
 
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
@@ -401,6 +406,7 @@ int main(void) {
             P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
 
             state = S_BOOTUP4;
+            channel = (char)XBEE_CH;
             txmax = XBEE_CH
             atcom_ch_set(txmax);
 
@@ -690,7 +696,9 @@ int main(void) {
     					}
     					// Change CH
     					else if (j == 5){
-    						state = NS_DEBUG5;
+    						//state = NS_DEBUG5;
+    					    state = S_DCHRES;
+    					    channel = (char)(txmax & 0x00ff);
     						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 							atcom_ch_set(txmax);
 							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
@@ -970,6 +978,11 @@ int main(void) {
 	        if (parameter == PARAM_WR){
 	            flash_assemble_segD(flash_data, node_id, node_id_len, node_loc, node_loc_len);
 	            flash_addr = (char *)SEG_D;
+	            flash_erase(flash_addr);
+	            segment_wr(flash_addr, flash_data);
+
+	            flash_assemble_segC(flash_data, channel, panid, unicast_addr, sample_period);
+	            flash_addr = (char *)SEG_C;
 	            flash_erase(flash_addr);
 	            segment_wr(flash_addr, flash_data);
 	        }
