@@ -95,3 +95,87 @@ void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsign
         node_loc[i] = data[i+33];
     }
 }
+
+/* Assemble 64-byte segment C data
+ * Format:
+ *   valid        (1 byte)
+ *   channel      (1 byte)
+ *   ID (XBee)    (2 byte)
+ *   Aggregator   (8 bytes)
+ *   Sampling     (2 bytes)
+ */
+void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling){
+
+    unsigned int i;
+
+    /* Initialize data */
+    for (i=1; i<64; i++){
+        data[i] = 0xff;
+    }
+
+    /* Valid byte (valid if 0)
+     * bit 7 - channel
+     * bit 6 - pan ID
+     * bit 5 - aggregator
+     * bit 4 - sampling
+     */
+    data[0] = 0x0f;
+
+    /* Channel */
+    data[1] = *channel;
+
+    /* Pan ID */
+    data[2] = panid[0];
+    data[3] = panid[1];
+
+    /* Aggregator */
+    for (i=0; i<8; i++){
+        data[4+i] = aggre[i];
+    }
+
+    /* Sampling period */
+    data[12] = (char)(sampling >> 8);
+    data[13] = (char)(sampling & 0x00ff);
+
+}
+
+/* Read segment C data
+ * Copy flash contents to (if valid):
+ * - panid
+ * - channel
+ * - aggre
+ * - sampling
+ */
+void read_segC(char *panid, char *channel, char *aggre, unsigned int *samplingp){
+    unsigned int i, sampling;
+    char valid;
+
+    char *data = (char *)SEG_C;
+
+    valid = data[0];
+
+    /* Channel */
+    if (valid & 0x80){
+       *channel = data[1];
+    }
+
+    /* Pan ID */
+    if (valid & 0x40){
+        panid[0] = data[2];
+        panid[1] = data[3];
+    }
+
+    /* Aggregator */
+    if (valid & 0x20){
+        for (i=0; i<8; i++){
+            aggre[i] = data[4+i];
+        }
+    }
+
+    /* Sampling period */
+    if (valid & 0x10){
+        sampling = (unsigned int)data[12];
+        sampling = (sampling << 8) + (unsigned int)data[13];
+        *samplingp = sampling;
+    }
+}
