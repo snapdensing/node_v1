@@ -146,36 +146,38 @@ void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, un
  * - aggre
  * - sampling
  */
-void read_segC(char *panid, char *channel, char *aggre, unsigned int *samplingp){
+void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp){
     unsigned int i, sampling;
     char valid;
 
     char *data = (char *)SEG_C;
 
     valid = data[0];
+    *validp = valid;
 
     /* Channel */
-    if (valid & 0x80){
+    if (!(valid & 0x80)){
        *channel = data[1];
     }
 
     /* Pan ID */
-    if (valid & 0x40){
+    if (!(valid & 0x40)){
         panid[0] = data[2];
         panid[1] = data[3];
     }
 
     /* Aggregator */
-    if (valid & 0x20){
+    if (!(valid & 0x20)){
         for (i=0; i<8; i++){
             aggre[i] = data[4+i];
         }
     }
 
     /* Sampling period */
-    if (valid & 0x10){
+    if (!(valid & 0x10)){
         sampling = (unsigned int)data[12];
         sampling = (sampling << 8) + (unsigned int)data[13];
         *samplingp = sampling;
     }
+
 }

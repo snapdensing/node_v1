@@ -44,6 +44,7 @@ void segment_wr(char *base_addr, char *data);
 void flash_assemble_segD(char *data, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len);
 void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsigned int *node_loc_lenp);
 void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling);
+void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp);
 
 /* Global Variables */
 
@@ -106,6 +107,7 @@ int main(void) {
 	/** Flash data buffer **/
 	char flash_data[64];
 	char *flash_addr;
+	char valid_segC;
 #endif
 
 
@@ -189,12 +191,6 @@ int main(void) {
     //sample_period = 2;
     sample_period = SAMPLE_PERIOD;
 
-    /** Initialize Default unicast address **/
-    for (i=0; i<8; i++){
-    	origin_addr[i] = unicast_addr_default[i];
-    	unicast_addr[i] = unicast_addr_default[i];
-    }
-
     /*** FLASH WRITE TEST ***/
 
     /*char data_segD[64];
@@ -235,6 +231,15 @@ int main(void) {
         node_loc_len = node_loc_len_default;
         for (i=0; i<node_loc_len_default; i++)
             node_loc[i] = node_loc_default[i];
+    }
+
+    /* Flash Segment C read for initialization */
+    read_segC(&valid_segC, panid, &channel, unicast_addr, &sample_period);
+
+    /** Initialize Default unicast address **/
+    for (i=0; i<8; i++){
+        origin_addr[i] = unicast_addr_default[i];
+        unicast_addr[i] = unicast_addr_default[i];
     }
 
     /* Start */
@@ -981,7 +986,7 @@ int main(void) {
 	            flash_erase(flash_addr);
 	            segment_wr(flash_addr, flash_data);
 
-	            flash_assemble_segC(flash_data, channel, panid, unicast_addr, sample_period);
+	            flash_assemble_segC(flash_data, &channel, panid, unicast_addr, sample_period);
 	            flash_addr = (char *)SEG_C;
 	            flash_erase(flash_addr);
 	            segment_wr(flash_addr, flash_data);
