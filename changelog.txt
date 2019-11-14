@@ -1,3 +1,13 @@
+Branch v1.6
+(14 Nov 2019)
+- Added flash memory support (save and load during boot):
+-- Node ID
+-- Node Loc
+-- Pan ID
+-- Channel
+-- Aggregator Address (unicast_addr)
+-- Sampling rate
+
 Branch v1.5
 (31 Oct 2019)
 - Added sleep on timer state (tx: 'Z'[time_hi][time_lo])
