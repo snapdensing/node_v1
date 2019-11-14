@@ -187,8 +187,9 @@ int main(void) {
     /** Check sensors **/
     sensor_flag = detect_sensor();
 
-    /** Base station sent configuration **/
-    //sample_period = 2;
+    /* Base station sent configuration
+     * - possible overwrite by flash if value exists
+     */
     sample_period = SAMPLE_PERIOD;
 
     /*** FLASH WRITE TEST ***/
@@ -233,14 +234,16 @@ int main(void) {
             node_loc[i] = node_loc_default[i];
     }
 
-    /* Flash Segment C read for initialization */
-    read_segC(&valid_segC, panid, &channel, unicast_addr, &sample_period);
-
-    /** Initialize Default unicast address **/
+    /* Initialize Default unicast address
+     * - Possible overwrite by flash if value exists
+     */
     for (i=0; i<8; i++){
         origin_addr[i] = unicast_addr_default[i];
         unicast_addr[i] = unicast_addr_default[i];
     }
+
+    /* Flash Segment C read for initialization */
+    read_segC(&valid_segC, panid, &channel, unicast_addr, &sample_period);
 
     /* Start */
 
@@ -368,9 +371,15 @@ int main(void) {
     	    state = S_BOOTUP2;
     	    //parameter = PARAM_ID;
     	    //atcom_set(parameter,default_id);
-    	    txmax = XBEE_ID;
-    	    panid[0] = (char)(txmax >> 8);
-    	    panid[1] = (char)(txmax & 0x00ff);
+    	    /* Get value from flash if it exists */
+    	    if (!(valid_segC & 0x40)){
+    	        txmax = (unsigned int)panid[0];
+    	        txmax = (txmax << 8) + (unsigned int)panid[1];
+    	    }else{
+    	        txmax = XBEE_ID;
+    	        panid[0] = (char)(txmax >> 8);
+    	        panid[1] = (char)(txmax & 0x00ff);
+    	    }
     	    atcom_id_set(txmax);
 
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
@@ -411,8 +420,13 @@ int main(void) {
             P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
 
             state = S_BOOTUP4;
-            channel = (char)XBEE_CH;
-            txmax = XBEE_CH
+            /* Get value from flash if it exists */
+            if (!(valid_segC & 0x80)){
+                txmax = channel;
+            }else{
+                channel = (char)XBEE_CH;
+                txmax = XBEE_CH;
+            }
             atcom_ch_set(txmax);
 
             P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
