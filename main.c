@@ -67,7 +67,7 @@ char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast ad
 
 /** Constant messages **/
 char stopACK[] = "XA"; // Stop command acknowledge
-
+char startACK[] = "SA"; // Start command acknowledge
 
 /* Main */
 int main(void) {
@@ -187,26 +187,10 @@ int main(void) {
     /** Check sensors **/
     sensor_flag = detect_sensor();
 
-    /* Base station sent configuration
+    /* Default sampling period
      * - possible overwrite by flash if value exists
      */
     sample_period = SAMPLE_PERIOD;
-
-    /*** FLASH WRITE TEST ***/
-
-    /*char data_segD[64];
-    char *base_addr = (char *)SEG_D;
-    flash_erase(base_addr);
-    flash_assemble_segD(data_segD,node_id,node_id_len,node_loc,node_loc_len);
-    segment_wr(base_addr,data_segD);
-
-    char test_str[64];
-    for (i=0; i<64; i++){
-        test_str[i] = base_addr[i];
-    }*/
-
-    /*** END OF FLASH WRITE TEST ***/
-
 
     /* Initialize Node ID/Loc */
     unsigned int test_id_len;
@@ -456,69 +440,6 @@ int main(void) {
             }
             break;
 
-    	/** State: Initialization - Broadcast presence to base station **/
-    	case S_INIT:
-
-    		// Transmit "Present" signal
-    	    if (timer_flag > PRES_PERIOD){
-
-    			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-
-    			tx_data[0] = 'P';
-    		    transmitreq(tx_data, 1, broadcast_addr);
-    		    timer_flag = 0;
-
-    		    P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
-    	    }
-
-    	    // Check if acknowledge signal from base station
-    	    if (rxheader_flag == 0){
-    	    	parse_header();
-    	    }
-    	    else{
-    	    	if (rxctr >= (rxpsize + 4)){ // Entire packet received
-
-    	    		j = parse_ack(rxbuf,rxpsize,unicast_addr);
-
-    	    		if (j == 1){
-    	    			state = S_READY;
-    	    		}
-
-    	    		// Reset buffer
-    	    		rxctr = 0;
-    	    		rxheader_flag = 0;
-    	    		rxpsize = 0;
-    	    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
-    	    	}
-    	    }
-    	    break;
-
-    	/** State: Wait for base station signal to start sensing **/
-    	case S_READY:
-    		// Wait for start signal from base station
-    		if (rxheader_flag == 0){
-    			parse_header();
-    		}else{
-    			if (rxctr >= (rxpsize + 4)){ // Entire packet received
-
-    				j = parse_start(rxbuf, rxpsize, &sample_period);
-
-    				if (j == 1){
-    					timer_flag = 0; // Reset timer flag
-    					state = S_SENSE;
-    				}
-
-    				// Reset buffer
-    				rxctr = 0;
-    				rxheader_flag = 0;
-    				rxpsize = 0;
-    				P3OUT &= 0xbf;	// nRTS to 0 (UART enable)
-
-    			}
-    		}
-
-    		break;
-
     	/** State: Perform sensing and transmit **/
     	case S_SENSE:
     		/* Sense and transmit
@@ -625,7 +546,8 @@ int main(void) {
 
     		if (stop_flag == 1){
     			//state = S_DEBUG;
-    			state = NS_WINBRK;
+    			//state = NS_WINBRK;
+    		    state = S_STOP;
     		}else{
     			timer_flag = 0; // Reset timer flag
     			//state = S_SENSE;
@@ -637,21 +559,27 @@ int main(void) {
     	case S_STOP:
     		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
-    		state = NS_STOP;
-
-    		/* Assemble Packet Data */
-    		//tx_data[0] = stopACK[0];
-    		//tx_data[1] = stopACK[1];
+    		//state = NS_STOP;
+    		state = S_DEBUG;
 
     		/* Transmit */
    			transmitreq(stopACK, 2, origin_addr);
 
-    		/* Reset Timer flag */
-    		//timer_flag = 0;
-
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
     		break;
+
+    	/** State: Start signal acknowledge **/
+    	case S_START:
+    	    P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
+
+    	    state = S_SENSE;
+
+    	    /* Transmit */
+    	    transmitreq(startACK, 2, origin_addr);
+
+    	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
+    	    break;
 
 #ifdef MODE_DEBUG
     	/** State: Debug mode entrypoint **/
@@ -724,7 +652,8 @@ int main(void) {
     					}
     					// Start sensing
     					else if (j == 6){
-    						state = S_SENSE;
+    						//state = S_SENSE;
+    					    state = S_START;
     						sample_period = txmax;
     					}
     					// Change unicast address

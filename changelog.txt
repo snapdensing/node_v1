@@ -1,4 +1,7 @@
 Branch v1.6
+(15 Nov 2019)
+- Added start acknowledge (node replies "SA" after start)
+
 (14 Nov 2019)
 - Added flash memory support (save and load during boot):
 -- Node ID

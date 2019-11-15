@@ -38,6 +38,7 @@
 #define S_TRACE2	8
 #define S_WINDOW	9
 #define S_STOP		17
+#define S_START     26
 
 #define S_DEBUG		12
 #define S_DBRD		13
