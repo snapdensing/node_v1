@@ -39,6 +39,8 @@
 #define S_WINDOW	9
 #define S_STOP		17
 #define S_START     26
+#define S_STARTRES  27
+#define S_SENSERES  28
 
 #define S_DEBUG		12
 #define S_DBRD		13

@@ -11,6 +11,13 @@
 
 int parse_txstat(char *packet, unsigned int length, char *delivery_p);
 
+/* Receive and parse transmit status
+ * Return values:
+ *   1 - Successful delivery
+ *   2 - Received transmit status but failed delivery
+ *   0 - Non-transmit status frame received
+ * Resets receive buffer after whole frame is received
+ */
 int rx_txstat(int *state_p,/* int next_state,*/ int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p){
 
     int parsed_txstat, success;
@@ -31,6 +38,7 @@ int rx_txstat(int *state_p,/* int next_state,*/ int *rxheader_flag_p, unsigned i
             /* Failed transmit ctr */
             if (delivery != 0x00){
                 *fail_ctr_p = *fail_ctr_p + 1;
+                success = 2;
             }else{
                 success = 1;
             }

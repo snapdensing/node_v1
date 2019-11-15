@@ -294,3 +294,21 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
 }
 #endif
 
+/* Parse Transmit Status
+ * length - header + payload + checksum (3 + x + 1)
+ * returns 1 on success
+ */
+int parse_txstat(char *packet, unsigned int length, char *delivery_p){
+
+    // Check frame type
+    if ((packet[3] == 0x8b) && (length == 7)){
+
+        // Delivery status
+        *delivery_p = packet[8];
+
+        return 1;
+    }else{
+        return 0;
+    }
+}
+

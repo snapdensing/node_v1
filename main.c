@@ -46,6 +46,8 @@ void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsign
 void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling);
 void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp);
 
+int rx_txstat(int *state_p, int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
+
 /* Global Variables */
 
 /** Receive Buffer **/
@@ -162,6 +164,10 @@ int main(void) {
     unsigned int batt; // Battery voltage
     unsigned int batt_hi = BATT_VTHHI;
     unsigned int batt_lo = BATT_VTHLO;
+
+    /** Debug information **/
+    unsigned int sensetx_fail = 0;
+    unsigned int sensetx = 0;
 
 
     /* Initialization */
@@ -449,7 +455,8 @@ int main(void) {
 
    			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
-   			state = NS_SENSE;
+   			//state = NS_SENSE;
+   			state = S_SENSERES;
 
    			/* Assemble Packet Data */
 #ifdef SENSOR_BATT
@@ -519,6 +526,20 @@ int main(void) {
 
     		break;
 
+    	/** State: Sense response (catch transmit status) **/
+    	case S_SENSERES:
+
+    	    if (rxheader_flag == 0){
+    	        parse_header();
+    	    }else{
+    	        j = rx_txstat(&state, &rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
+    	        if (j != 0){
+    	            state = S_WINDOW;
+    	        }
+    	    }
+
+    	    break;
+
     	/** State: Window for stopping node sensing **/
     	case S_WINDOW:
 
@@ -573,12 +594,31 @@ int main(void) {
     	case S_START:
     	    P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
 
-    	    state = S_SENSE;
+    	    //state = S_SENSE;
+    	    state = S_STARTRES;
 
     	    /* Transmit */
     	    transmitreq(startACK, 2, origin_addr);
 
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
+    	    break;
+
+    	/** State: Start signal acknowledge response **/
+    	case S_STARTRES:
+
+    	    if (rxheader_flag == 0){
+    	        parse_header();
+    	    }else{
+    	        j = rx_txstat(&state, /*S_SENSE,*/ &rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
+    	        if (j == 1){
+    	            state = S_SENSE;
+
+    	            /* Reset statistics */
+    	            sensetx = 0;
+    	            sensetx_fail = 0;
+    	        }
+    	    }
+
     	    break;
 
 #ifdef MODE_DEBUG
