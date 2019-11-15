@@ -46,7 +46,7 @@ void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsign
 void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling);
 void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp);
 
-int rx_txstat(int *state_p, int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
+int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
 
 /* Global Variables */
 
@@ -532,7 +532,7 @@ int main(void) {
     	    if (rxheader_flag == 0){
     	        parse_header();
     	    }else{
-    	        j = rx_txstat(&state, &rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
+    	        j = rx_txstat(&rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
     	        if (j != 0){
     	            state = S_WINDOW;
     	        }
@@ -581,7 +581,8 @@ int main(void) {
     		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		//state = NS_STOP;
-    		state = S_DEBUG;
+    		//state = S_DEBUG;
+    		state = S_STOPRES;
 
     		/* Transmit */
    			transmitreq(stopACK, 2, origin_addr);
@@ -589,6 +590,22 @@ int main(void) {
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
     		break;
+
+    	/** State: Stop signal acknowledge response **/
+    	case S_STOPRES:
+
+    	    if (rxheader_flag == 0){
+    	        parse_header();
+    	    }else{
+    	        j = rx_txstat(&rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
+    	        if (j == 1){
+    	            state = S_DEBUG;
+    	        }else if (j != 0){
+    	            state = S_STOP; // Re-transmit stopACK
+    	        }
+    	    }
+
+    	    break;
 
     	/** State: Start signal acknowledge **/
     	case S_START:
@@ -609,13 +626,15 @@ int main(void) {
     	    if (rxheader_flag == 0){
     	        parse_header();
     	    }else{
-    	        j = rx_txstat(&state, /*S_SENSE,*/ &rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
+    	        j = rx_txstat(&rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
     	        if (j == 1){
-    	            state = S_SENSE;
+    	            state = S_SENSE; // Loop until successful ack transmit
 
     	            /* Reset statistics */
     	            sensetx = 0;
     	            sensetx_fail = 0;
+    	        }else if (j != 0){
+    	            state = S_START; // re-transmit  startACK
     	        }
     	    }
 
