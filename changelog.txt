@@ -1,5 +1,11 @@
 Branch v1.6
 (15 Nov 2019)
+- Added query command for transmit statistics:
+-- Send 'QS' to node
+-- Replies 'QS'[tx count][tx_failed]
+--- both tx_count and tx_failed are 2 bytes each, MSB sent first
+--- both counters are reset on a start command
+- Now catching transmit status frames from sense, start, stop, and query
 - Added start acknowledge (node replies "SA" after start)
 
 (14 Nov 2019)

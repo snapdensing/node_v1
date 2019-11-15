@@ -140,7 +140,7 @@ int parse_stop(char *packet, unsigned int length, char *origin){
 
 #ifdef MODE_DEBUG
 /* Parse Debug mode broadcast signal
- *
+ * - Return range: 0 - 15
  */
 int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 	int success = 0;
@@ -190,6 +190,9 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 			// Sampling period
 			else if (packet[16] == 'T')
 			    success = 10;
+			// Transmit Statistics
+			else if (packet[16] == 'S')
+			    success = 15;
 
 		}
 		// Commit radio settings to NVM

@@ -768,6 +768,20 @@ int main(void) {
     					    timer_flag = 0;
     					    P3OUT |= 0x80; // high to sleep XBee
     					}
+    					// Query statistics
+    					else if (j == 15){
+    					    state = S_DQRES3;
+                            parse_srcaddr(rxbuf,origin_addr);
+                            tx_data[0] = 'Q';
+                            tx_data[1] = 'S';
+                            // 1st parameter: sensetx
+                            tx_data[2] = (char)(sensetx >> 8);
+                            tx_data[3] = (char)(sensetx & 0x00ff);
+                            // 2nd parameter: sensetx_fail
+                            tx_data[4] = (char)(sensetx_fail >> 8);
+                            tx_data[5] = (char)(sensetx_fail & 0x00ff);
+                            j = 6; // tx_data length
+    					}
     				}
 
     				// Reset buffer
@@ -975,23 +989,43 @@ int main(void) {
 
 	    /* State: Debug Transmit Query parameter response */
 	    case S_DQRES3:
+
+	        // Save MSP Parameters to flash
+            if (parameter == PARAM_WR){
+                flash_assemble_segD(flash_data, node_id, node_id_len, node_loc, node_loc_len);
+                flash_addr = (char *)SEG_D;
+                flash_erase(flash_addr);
+                segment_wr(flash_addr, flash_data);
+
+                flash_assemble_segC(flash_data, &channel, panid, unicast_addr, sample_period);
+                flash_addr = (char *)SEG_C;
+                flash_erase(flash_addr);
+                segment_wr(flash_addr, flash_data);
+            }
+
 	        P3OUT |= 0x40; // UART Rx disable
 	        transmitreq(tx_data, j, origin_addr);
 	        P3OUT &= 0xbf; // UART Rx enable
 
-	        state = S_DEBUG;
+	        //state = S_DEBUG;
+	        state = S_DQRES4;
 
-	        // Save MSP Parameters to flash
-	        if (parameter == PARAM_WR){
-	            flash_assemble_segD(flash_data, node_id, node_id_len, node_loc, node_loc_len);
-	            flash_addr = (char *)SEG_D;
-	            flash_erase(flash_addr);
-	            segment_wr(flash_addr, flash_data);
+	        break;
 
-	            flash_assemble_segC(flash_data, &channel, panid, unicast_addr, sample_period);
-	            flash_addr = (char *)SEG_C;
-	            flash_erase(flash_addr);
-	            segment_wr(flash_addr, flash_data);
+	    /* State: Debug Transmit Query parameter response - Transmit status */
+	    case S_DQRES4:
+
+	        if (rxheader_flag == 0){
+	            parse_header();
+	        }else{
+
+	            j = rx_txstat(&rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
+
+	            if (j == 1){
+	                state = S_DEBUG;
+	            }else if (j != 0){
+	                state = S_DQRES3; // re-transmit Query response
+	            }
 	        }
 
 	        break;

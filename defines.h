@@ -51,6 +51,7 @@
 #define S_DQRES1	18
 #define S_DQRES2    19
 #define S_DQRES3    20
+#define S_DQRES4    30
 
 #define S_BOOTUP1   21
 #define S_BOOTUP2   22
