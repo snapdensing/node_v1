@@ -149,73 +149,90 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 	if (packet[3]==0x90){
 
 		// Check data
+
+        // Change node ID or node loc
+        if (packet[15] == 'D'){
+            if (packet[16] == 'I'){ // Change node ID
+                success = 12;
+            }
+            else if (packet[16] == 'L'){ // Change node loc
+                success = 13;
+            }
+            return success;
+        }
+
 		// Debug mode commands
 		if ((packet[15] == 'D') && (length == 15)){
 			// Check if Broadcast or Unicast
-			if (packet[16] == 'B')
+			if (packet[16] == 'B'){
 				success = 1; // Broadcast
-			else if (packet[16] == 'U')
+			}else if (packet[16] == 'U'){
 				success = 2; // Unicast
-			else if (packet[16] == 'T')
+			}else if (packet[16] == 'T'){
 				success = 3; // Change sampling period
-			else if (packet[16] == 'P')
+			}else if (packet[16] == 'P'){
 				success = 4; // Change power level
-			else if (packet[16] == 'C')
+			}else if (packet[16] == 'C'){
 				success = 5; // Change channel
+			}
 			// Extract additional argument
 			*num = (unsigned int)packet[17];
+
+			return success;
 		}
+
 		// Change Unicast address
-		else if ((packet[15] == 'D') && (length == 22)){
+		if ((packet[15] == 'D') && (length == 22)){
 			if (packet[16] == 'A'){
 				success = 7;
 			}
+
+			return success;
 		}
+
 		// Start normal operation
-		else if (packet[15] == 'S') {
+		if (packet[15] == 'S') {
 			success = parse_start(packet,length,num);
-			if (success)
+			if (success){
 				success = 6; // Start normal sensing
-			else
+			}else{
 				success = 0;
+			}
+
+			return success;
 		}
+
 		// Query parameters
-		else if ((packet[15] == 'Q') && (length == 14)){
+		if ((packet[15] == 'Q') && (length == 14)){
 			// Power level
-			if (packet[16] == 'P')
+			if (packet[16] == 'P'){
 				success = 8;
 			// Unicast address
-			else if (packet[16] == 'A')
+			}else if (packet[16] == 'A'){
 			    success = 9;
 			// Sampling period
-			else if (packet[16] == 'T')
+			}else if (packet[16] == 'T'){
 			    success = 10;
 			// Transmit Statistics
-			else if (packet[16] == 'S')
+			}else if (packet[16] == 'S'){
 			    success = 15;
-
+			}
+			return success;
 		}
+
 		// Commit radio settings to NVM
-		else if ((packet[15] == 'D') && (length == 14)){
-		    if (packet[16] == 'W')
-		        success = 11;
-		}
-
-		// Change node ID or node loc
-		else if (packet[15] == 'D'){
-		    if (packet[16] == 'I'){ // Change node ID
-		        success = 12;
-		    }
-		    else if (packet[16] == 'L'){ // Change node loc
-		        success = 13;
-		    }
+		if ((packet[15] == 'D') && (packet[16] == 'W') && (length == 14)){
+		    success = 11;
+		    return success;
 		}
 
 		// Enter sleep mode (timed)
-		else if ((packet[15] == 'Z') && (length == 15)){
+		if ((packet[15] == 'Z') && (length == 15)){
 		    // Extract sleep period
 		    *num = (unsigned int)(packet[16] << 8) + (unsigned int)packet[17];
 		    success = 14;
+
+		    return success;
 		}
 	}
 
