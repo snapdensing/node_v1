@@ -235,10 +235,23 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 
 	case 'S':
 
-		if (length == 14){
-			success = START;
-			*num = (unsigned int)packet[16];
-		}
+	    switch (length){
+
+	    case 13: // Retain sampling period
+	        success = START;
+	        break;
+
+	    case 14: // 1-byte sampling period
+	        success = START;
+	        *num = (unsigned int)packet[16];
+	        break;
+
+	    case 15: // 2-byte sampling period
+	        success = START;
+	        *num = (unsigned int)(packet[16] << 8) + (unsigned int)(packet[17] & 0x00ff);
+	        break;
+
+	    }
 		break;
 
 	case 'Z':
@@ -256,105 +269,6 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 	else
 		return 0;
 }
-/*int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
-	int success = 0;
-
-	// Check frame type
-	if (packet[3]==0x90){
-
-		// Check data
-
-        // Change node ID or node loc
-        if (packet[15] == 'D'){
-            if (packet[16] == 'I'){ // Change node ID
-                success = 12;
-            }
-            else if (packet[16] == 'L'){ // Change node loc
-                success = 13;
-            }
-            return success;
-        }
-
-		// Debug mode commands
-		if ((packet[15] == 'D') && (length == 15)){
-			// Check if Broadcast or Unicast
-			if (packet[16] == 'B'){
-				success = 1; // Broadcast
-			}else if (packet[16] == 'U'){
-				success = 2; // Unicast
-			}else if (packet[16] == 'T'){
-				success = 3; // Change sampling period
-			}else if (packet[16] == 'P'){
-				success = 4; // Change power level
-			}else if (packet[16] == 'C'){
-				success = 5; // Change channel
-			}
-			// Extract additional argument
-			*num = (unsigned int)packet[17];
-
-			return success;
-		}
-
-		// Change Unicast address
-		if ((packet[15] == 'D') && (length == 22)){
-			if (packet[16] == 'A'){
-				success = 7;
-			}
-
-			return success;
-		}
-
-		// Start normal operation
-		if (packet[15] == 'S') {
-			success = parse_start(packet,length,num);
-			if (success){
-				success = 6; // Start normal sensing
-			}else{
-				success = 0;
-			}
-
-			return success;
-		}
-
-		// Query parameters
-		if ((packet[15] == 'Q') && (length == 14)){
-			// Power level
-			if (packet[16] == 'P'){
-				success = 8;
-			// Unicast address
-			}else if (packet[16] == 'A'){
-			    success = 9;
-			// Sampling period
-			}else if (packet[16] == 'T'){
-			    success = 10;
-			// Transmit Statistics
-			}else if (packet[16] == 'S'){
-			    success = 15;
-			}
-			return success;
-		}
-
-		// Commit radio settings to NVM
-		if ((packet[15] == 'D') && (packet[16] == 'W') && (length == 14)){
-		    success = 11;
-		    return success;
-		}
-
-		// Enter sleep mode (timed)
-		if ((packet[15] == 'Z') && (length == 15)){
-		    // Extract sleep period
-		    *num = (unsigned int)(packet[16] << 8) + (unsigned int)packet[17];
-		    success = 14;
-
-		    return success;
-		}
-	}
-
-	return success;
-
-}*/
-
-
 
 /* Change 64-bit address string
  */
