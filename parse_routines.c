@@ -143,6 +143,120 @@ int parse_stop(char *packet, unsigned int length, char *origin){
  * - Return range: 0 - 15
  */
 int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
+        int success = 0;
+
+        switch(packet[15]){
+        case 'D': 
+		switch(packet[16]){
+
+		case 'A':
+			if (length == 22)
+				success = CHGSINK;
+			break;
+
+		case 'B':
+			if (length == 15){
+				success = DBRD;
+				*num = (unsigned int) packet[17];
+			}
+			break;
+
+		case 'C':
+			if (length == 15){
+				success = CHGCH;
+				*num = (unsigned int) packet[17];
+			}
+			break;
+
+		case 'P':
+			if (length == 15){
+				success = CHGPL;
+				*num = (unsigned int) packet[17];
+			}
+			break;
+
+		case 'T':
+			if (length == 15){
+				success = CHGPER;
+				*num = (unsigned int) packet[17];
+			}
+			break;
+			
+		case 'U':
+			if (length == 15){
+				success = DUNI;
+				*num = (unsigned int) packet[17];
+			}
+			break;
+
+		case 'I':
+			success = CHGID;
+			break;
+
+		case 'L':
+			success = CHGLOC;
+			break;
+
+		case 'W':
+			if (length == 14)
+				success = COMMIT;
+			break;
+		}
+
+		break;
+
+	case 'Q':
+
+		switch(packet[16]){
+
+		case 'A':
+			if (length == 14)
+				success = QUESINK;
+			break;
+
+		case 'P':
+			if (length == 14)
+				success = QUEPL;
+			break;
+			
+		case 'S':
+			if (length == 14)
+				success = QUESTAT;
+			break;
+
+		case 'T':
+			if (length == 14)
+				success = QUEPER;
+			break;
+
+		}
+
+		break;
+
+	case 'S':
+
+		if (length == 14){
+			success = START;
+			*num = (unsigned int)packet[16];
+		}
+		break;
+
+	case 'Z':
+
+		if (length == 15){
+			success = SLPTIMED;
+			*num = (unsigned int)(packet[16] << 8) + (unsigned int)packet[17];
+		}
+		break;
+	}
+
+	/* Check frame type */
+	if (packet[3] == 0x90)
+		return success;
+	else
+		return 0;
+}
+/*int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 	int success = 0;
 
 	// Check frame type
@@ -238,7 +352,9 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 
 	return success;
 
-}
+}*/
+
+
 
 /* Change 64-bit address string
  */

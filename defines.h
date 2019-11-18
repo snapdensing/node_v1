@@ -101,6 +101,23 @@
 #define PARAM_ID    2
 #define PARAM_CH    3
 
+/** Debug parse return values **/
+#define CHGSINK  7
+#define DBRD     1
+#define CHGCH    5
+#define CHGID    12
+#define CHGLOC   13
+#define CHGPL    4
+#define CHGPER   3
+#define DUNI     2
+#define COMMIT   11
+#define QUESINK  9
+#define QUEPL    8
+#define QUESTAT  15
+#define QUEPER   10
+#define START    6
+#define SLPTIMED 14
+
 /** Battery charging thresholds **/
 #define BATT_VTHLO 0x02e0 // 3.6V
 #define BATT_VTHHI 0x0346 // 4.1V
