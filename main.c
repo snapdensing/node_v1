@@ -385,12 +385,6 @@ int main(void) {
 
                     P3OUT |= 0x40; // UART Rx disable
 
-                    /*j = parse_atcom_query(rxbuf, rxpsize, PARAM_ID, parsedparam); // j is parsed parameter length
-                    if (j == 2){
-                        if ((parsedparam[0]==default_id[0]) && (parsedparam[1]==default_id[1])){
-                            state = S_DEBUG;
-                        }
-                    }*/
                     j = parse_atres('I','D',node_address,rxbuf,rxpsize);
                     if (j == 1){
                         state = S_BOOTUP3;
@@ -566,8 +560,6 @@ int main(void) {
     		}
 
     		if (stop_flag == 1){
-    			//state = S_DEBUG;
-    			//state = NS_WINBRK;
     		    state = S_STOP;
     		}else{
     			timer_flag = 0; // Reset timer flag
@@ -580,8 +572,6 @@ int main(void) {
     	case S_STOP:
     		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
-    		//state = NS_STOP;
-    		//state = S_DEBUG;
     		state = S_STOPRES;
 
     		/* Transmit */
@@ -674,60 +664,91 @@ int main(void) {
 
     				j = parse_debugpacket(rxbuf, rxpsize, &txmax);
 
-    				if (j != 0){
+    				tx_count = 0;
+
+    				switch(j){
+    				//if (j != 0){
     					//timer_flag = 0; // Reset timer flag
-    					tx_count = 0;
+    					//tx_count = 0;
+
     					// Debug Broadcast
-    					if (j == 1){
+    					//if (j == DBRD){
+    					case DBRD:
     						timer_flag = 0; // Reset timer flag
     						state = NS_DEBUG1;
-    					}
+    						break;
+    					//}
+
     					// Debug Unicast
-    					else if (j == 2){
+    					//else if (j == DUNI){
+    					case DUNI:
     						timer_flag = 0; // Reset timer flag
     						state = NS_DEBUG2;
     						parse_srcaddr(rxbuf,origin_addr);
-    					}
+    						break;
+    					//}
+
     					// Change Period
-    					else if (j == 3){
-    						state = NS_DEBUG3;
+    					//else if (j == CHGPER){
+    					case CHGPER:
+    						//state = NS_DEBUG3;
+    					    state = S_DEBUG;
     						sample_period = txmax;
-    					}
+    						break;
+    					//}
+
     					// Change PL
-    					else if (j == 4){
-    						state = NS_DEBUG4;
+    					//else if (j == CHGPL){
+    					case CHGPL:
+    						//state = NS_DEBUG4;
+    					    state = S_DPLRES;
     			    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
     			    		atcom_pl_set(txmax);
     			    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
-    					}
+    			    		break;
+    					//}
+
     					// Change CH
-    					else if (j == 5){
+    					//else if (j == CHGCH){
+    					case CHGCH:
     						//state = NS_DEBUG5;
     					    state = S_DCHRES;
     					    channel = (char)(txmax & 0x00ff);
     						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 							atcom_ch_set(txmax);
 							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
-    					}
+							break;
+    					//}
+
     					// Start sensing
-    					else if (j == 6){
+    					//else if (j == START){
+    					case START:
     						//state = S_SENSE;
     					    state = S_START;
     						sample_period = txmax;
-    					}
+    						break;
+    					//}
+
     					// Change unicast address
-    					else if (j == 7){
+    					case CHGSINK:
+    					//else if (j == CHGSINK){
     						state = S_DEBUG;
     						parse_setaddr(rxbuf,unicast_addr);
-    					}
+    						break;
+    					//}
+
     					// Query power level
-    					else if (j == 8){
+    					case QUEPL:
+    					//else if (j == QUEPL){
     						state = S_DQRES1;
     						parameter = PARAM_PL;
     						parse_srcaddr(rxbuf,origin_addr);
-    					}
+    						break;
+    					//}
+
     					// Query unicast address
-    					else if (j == 9){
+    					case QUESINK:
+    					//else if (j == QUESINK){
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
     					    tx_data[0] = 'Q';
@@ -735,41 +756,59 @@ int main(void) {
     					    for (i=0; i<8; i++)
     					        tx_data[i+2] = unicast_addr[i];
     					    j = 10; // tx_data length
-    					}
+    					    break;
+    					//}
+
     					// Query sampling period
-    					else if (j == 10){
+    					case QUEPER:
+    					//else if (j == QUEPER){
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
     					    tx_data[0] = 'Q';
     					    tx_data[1] = 'T';
     					    tx_data[2] = (char)sample_period; //assumes period is only 8-bits
     					    j = 3; // tx_data length
-    					}
+    					    break;
+    					//}
+
     					// Commit radio settings to NVM
-    					else if (j == 11){
+    					case COMMIT:
+    					//else if (j == COMMIT){
     					    state = S_DQRES1;
     					    parameter = PARAM_WR;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					}
+    					    break;
+    					//}
+
     					// Change node ID
-    					else if (j == 12){
+    					case CHGID:
+    					//else if (j == CHGID){
     					    state = S_DEBUG;
     					    node_id_len = parse_setnodeid(rxbuf,node_id);
-    					}
+    					    break;
+    					//}
+
     					// Change node loc
-    					else if (j == 13){
+    					case CHGLOC:
+    					//else if (j == CHGLOC){
     					    state = S_DEBUG;
     					    node_loc_len = parse_setnodeid(rxbuf,node_loc);
-    					}
+    					    break;
+    					//}
+
     					// Enter timed sleep
-    					else if (j == 14){
+    					case SLPTIMED:
+    					//else if (j == SLPTIMED){
     					    state = S_SLEEP1;
     					    sleep_time = txmax;
     					    timer_flag = 0;
     					    P3OUT |= 0x80; // high to sleep XBee
-    					}
+    					    break;
+    					//}
+
     					// Query statistics
-    					else if (j == 15){
+    					case QUESTAT:
+    					//else if (j == QUESTAT){
     					    state = S_DQRES3;
                             parse_srcaddr(rxbuf,origin_addr);
                             tx_data[0] = 'Q';
@@ -781,8 +820,10 @@ int main(void) {
                             tx_data[4] = (char)(sensetx_fail >> 8);
                             tx_data[5] = (char)(sensetx_fail & 0x00ff);
                             j = 6; // tx_data length
-    					}
+                            break;
+    					//}
     				}
+    				//}
 
     				// Reset buffer
     				rxctr = 0;
