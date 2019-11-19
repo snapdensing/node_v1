@@ -537,35 +537,36 @@ int main(void) {
     	/** State: Window for stopping node sensing **/
     	case S_WINDOW:
 
-    		// Wait for stop signal
-    		if (stop_flag == 0){
-    			//while (timer_flag < STOP_PERIOD){
-    			while (timer_flag < sample_period){
-    				if (rxheader_flag == 0){
-    					parse_header();
-    				}else{
-    					if (rxctr >= (rxpsize + 4)){ // Entire packet received
+    		// Receive and process XBee frame
+    		if (rxheader_flag == 0){
+    		    parse_header();
+    		}else{
+    		    if (rxctr >= (rxpsize + 4)){
 
-    						stop_flag = parse_stop(rxbuf, rxpsize, origin_addr);
-    						//stop_flag = j;
+    		        P3OUT |= 0x40; // (UART Rx disable)
 
-    						// Reset buffer
-    						rxctr = 0;
-    						rxheader_flag = 0;
-    						rxpsize = 0;
-    						P3OUT &= 0xbf;	// nRTS to 1 (UART enable)
-    					}
-    				}
-    			}
+    		        stop_flag = parse_stop(rxbuf, rxpsize, origin_addr);
+
+    		        // Reset buffer
+    		        rxctr = 0;
+    		        rxheader_flag = 0;
+    		        rxpsize = 0;
+    		        P3OUT &= 0xbf; // (UART Rx enable)
+    		    }
     		}
 
+    		// Determine next state
     		if (stop_flag == 1){
     		    state = S_STOP;
     		}else{
-    			timer_flag = 0; // Reset timer flag
-    			//state = S_SENSE;
-    			state = NS_WINLOOP;
+    		    if (timer_flag < sample_period){
+    		        state = S_WINDOW;
+    		    }else{
+    		        state = S_SENSE;
+    		        timer_flag = 0; // Reset timer flag
+    		    }
     		}
+
     		break;
 
     	/** State: Stop signal acknowledge **/

@@ -1,4 +1,8 @@
 Branch v1.6
+(19 Nov 2019)
+- Supports 0, 1, and 2 byte arguments to start command. On a start with 0
+arguments, node retains previous sampling period.
+
 (15 Nov 2019)
 - Added query command for transmit statistics:
 -- Send 'QS' to node
