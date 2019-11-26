@@ -72,6 +72,7 @@ char stopACK[] = "XA"; // Stop command acknowledge
 char startACK[] = "SA"; // Start command acknowledge
 
 /* Main */
+
 int main(void) {
 
 	/* Global Variables */
@@ -727,6 +728,7 @@ int main(void) {
     						//state = S_SENSE;
     					    state = S_START;
     						sample_period = txmax;
+    						parse_srcaddr(rxbuf,origin_addr);
     						break;
     					//}
 
