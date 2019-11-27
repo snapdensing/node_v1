@@ -54,3 +54,79 @@ int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize
 
     return success;
 }
+
+/* UART transmit: XBee frame
+ * Arguments:
+ *   tx_buffer - pointer to char array containing frame payload (Xbee frame sans headers + checksum)
+ *   length - length of payload
+ */
+void uarttx_xbee(char *tx_buffer, unsigned int length){
+    int i;
+    unsigned int checksum;
+    char checksum_c;
+    checksum = 0;
+
+    /* Send header */
+    UCA0TXBUF = 0x7e;
+    while (!(IFG2 & UCA0TXIFG));
+    UCA0TXBUF = (char)(length >> 8); // upper byte
+    while (!(IFG2 & UCA0TXIFG));
+    UCA0TXBUF = (char)(length & 0x00ff); // lower byte
+    while (!(IFG2 & UCA0TXIFG));
+
+    /* Send payload and Compute checksum */
+    for (i=0; i<length; i++){
+        UCA0TXBUF = tx_buffer[i];
+        checksum += (unsigned int)tx_buffer[i];
+        while (!(IFG2 & UCA0TXIFG));
+    }
+
+    /* Send checksum */
+    checksum_c = 0xff - (char)(checksum & 0xff);
+    UCA0TXBUF = checksum_c;
+    while (!(IFG2 & UCA0TXIFG));
+}
+
+/* UART assemble transmit request frame (payload only)
+ * Arguments:
+ *   dest_addr - destination address
+ *   data - data to transmit
+ *   data_len - length of data
+ *   payload - assembled payload
+ * Returns:
+ *   length of assembled payload
+ */
+unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *payload){
+    int i, length;
+
+    /* Frame type */
+    payload[0] = 0x10;
+
+    /* Frame ID */
+    payload[1] = 0x01;
+
+    /* 64-bit destination address */
+    for (i=0; i<8; i++){
+        payload[2+i] = dest_addr[i];
+    }
+
+    /* Reserved (2 bytes) */
+    payload[10] = 0xff;
+    payload[11] = 0xfe;
+
+    /* Broadcast radius */
+    payload[12] = 0x00;
+
+    /* Transmit options */
+    payload[13] = 0x00;
+
+    /* Data */
+    length = 14;
+    for (i=0; i<data_len; i++){
+        payload[14+i] = data[i];
+        length++;
+    }
+
+    return length;
+
+}

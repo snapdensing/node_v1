@@ -8,6 +8,8 @@
 #include <msp430.h>
 #include "defines.h"
 
+void uarttx_xbee(char *tx_buffer, unsigned int length);
+
 /* AT Command: SH/SL
  * -> 1: SH
  * -> 2: SL

@@ -42,6 +42,7 @@
 #define S_STARTRES  27
 #define S_SENSERES  28
 #define S_STOPRES   29
+#define S_RXBUFOFW  31
 
 #define S_DEBUG		12
 #define S_DBRD		13
@@ -132,3 +133,7 @@
 #define SEG_D 0x1000
 #define SEG_C 0x1040
 #define SEG_B 0x1080
+
+/** Buffers **/
+#define MAXDATA 50
+#define MAXPAYLOAD 64

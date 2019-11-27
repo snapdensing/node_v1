@@ -36,8 +36,12 @@ void atcom_query(int param);
 void atcom_set(int param, char *value); //buggy
 void atcom_id_set(unsigned int val);
 
+unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *payload);
+void uarttx_xbee(char *tx_buffer, unsigned int length);
+
 int check_sensor(int sensor_id);
-unsigned int detect_sensor(void);
+//unsigned int detect_sensor(void);
+void detect_sensor(unsigned int *sensor_flagp);
 
 void flash_erase(char *addr);
 void segment_wr(char *base_addr, char *data);
@@ -64,16 +68,24 @@ unsigned int timer_flag;
 int state;
 
 /** Constant Addresses **/
-char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
-char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
+//static char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
+//static char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
 
 /** Constant messages **/
-char stopACK[] = "XA"; // Stop command acknowledge
-char startACK[] = "SA"; // Start command acknowledge
+//char stopACK[] = "XA"; // Stop command acknowledge
+//char startACK[] = "SA"; // Start command acknowledge
 
 /* Main */
 
 int main(void) {
+
+    /** Constant Addresses **/
+    static char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
+    static char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
+
+    /** Constant messages **/
+    static char stopACK[] = "XA"; // Stop command acknowledge
+    static char startACK[] = "SA"; // Start command acknowledge
 
 	/* Global Variables */
 
@@ -95,7 +107,8 @@ int main(void) {
 	unsigned int sleep_time;
 
 	/** Transmit buffer **/
-	char tx_data[73];
+	char tx_data[MAXDATA];
+	char payload[MAXPAYLOAD];
 	unsigned int tx_count;
 #ifdef MODE_DEBUG
 	unsigned int txmax;
@@ -107,10 +120,13 @@ int main(void) {
 
 	unsigned int standby_sample = STANDBY_SAMPLEBATT; // Standby (Debug state) battery sample period
 
-	/** Flash data buffer **/
+	/** Flash **/
 	char flash_data[64];
 	char *flash_addr;
 	char valid_segC;
+    unsigned int test_id_len;
+    unsigned int test_loc_len;
+    char test_id[31], test_loc[31];
 #endif
 
 
@@ -192,7 +208,8 @@ int main(void) {
 #endif
 
     /** Check sensors **/
-    sensor_flag = detect_sensor();
+    //sensor_flag = detect_sensor();
+    //detect_sensor(&sensor_flag);
 
     /* Default sampling period
      * - possible overwrite by flash if value exists
@@ -200,10 +217,8 @@ int main(void) {
     sample_period = SAMPLE_PERIOD;
 
     /* Initialize Node ID/Loc */
-    unsigned int test_id_len;
-    unsigned int test_loc_len;
-    char test_id[31], test_loc[31];
     read_segD(test_id, &test_id_len, test_loc, &test_loc_len);
+
     // Node ID
     if (test_id_len < MAXIDLEN){ // Get from flash
         node_id_len = test_id_len;
@@ -235,6 +250,9 @@ int main(void) {
 
     /* Flash Segment C read for initialization */
     read_segC(&valid_segC, panid, &channel, unicast_addr, &sample_period);
+
+    /** Check sensors **/
+    detect_sensor(&sensor_flag);
 
     /* Start */
 
@@ -1047,9 +1065,11 @@ int main(void) {
                 segment_wr(flash_addr, flash_data);
             }
 
-	        P3OUT |= 0x40; // UART Rx disable
-	        transmitreq(tx_data, j, origin_addr);
-	        P3OUT &= 0xbf; // UART Rx enable
+	        //P3OUT |= 0x40; // UART Rx disable
+	        //transmitreq(tx_data, j, origin_addr);
+	        i = assemble_txreq(origin_addr, tx_data, j, payload);
+	        uarttx_xbee(payload, i);
+	        //P3OUT &= 0xbf; // UART Rx enable
 
 	        //state = S_DEBUG;
 	        state = S_DQRES4;
@@ -1059,7 +1079,7 @@ int main(void) {
 	    /* State: Debug Transmit Query parameter response - Transmit status */
 	    case S_DQRES4:
 
-	        if (rxheader_flag == 0){
+	        /*if (rxheader_flag == 0){
 	            parse_header();
 	        }else{
 
@@ -1070,6 +1090,18 @@ int main(void) {
 	            }else if (j != 0){
 	                state = S_DQRES3; // re-transmit Query response
 	            }
+	        }
+
+	        */
+	        /*j = parse_header();
+	        if (rxheader_flag == 1){*/
+	        if (parse_header()){
+	            j = rx_txstat(&rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
+                if (j == 1){
+                    state = S_DEBUG;
+                }else if (j != 0){
+                    state = S_DQRES3; // re-transmit Query response
+                }
 	        }
 
 	        break;
@@ -1092,7 +1124,7 @@ int main(void) {
 #pragma vector=USCIAB0RX_VECTOR
 __interrupt void USCI0RX_ISR(void){
 
-	if (rxbuf_overflow == 0){
+	/*if (rxbuf_overflow == 0){
 		if (rxctr == 0){
 			if (UCA0RXBUF == 0x7e){
 				rxbuf[0] = 0x7e;
@@ -1112,7 +1144,22 @@ __interrupt void USCI0RX_ISR(void){
 
 	if (rxctr == RXBUF_MAX){
 		rxbuf_overflow = 1;
-	}
+	}*/
+
+    if (rxctr < RXBUF_MAX){
+        if (rxctr == 0){
+            // Only start filling buffer on start delimeter 0x7e
+            if (UCA0RXBUF == 0x7e){
+                rxbuf[0] = 0x7e;
+                rxctr = 1;
+            }
+        }else{
+            rxbuf[rxctr] = UCA0RXBUF;
+            rxctr++;
+        }
+    }else{
+        state = S_RXBUFOFW;
+    }
 
 	IFG2 = IFG2 & 0x0A;				//this clears the interrupt flags
 }
