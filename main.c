@@ -111,7 +111,7 @@ int main(void) {
 	char payload[MAXPAYLOAD];
 	unsigned int tx_count;
 #ifdef MODE_DEBUG
-	unsigned int txmax;
+	unsigned int temp_uint;
 	char atres_status;
 	int parameter;
 	char parsedparam[8];
@@ -204,7 +204,7 @@ int main(void) {
     /** Tx Buffer **/
     tx_count = 0;
 #ifdef MODE_DEBUG
-    txmax = 0;
+    temp_uint = 0;
 #endif
 
     /** Check sensors **/
@@ -382,14 +382,14 @@ int main(void) {
     	    //atcom_set(parameter,default_id);
     	    /* Get value from flash if it exists */
     	    if (!(valid_segC & 0x40)){
-    	        txmax = (unsigned int)panid[0];
-    	        txmax = (txmax << 8) + (unsigned int)panid[1];
+    	        temp_uint = (unsigned int)panid[0];
+    	        temp_uint = (temp_uint << 8) + (unsigned int)panid[1];
     	    }else{
-    	        txmax = XBEE_ID;
-    	        panid[0] = (char)(txmax >> 8);
-    	        panid[1] = (char)(txmax & 0x00ff);
+    	        temp_uint = XBEE_ID;
+    	        panid[0] = (char)(temp_uint >> 8);
+    	        panid[1] = (char)(temp_uint & 0x00ff);
     	    }
-    	    atcom_id_set(txmax);
+    	    atcom_id_set(temp_uint);
 
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
     	    break;
@@ -425,12 +425,12 @@ int main(void) {
             state = S_BOOTUP4;
             /* Get value from flash if it exists */
             if (!(valid_segC & 0x80)){
-                txmax = channel;
+                temp_uint = channel;
             }else{
                 channel = (char)XBEE_CH;
-                txmax = XBEE_CH;
+                temp_uint = XBEE_CH;
             }
-            atcom_ch_set(txmax);
+            atcom_ch_set(temp_uint);
 
             P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
             break;
@@ -682,7 +682,7 @@ int main(void) {
 
     			if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
-    				j = parse_debugpacket(rxbuf, rxpsize, &txmax);
+    				j = parse_debugpacket(rxbuf, rxpsize, &temp_uint);
 
     				tx_count = 0;
 
@@ -713,7 +713,7 @@ int main(void) {
     					case CHGPER:
     						//state = NS_DEBUG3;
     					    state = S_DEBUG;
-    						sample_period = txmax;
+    						sample_period = temp_uint;
     						break;
     					//}
 
@@ -723,7 +723,7 @@ int main(void) {
     						//state = NS_DEBUG4;
     					    state = S_DPLRES;
     			    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-    			    		atcom_pl_set(txmax);
+    			    		atcom_pl_set(temp_uint);
     			    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     			    		break;
     					//}
@@ -733,9 +733,9 @@ int main(void) {
     					case CHGCH:
     						//state = NS_DEBUG5;
     					    state = S_DCHRES;
-    					    channel = (char)(txmax & 0x00ff);
+    					    channel = (char)(temp_uint & 0x00ff);
     						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-							atcom_ch_set(txmax);
+							atcom_ch_set(temp_uint);
 							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 							break;
     					//}
@@ -745,7 +745,7 @@ int main(void) {
     					case START:
     						//state = S_SENSE;
     					    state = S_START;
-    						sample_period = txmax;
+    						sample_period = temp_uint;
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
     					//}
@@ -821,7 +821,7 @@ int main(void) {
     					case SLPTIMED:
     					//else if (j == SLPTIMED){
     					    state = S_SLEEP1;
-    					    sleep_time = txmax;
+    					    sleep_time = temp_uint;
     					    timer_flag = 0;
     					    P3OUT |= 0x80; // high to sleep XBee
     					    break;
@@ -864,7 +864,7 @@ int main(void) {
 
     			/* Update Transmit Counter */
     			tx_count++;
-    			if (tx_count < txmax){
+    			if (tx_count < temp_uint){
     				state = NS_DBRDLOOP;
     			}else{
     				state = NS_DBRDBRK;
@@ -911,7 +911,7 @@ int main(void) {
 
     		    /* Update Transmit Counter */
     		    tx_count++;
-    		    if (tx_count < txmax){
+    		    if (tx_count < temp_uint){
     		    	state = NS_DUNILOOP;
     		    }else{
     		    	state = NS_DUNIBRK;
@@ -960,7 +960,8 @@ int main(void) {
 
     				j = parse_atres('P','L',&atres_status,rxbuf,rxpsize);
     				if (j == 1){
-    					state = NS_DPLRES;
+    					//state = NS_DPLRES;
+    				    state = S_DEBUG;
     				}
 
     				// Reset buffer
