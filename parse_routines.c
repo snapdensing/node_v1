@@ -16,18 +16,19 @@
  * - PL
  * - CH
  */
-int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length){
+//int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length){
+int parse_atres(char com0, char com1, char *returndata, char *rxbuf){
 	int j;
-	if (packet[3]==0x88){
+	if (rxbuf[3]==0x88){
 
 		// Match received with parameter (ignore otherwise)
-		if ((packet[5] == com0) && (packet[6] == com1)){
+		if ((rxbuf[5] == com0) && (rxbuf[6] == com1)){
 
 			// Parameter SH
 			if ((com0 == 'S') && (com1 == 'H')){
 				// Extract upper byte of address
 				for (j=0; j<4; j++){
-					returndata[j] = packet[j+8];
+					returndata[j] = rxbuf[j+8];
 				}
 				return 1;
 			}
@@ -36,7 +37,7 @@ int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned i
 			else if ((com0 == 'S') && (com1 == 'L')){
 				// Extract lower byte of address
 				for (j=0; j<4; j++){
-					returndata[j+4] = packet[j+8];
+					returndata[j+4] = rxbuf[j+8];
 				}
 				return 1;
 			}
@@ -49,15 +50,15 @@ int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned i
 			// Parameter PL
 			else if ((com0 == 'P') && (com1 == 'L')){
 				// Extract PL parameter value
-				returndata[0] = packet[7];
-				//*returndata = packet[7];
+				returndata[0] = rxbuf[7];
+				//*returndata = rxbuf[7];
 				return 1;
 			}
 
 			// Parameter CH
 			else if ((com0 == 'C') && (com1 == 'H')){
 				// Extract CH parameter value
-				returndata[0] = packet[7];
+				returndata[0] = rxbuf[7];
 				return 1;
 			}
 

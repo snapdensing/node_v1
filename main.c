@@ -6,7 +6,7 @@
 
 int parse_header(void);
 
-int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length);
+//int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length);
 
 int parse_ack(char *packet, unsigned int length, char *base_addr);
 int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
@@ -53,6 +53,7 @@ void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned i
 
 void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p);
 int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
+int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata);
 
 /* Global Variables */
 
@@ -281,8 +282,9 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-    			if (rxctr >= (rxpsize + 4)){
-    				if (parse_atres('D','6',node_address,rxbuf,rxpsize)){
+    			//if (rxctr >= (rxpsize + 4)){
+    				//if (parse_atres('D','6',node_address,rxbuf,rxpsize)){
+    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'D', '6', node_address)){
     				//if (j == 1){
     					//state = S_ADDR1;
     				    state = S_BOOTUP1;
@@ -295,8 +297,8 @@ int main(void) {
     				rxpsize = 0;
 
     				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
-    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			}
+    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
+    			//}
     		}
     		break;
 
@@ -318,11 +320,12 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-    			if (rxctr >= (rxpsize + 4)){ // Entire packet received
+    			//if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
-    			    P3OUT |= 0x40; // UART Rx disable
+    			    //P3OUT |= 0x40; // UART Rx disable
 
-    				if (parse_atres('S','H',node_address,rxbuf,rxpsize)){
+    				//if (parse_atres('S','H',node_address,rxbuf,rxpsize)){
+    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'H', node_address)){
     				//if (j == 1){
     					state = S_ADDR3;
     				}
@@ -332,8 +335,8 @@ int main(void) {
     				rxheader_flag = 0;
     				rxpsize = 0;
     				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
-    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			}
+    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
+    			//}
     		}
     		break;
 
@@ -355,11 +358,12 @@ int main(void) {
     			parse_header();
     		}
     		else{
-    			if (rxctr >= (rxpsize + 4)){ // Entire packet received
+    			//if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
-    			    P3OUT |= 0x40; // UART Rx disable
+    			    //P3OUT |= 0x40; // UART Rx disable
 
-    				if (parse_atres('S','L',node_address,rxbuf,rxpsize)){
+    				//if (parse_atres('S','L',node_address,rxbuf,rxpsize)){
+    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'L', node_address)){
     				//if (j == 1){
 #ifdef MODE_DEBUG
     					state = S_DEBUG;
@@ -375,8 +379,8 @@ int main(void) {
     				rxheader_flag = 0;
     				rxpsize = 0;
     				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
-    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			}
+    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
+    			//}
     		}
     		break;
 
@@ -407,12 +411,12 @@ int main(void) {
                 parse_header();
             }
             else{
-                if (rxctr >= (rxpsize + 4)){
+                //if (rxctr >= (rxpsize + 4)){
 
-                    P3OUT |= 0x40; // UART Rx disable
+                    //P3OUT |= 0x40; // UART Rx disable
 
-                    if (parse_atres('I','D',node_address,rxbuf,rxpsize)){
-                    //if (j == 1){
+                    if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'I', 'D', node_address)){
+                    //if (parse_atres('I','D',node_address,rxbuf,rxpsize)){
                         state = S_BOOTUP3;
                     }
 
@@ -421,8 +425,8 @@ int main(void) {
                     rxheader_flag = 0;
                     rxpsize = 0;
                     P3OUT &= 0xbf;*/ // UART Rx enable
-                    rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-                }
+                    //rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
+                //}
             }
             break;
 
@@ -449,11 +453,12 @@ int main(void) {
                 parse_header();
             }
             else{
-                if (rxctr >= (rxpsize + 4)){
+                //if (rxctr >= (rxpsize + 4)){
 
-                    P3OUT |= 0x40; // UART Rx disable
+                    //P3OUT |= 0x40; // UART Rx disable
 
-                    if (parse_atres('C','H',node_address,rxbuf,rxpsize)){
+                    if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', node_address)){
+                    //if (parse_atres('C','H',node_address,rxbuf,rxpsize)){
                     //if (j == 1){
                         //state = S_DEBUG;
                         state = S_ADDR1;
@@ -464,8 +469,8 @@ int main(void) {
                     rxheader_flag = 0;
                     rxpsize = 0;
                     P3OUT &= 0xbf;*/ // UART Rx enable
-                    rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-                }
+                    //rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
+                //}
             }
             break;
 
@@ -968,9 +973,10 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-    			if (rxctr >= (rxpsize + 4)){
+    			//if (rxctr >= (rxpsize + 4)){
 
-    				if (parse_atres('P','L',&atres_status,rxbuf,rxpsize)){
+    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
+    			    //if (parse_atres('P','L',&atres_status,rxbuf,rxpsize)){
     				//if (j == 1){
     					//state = NS_DPLRES;
     				    state = S_DEBUG;
@@ -981,8 +987,8 @@ int main(void) {
     				rxheader_flag = 0;
     				rxpsize = 0;
     				P3OUT &= 0xbf;*/ // nRTS to 0 (UART Rx enable)
-    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			}
+    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
+    			//}
     		}
     		break;
 
@@ -992,9 +998,10 @@ int main(void) {
 			if (rxheader_flag == 0){
 				parse_header();
 			}else{
-				if (rxctr >= (rxpsize + 4)){
+				//if (rxctr >= (rxpsize + 4)){
 
-					if (parse_atres('C','H',&atres_status,rxbuf,rxpsize)){
+					//if (parse_atres('C','H',&atres_status,rxbuf,rxpsize)){
+					if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', &atres_status)){
 					//if (j == 1){
 						state = NS_DCHRES;
 					}
@@ -1004,8 +1011,8 @@ int main(void) {
 					rxheader_flag = 0;
 					rxpsize = 0;
 					P3OUT &= 0xbf;*/ // nRTS to 0 (UART Rx enable)
-					rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-				}
+					//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
+				//}
 			}
 			break;
 
@@ -1129,12 +1136,13 @@ int main(void) {
 	        if (timer_flag > sleep_time ){ //exit sleep
 	            state = S_DEBUG;
 	            P3OUT &= 0x7f; // low to wakeup XBee
+	        }
 	        break;
 #endif
     	}
     }
 }
-}
+
 
 /* Interrupts */
 

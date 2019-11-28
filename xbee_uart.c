@@ -9,6 +9,7 @@
 #include "defines.h"
 
 int parse_txstat(char *packet, unsigned int length, char *delivery_p);
+int parse_atres(char com0, char com1, char *returndata, char *rxbuf);
 
 /* Reset receive buffer
  * - Includes UART Rx enable
@@ -18,6 +19,26 @@ void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsiz
     *rxheader_flag_p = 0;
     *rxpsize_p = 0;
     P3OUT &= 0xbf;
+}
+
+/* Receive and parse AT command response
+ * Return values:
+ *   1 - success
+ *   0 - Non-AT command response received
+ */
+int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata){
+
+    int success = 0;
+
+    if (*rxctr_p >= (*rxpsize_p + 4)){
+        P3OUT |= 0x40; // UART Rx disable
+        success = parse_atres(com0, com1, returndata, rxbuf);
+
+        // Reset buffer
+        rst_rxbuf(rxheader_flag_p, rxctr_p, rxpsize_p);
+    }
+
+    return success;
 }
 
 /* Receive and parse transmit status
