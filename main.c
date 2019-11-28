@@ -51,6 +51,7 @@ void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsign
 void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling);
 void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp);
 
+void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p);
 int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
 
 /* Global Variables */
@@ -287,11 +288,12 @@ int main(void) {
     				//}
 
     				// Reset buffer
-    				rxctr = 0;
+    				/*rxctr = 0;
     				rxheader_flag = 0;
     				rxpsize = 0;
 
-    				P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
+    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     			}
     		}
     		break;
@@ -324,10 +326,11 @@ int main(void) {
     				}
 
     				// Reset buffer
-    				rxctr = 0;
+    				/*rxctr = 0;
     				rxheader_flag = 0;
     				rxpsize = 0;
-    				P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
+    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     			}
     		}
     		break;
@@ -366,10 +369,11 @@ int main(void) {
     				}
 
     				// Reset buffer
-    				rxctr = 0;
+    				/*rxctr = 0;
     				rxheader_flag = 0;
     				rxpsize = 0;
-    				P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
+    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     			}
     		}
     		break;
@@ -411,10 +415,11 @@ int main(void) {
                     }
 
                     // Reset buffer
-                    rxctr = 0;
+                    /*rxctr = 0;
                     rxheader_flag = 0;
                     rxpsize = 0;
-                    P3OUT &= 0xbf; // UART Rx enable
+                    P3OUT &= 0xbf;*/ // UART Rx enable
+                    rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
                 }
             }
             break;
@@ -452,10 +457,11 @@ int main(void) {
                     }
 
                     // Reset buffer
-                    rxctr = 0;
+                    /*rxctr = 0;
                     rxheader_flag = 0;
                     rxpsize = 0;
-                    P3OUT &= 0xbf; // UART Rx enable
+                    P3OUT &= 0xbf;*/ // UART Rx enable
+                    rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
                 }
             }
             break;
@@ -568,10 +574,11 @@ int main(void) {
     		        stop_flag = parse_stop(rxbuf, rxpsize, origin_addr);
 
     		        // Reset buffer
-    		        rxctr = 0;
+    		        /*rxctr = 0;
     		        rxheader_flag = 0;
     		        rxpsize = 0;
-    		        P3OUT &= 0xbf; // (UART Rx enable)
+    		        P3OUT &= 0xbf;*/ // (UART Rx enable)
+    		        rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     		    }
     		}
 
@@ -848,10 +855,11 @@ int main(void) {
     				//}
 
     				// Reset buffer
-    				rxctr = 0;
+    				/*rxctr = 0;
     				rxheader_flag = 0;
     				rxpsize = 0;
-    				P3OUT &= 0xbf; // nRTS to 0 (UART enable)
+    				P3OUT &= 0xbf;*/ // nRTS to 0 (UART enable)
+    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     			}
 
     		}
@@ -966,10 +974,11 @@ int main(void) {
     				}
 
     				// Reset buffer
-    				rxctr = 0;
+    				/*rxctr = 0;
     				rxheader_flag = 0;
     				rxpsize = 0;
-    				P3OUT &= 0xbf; // nRTS to 0 (UART Rx enable)
+    				P3OUT &= 0xbf;*/ // nRTS to 0 (UART Rx enable)
+    				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     			}
     		}
     		break;
@@ -988,10 +997,11 @@ int main(void) {
 					}
 
 					// Reset buffer
-					rxctr = 0;
+					/*rxctr = 0;
 					rxheader_flag = 0;
 					rxpsize = 0;
-					P3OUT &= 0xbf; // nRTS to 0 (UART Rx enable)
+					P3OUT &= 0xbf;*/ // nRTS to 0 (UART Rx enable)
+					rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
 				}
 			}
 			break;
@@ -1043,10 +1053,11 @@ int main(void) {
 		            }
 
 		            // Reset buffer
-		            rxctr = 0;
+		            /*rxctr = 0;
 		            rxheader_flag = 0;
 		            rxpsize = 0;
-		            P3OUT &= 0xbf; // UART Rx enable
+		            P3OUT &= 0xbf;*/ // UART Rx enable
+		            rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
 		        }
 		    }
 		    break;

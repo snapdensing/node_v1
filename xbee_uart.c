@@ -7,9 +7,18 @@
 
 #include <msp430.h>
 #include "defines.h"
-//#include "parse_routines.c"
 
 int parse_txstat(char *packet, unsigned int length, char *delivery_p);
+
+/* Reset receive buffer
+ * - Includes UART Rx enable
+ */
+void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p){
+    *rxctr_p = 0;
+    *rxheader_flag_p = 0;
+    *rxpsize_p = 0;
+    P3OUT &= 0xbf;
+}
 
 /* Receive and parse transmit status
  * Return values:
@@ -45,10 +54,11 @@ int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize
         }
 
         // Reset buffer
-        *rxctr_p = 0;
+        rst_rxbuf(rxheader_flag_p, rxctr_p, rxpsize_p);
+        /**rxctr_p = 0;
         *rxheader_flag_p = 0;
         *rxpsize_p = 0;
-        P3OUT &= 0xbf; // UART Rx Enable
+        P3OUT &= 0xbf;*/ // UART Rx Enable
 
     }
 
