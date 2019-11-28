@@ -282,11 +282,12 @@ int main(void) {
     			parse_header();
     		}else{
     			if (rxctr >= (rxpsize + 4)){
-    				j = parse_atres('D','6',node_address,rxbuf,rxpsize);
+    				if (parse_atres('D','6',node_address,rxbuf,rxpsize)){
     				//if (j == 1){
     					//state = S_ADDR1;
     				    state = S_BOOTUP1;
     				//}
+    				}
 
     				// Reset buffer
     				/*rxctr = 0;
@@ -321,8 +322,8 @@ int main(void) {
 
     			    P3OUT |= 0x40; // UART Rx disable
 
-    				j = parse_atres('S','H',node_address,rxbuf,rxpsize);
-    				if (j == 1){
+    				if (parse_atres('S','H',node_address,rxbuf,rxpsize)){
+    				//if (j == 1){
     					state = S_ADDR3;
     				}
 
@@ -358,8 +359,8 @@ int main(void) {
 
     			    P3OUT |= 0x40; // UART Rx disable
 
-    				j = parse_atres('S','L',node_address,rxbuf,rxpsize);
-    				if (j == 1){
+    				if (parse_atres('S','L',node_address,rxbuf,rxpsize)){
+    				//if (j == 1){
 #ifdef MODE_DEBUG
     					state = S_DEBUG;
     				    //state = S_BOOTUP1;
@@ -410,8 +411,8 @@ int main(void) {
 
                     P3OUT |= 0x40; // UART Rx disable
 
-                    j = parse_atres('I','D',node_address,rxbuf,rxpsize);
-                    if (j == 1){
+                    if (parse_atres('I','D',node_address,rxbuf,rxpsize)){
+                    //if (j == 1){
                         state = S_BOOTUP3;
                     }
 
@@ -452,8 +453,8 @@ int main(void) {
 
                     P3OUT |= 0x40; // UART Rx disable
 
-                    j = parse_atres('C','H',node_address,rxbuf,rxpsize);
-                    if (j == 1){
+                    if (parse_atres('C','H',node_address,rxbuf,rxpsize)){
+                    //if (j == 1){
                         //state = S_DEBUG;
                         state = S_ADDR1;
                     }
@@ -969,8 +970,8 @@ int main(void) {
     		}else{
     			if (rxctr >= (rxpsize + 4)){
 
-    				j = parse_atres('P','L',&atres_status,rxbuf,rxpsize);
-    				if (j == 1){
+    				if (parse_atres('P','L',&atres_status,rxbuf,rxpsize)){
+    				//if (j == 1){
     					//state = NS_DPLRES;
     				    state = S_DEBUG;
     				}
@@ -993,8 +994,8 @@ int main(void) {
 			}else{
 				if (rxctr >= (rxpsize + 4)){
 
-					j = parse_atres('C','H',&atres_status,rxbuf,rxpsize);
-					if (j == 1){
+					if (parse_atres('C','H',&atres_status,rxbuf,rxpsize)){
+					//if (j == 1){
 						state = NS_DCHRES;
 					}
 
