@@ -8,7 +8,8 @@
 #include <msp430.h>
 #include "defines.h"
 
-void uarttx_xbee(char *tx_buffer, unsigned int length);
+void uarttx_xbee(char *txbuf, unsigned int length);
+unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
 
 /* AT Command: SH/SL
  * -> 1: SH
@@ -66,8 +67,15 @@ void atcom_shsl(int sel){
 }
 
 // Transmit Request
-void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc){
-	int packet_len;
+//void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc){
+void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf){
+
+    unsigned int i;
+
+    i = assemble_txreq(dest_addr, tx_data, tx_data_len, txbuf);
+    uarttx_xbee(txbuf, i);
+
+	/*int packet_len;
 	int j;
 	int checksum;
 	char checksum_c;
@@ -114,9 +122,6 @@ void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc){
 	checksum += 0x00;
 
 	// Transmit Options
-	/*UCA0TXBUF = 0x01;
-	while (!(IFG2&UCA0TXIFG));
-	checksum += 0x01;*/
 	UCA0TXBUF = 0x00;
 	while (!(IFG2&UCA0TXIFG));
 	checksum += 0x00;
@@ -133,7 +138,7 @@ void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc){
 	checksum_c = (char)checksum;
 	checksum_c = 0xff - checksum_c;
 	UCA0TXBUF = checksum_c;
-	while (!(IFG2&UCA0TXIFG));
+	while (!(IFG2&UCA0TXIFG));*/
 }
 
 /* Enable UART RTS control */

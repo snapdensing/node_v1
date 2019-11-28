@@ -57,14 +57,13 @@ int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize
 
 /* UART transmit: XBee frame
  * Arguments:
- *   tx_buffer - pointer to char array containing frame payload (Xbee frame sans headers + checksum)
- *   length - length of payload
+ *   txbuf - pointer to char array containing frame payload (Xbee frame sans headers + checksum)
+ *   length - length of payload (does not include headers and checksum)
  */
-void uarttx_xbee(char *tx_buffer, unsigned int length){
+void uarttx_xbee(char *txbuf, unsigned int length){
     int i;
-    unsigned int checksum;
+    char checksum = 0x00;
     char checksum_c;
-    checksum = 0;
 
     /* Send header */
     UCA0TXBUF = 0x7e;
@@ -76,13 +75,15 @@ void uarttx_xbee(char *tx_buffer, unsigned int length){
 
     /* Send payload and Compute checksum */
     for (i=0; i<length; i++){
-        UCA0TXBUF = tx_buffer[i];
-        checksum += (unsigned int)tx_buffer[i];
+        UCA0TXBUF = txbuf[i];
+        //checksum += (unsigned int)txbuf[i];
+        checksum += txbuf[i];
         while (!(IFG2 & UCA0TXIFG));
     }
 
     /* Send checksum */
-    checksum_c = 0xff - (char)(checksum & 0xff);
+    //checksum_c = 0xff - (char)(checksum & 0xff);
+    checksum_c = 0xff - checksum;
     UCA0TXBUF = checksum_c;
     while (!(IFG2 & UCA0TXIFG));
 }
@@ -92,41 +93,43 @@ void uarttx_xbee(char *tx_buffer, unsigned int length){
  *   dest_addr - destination address
  *   data - data to transmit
  *   data_len - length of data
- *   payload - assembled payload
+ *   txbuf - tx data buffer
  * Returns:
  *   length of assembled payload
  */
-unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *payload){
-    int i, length;
+unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf){
+    unsigned int i, length;
 
     /* Frame type */
-    payload[0] = 0x10;
+    txbuf[0] = 0x10;
 
     /* Frame ID */
-    payload[1] = 0x01;
+    txbuf[1] = 0x01;
 
     /* 64-bit destination address */
     for (i=0; i<8; i++){
-        payload[2+i] = dest_addr[i];
+        txbuf[2+i] = dest_addr[i];
     }
 
     /* Reserved (2 bytes) */
-    payload[10] = 0xff;
-    payload[11] = 0xfe;
+    txbuf[10] = 0xff;
+    txbuf[11] = 0xfe;
 
     /* Broadcast radius */
-    payload[12] = 0x00;
+    txbuf[12] = 0x00;
 
     /* Transmit options */
-    payload[13] = 0x00;
+    txbuf[13] = 0x00;
 
     /* Data */
-    length = 14;
+    length = 14; //initial length (no data yet)
     for (i=0; i<data_len; i++){
-        payload[14+i] = data[i];
+        txbuf[14+i] = data[i];
         length++;
     }
 
     return length;
 
 }
+
+

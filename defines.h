@@ -94,7 +94,7 @@
 
 #define MAC_ACK_TIMEOUT	10
 #define NODELIST_MAX	20
-#define RXBUF_MAX		100
+#define RXBUF_MAX		50
 #define TRACE_TIMEOUT	100
 
 #define PARAM_PL	0
@@ -126,8 +126,8 @@
 //#define BATT_VTHHI 0x0310
 
 /** Node ID maximum length **/
-#define MAXIDLEN 31
-#define MAXLOCLEN 31
+#define MAXIDLEN 20
+#define MAXLOCLEN 20
 
 /** Flash **/
 #define SEG_D 0x1000
@@ -135,5 +135,5 @@
 #define SEG_B 0x1080
 
 /** Buffers **/
-#define MAXDATA 50
-#define MAXPAYLOAD 64
+#define MAXDATA 32
+#define MAXPAYLOAD 46

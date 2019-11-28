@@ -28,7 +28,8 @@ int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 #endif
 
 void atcom_shsl(int sel);
-void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc);
+//void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc);
+void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
 void atcom_enrts(void);
 void atcom_pl_set(int val);
 void atcom_ch_set(int val);
@@ -36,8 +37,8 @@ void atcom_query(int param);
 void atcom_set(int param, char *value); //buggy
 void atcom_id_set(unsigned int val);
 
-unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *payload);
-void uarttx_xbee(char *tx_buffer, unsigned int length);
+/*unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
+void uarttx_xbee(char *txbuf, unsigned int length);*/
 
 int check_sensor(int sensor_id);
 //unsigned int detect_sensor(void);
@@ -107,8 +108,8 @@ int main(void) {
 	unsigned int sleep_time;
 
 	/** Transmit buffer **/
-	char tx_data[MAXDATA];
-	char payload[MAXPAYLOAD];
+	char tx_data[MAXDATA]; // Data buffer, data to transmit
+	char txbuf[MAXPAYLOAD]; // Transmit buffer, payload only (w/o headers and checksum)
 	unsigned int tx_count;
 #ifdef MODE_DEBUG
 	unsigned int temp_uint;
@@ -521,9 +522,9 @@ int main(void) {
 
    			/* Transmit */
 #ifdef BROADCAST
-   			transmitreq(tx_data, j, broadcast_addr);
+   			transmitreq(tx_data, j, broadcast_addr, txbuf);
 #else
-   			transmitreq(tx_data, j, unicast_addr);
+   			transmitreq(tx_data, j, unicast_addr, txbuf);
 #endif
 
    			/* Update Transmit Counter */
@@ -595,7 +596,7 @@ int main(void) {
     		state = S_STOPRES;
 
     		/* Transmit */
-   			transmitreq(stopACK, 2, origin_addr);
+   			transmitreq(stopACK, 2, origin_addr, txbuf);
 
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
@@ -625,7 +626,7 @@ int main(void) {
     	    state = S_STARTRES;
 
     	    /* Transmit */
-    	    transmitreq(startACK, 2, origin_addr);
+    	    transmitreq(startACK, 2, origin_addr, txbuf);
 
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
     	    break;
@@ -894,7 +895,7 @@ int main(void) {
                 }
 
     			/* Transmit */
-    			transmitreq(tx_data, j, broadcast_addr);
+    			transmitreq(tx_data, j, broadcast_addr, txbuf);
 
     			/* Reset Timer flag */
     			timer_flag = 0;
@@ -941,7 +942,7 @@ int main(void) {
                 }
 
     		    /* Transmit */
-    		    transmitreq(tx_data, j, origin_addr);
+    		    transmitreq(tx_data, j, origin_addr, txbuf);
 
     		    /* Reset Timer flag */
     		    timer_flag = 0;
@@ -1068,8 +1069,10 @@ int main(void) {
 
 	        //P3OUT |= 0x40; // UART Rx disable
 	        //transmitreq(tx_data, j, origin_addr);
-	        i = assemble_txreq(origin_addr, tx_data, j, payload);
-	        uarttx_xbee(payload, i);
+	        /*i = assemble_txreq(origin_addr, tx_data, j, txbuf);
+	        uarttx_xbee(txbuf, i);*/
+
+            transmitreq(tx_data, j, origin_addr, txbuf);
 	        //P3OUT &= 0xbf; // UART Rx enable
 
 	        //state = S_DEBUG;

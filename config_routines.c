@@ -47,5 +47,4 @@ void detect_sensor(unsigned int *sensor_flagp){
 	*sensor_flagp += 64;
 #endif
 
-	//return sensor;
 }
