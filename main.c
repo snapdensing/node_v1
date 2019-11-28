@@ -284,7 +284,8 @@ int main(void) {
     			if (rxctr >= (rxpsize + 4)){
     				j = parse_atres('D','6',node_address,rxbuf,rxpsize);
     				//if (j == 1){
-    					state = S_ADDR1;
+    					//state = S_ADDR1;
+    				    state = S_BOOTUP1;
     				//}
 
     				// Reset buffer
@@ -360,8 +361,8 @@ int main(void) {
     				j = parse_atres('S','L',node_address,rxbuf,rxpsize);
     				if (j == 1){
 #ifdef MODE_DEBUG
-    					//state = S_DEBUG;
-    				    state = S_BOOTUP1;
+    					state = S_DEBUG;
+    				    //state = S_BOOTUP1;
 #else
     					//state = S_INIT;
     					state = S_SENSE;
@@ -453,7 +454,8 @@ int main(void) {
 
                     j = parse_atres('C','H',node_address,rxbuf,rxpsize);
                     if (j == 1){
-                        state = S_DEBUG;
+                        //state = S_DEBUG;
+                        state = S_ADDR1;
                     }
 
                     // Reset buffer
