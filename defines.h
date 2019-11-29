@@ -61,25 +61,6 @@
 
 #define S_SLEEP1    25
 
-
-/* Next state assignment */
-#define NS_SENSE	S_WINDOW
-#define NS_WINLOOP	S_SENSE
-#define NS_WINBRK	S_STOP
-#define NS_STOP		S_DEBUG
-
-#define NS_DEBUG1	S_DBRD
-#define NS_DEBUG2	S_DUNI
-#define NS_DEBUG3	S_DEBUG
-#define NS_DEBUG4	S_DPLRES
-#define NS_DEBUG5	S_DCHRES
-#define NS_DBRDLOOP	S_DBRD
-#define NS_DBRDBRK	S_DEBUG
-#define NS_DUNILOOP S_DUNI
-#define NS_DUNIBRK	S_DEBUG
-#define NS_DPLRES	S_DEBUG
-#define NS_DCHRES	S_DEBUG
-
 /* Timer-relative periods */
 /** Sensing Period **/
 #define SAMPLE_PERIOD	10

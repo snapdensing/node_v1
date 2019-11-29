@@ -188,13 +188,7 @@ int main(void) {
 
     /** Tx Buffer **/
     tx_count = 0;
-#ifdef MODE_DEBUG
     temp_uint = 0;
-#endif
-
-    /** Check sensors **/
-    //sensor_flag = detect_sensor();
-    //detect_sensor(&sensor_flag);
 
     /* Default sampling period
      * - possible overwrite by flash if value exists
@@ -264,23 +258,9 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-    			//if (rxctr >= (rxpsize + 4)){
-    				//if (parse_atres('D','6',node_address,rxbuf,rxpsize)){
-    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'D', '6', node_address)){
-    				//if (j == 1){
-    					//state = S_ADDR1;
-    				    state = S_BOOTUP1;
-    				//}
-    				}
-
-    				// Reset buffer
-    				/*rxctr = 0;
-    				rxheader_flag = 0;
-    				rxpsize = 0;
-
-    				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
-    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			//}
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'D', '6', node_address)){
+                    state = S_BOOTUP1;
+                }
     		}
     		break;
 
@@ -302,23 +282,9 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-    			//if (rxctr >= (rxpsize + 4)){ // Entire packet received
-
-    			    //P3OUT |= 0x40; // UART Rx disable
-
-    				//if (parse_atres('S','H',node_address,rxbuf,rxpsize)){
-    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'H', node_address)){
-    				//if (j == 1){
-    					state = S_ADDR3;
-    				}
-
-    				// Reset buffer
-    				/*rxctr = 0;
-    				rxheader_flag = 0;
-    				rxpsize = 0;
-    				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
-    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			//}
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'H', node_address)){
+                    state = S_ADDR3;
+                }
     		}
     		break;
 
@@ -340,29 +306,9 @@ int main(void) {
     			parse_header();
     		}
     		else{
-    			//if (rxctr >= (rxpsize + 4)){ // Entire packet received
-
-    			    //P3OUT |= 0x40; // UART Rx disable
-
-    				//if (parse_atres('S','L',node_address,rxbuf,rxpsize)){
-    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'L', node_address)){
-    				//if (j == 1){
-#ifdef MODE_DEBUG
-    					state = S_DEBUG;
-    				    //state = S_BOOTUP1;
-#else
-    					//state = S_INIT;
-    					state = S_SENSE;
-#endif
-    				}
-
-    				// Reset buffer
-    				/*rxctr = 0;
-    				rxheader_flag = 0;
-    				rxpsize = 0;
-    				P3OUT &= 0xbf;*/	// nRTS to 0 (UART Rx enable)
-    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			//}
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'L', node_address)){
+                    state = S_DEBUG;
+                }
     		}
     		break;
 
@@ -371,8 +317,6 @@ int main(void) {
     	    P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
 
     	    state = S_BOOTUP2;
-    	    //parameter = PARAM_ID;
-    	    //atcom_set(parameter,default_id);
     	    /* Get value from flash if it exists */
     	    if (!(valid_segC & 0x40)){
     	        temp_uint = (unsigned int)panid[0];
@@ -393,22 +337,9 @@ int main(void) {
                 parse_header();
             }
             else{
-                //if (rxctr >= (rxpsize + 4)){
-
-                    //P3OUT |= 0x40; // UART Rx disable
-
-                    if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'I', 'D', node_address)){
-                    //if (parse_atres('I','D',node_address,rxbuf,rxpsize)){
-                        state = S_BOOTUP3;
-                    }
-
-                    // Reset buffer
-                    /*rxctr = 0;
-                    rxheader_flag = 0;
-                    rxpsize = 0;
-                    P3OUT &= 0xbf;*/ // UART Rx enable
-                    //rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-                //}
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'I', 'D', node_address)){
+                    state = S_BOOTUP3;
+                }
             }
             break;
 
@@ -435,24 +366,9 @@ int main(void) {
                 parse_header();
             }
             else{
-                //if (rxctr >= (rxpsize + 4)){
-
-                    //P3OUT |= 0x40; // UART Rx disable
-
-                    if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', node_address)){
-                    //if (parse_atres('C','H',node_address,rxbuf,rxpsize)){
-                    //if (j == 1){
-                        //state = S_DEBUG;
-                        state = S_ADDR1;
-                    }
-
-                    // Reset buffer
-                    /*rxctr = 0;
-                    rxheader_flag = 0;
-                    rxpsize = 0;
-                    P3OUT &= 0xbf;*/ // UART Rx enable
-                    //rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-                //}
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', node_address)){
+                    state = S_ADDR1;
+                }
             }
             break;
 
@@ -465,7 +381,6 @@ int main(void) {
 
    			P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
-   			//state = NS_SENSE;
    			state = S_SENSERES;
 
    			/* Assemble Packet Data */
@@ -685,85 +600,62 @@ int main(void) {
     				tx_count = 0;
 
     				switch(j){
-    				//if (j != 0){
-    					//timer_flag = 0; // Reset timer flag
-    					//tx_count = 0;
 
     					// Debug Broadcast
-    					//if (j == DBRD){
     					case DBRD:
     						timer_flag = 0; // Reset timer flag
-    						state = NS_DEBUG1;
+    						state = S_DBRD;
     						break;
-    					//}
 
     					// Debug Unicast
-    					//else if (j == DUNI){
     					case DUNI:
     						timer_flag = 0; // Reset timer flag
-    						state = NS_DEBUG2;
+    						state = S_DUNI;
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
-    					//}
 
     					// Change Period
-    					//else if (j == CHGPER){
     					case CHGPER:
-    						//state = NS_DEBUG3;
     					    state = S_DEBUG;
     						sample_period = temp_uint;
     						break;
-    					//}
 
     					// Change PL
-    					//else if (j == CHGPL){
     					case CHGPL:
-    						//state = NS_DEBUG4;
     					    state = S_DPLRES;
     			    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
     			    		atcom_pl_set(temp_uint);
     			    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     			    		break;
-    					//}
 
     					// Change CH
-    					//else if (j == CHGCH){
     					case CHGCH:
-    						//state = NS_DEBUG5;
-    					    state = S_DCHRES;
+    						state = S_DCHRES;
     					    channel = (char)(temp_uint & 0x00ff);
     						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 							atcom_ch_set(temp_uint);
 							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 							break;
-    					//}
 
     					// Start sensing
-    					//else if (j == START){
     					case START:
-    						//state = S_SENSE;
-    					    state = S_START;
+    						state = S_START;
     						sample_period = temp_uint;
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
-    					//}
 
     					// Change unicast address
     					case CHGSINK:
-    					//else if (j == CHGSINK){
     						state = S_DEBUG;
     						parse_setaddr(rxbuf,unicast_addr);
     						break;
-    					//}
 
     					// Query power level
     					case QUEPL:
-    					//else if (j == QUEPL){
     						state = S_DQRES1;
     						parameter = PARAM_PL;
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
-    					//}
 
     					// Query unicast address
     					case QUESINK:
@@ -864,9 +756,9 @@ int main(void) {
     			/* Update Transmit Counter */
     			tx_count++;
     			if (tx_count < temp_uint){
-    				state = NS_DBRDLOOP;
+    				state = S_DBRD;
     			}else{
-    				state = NS_DBRDBRK;
+    				state = S_DEBUG;
     			}
 
     			/* Assemble Packet Data */
@@ -911,9 +803,9 @@ int main(void) {
     		    /* Update Transmit Counter */
     		    tx_count++;
     		    if (tx_count < temp_uint){
-    		    	state = NS_DUNILOOP;
+    		    	state = S_DUNI;
     		    }else{
-    		    	state = NS_DUNIBRK;
+    		    	state = S_DEBUG;
     		    }
 
     		    /* Assemble Packet Data */
@@ -955,22 +847,9 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-    			//if (rxctr >= (rxpsize + 4)){
-
-    				if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
-    			    //if (parse_atres('P','L',&atres_status,rxbuf,rxpsize)){
-    				//if (j == 1){
-    					//state = NS_DPLRES;
-    				    state = S_DEBUG;
-    				}
-
-    				// Reset buffer
-    				/*rxctr = 0;
-    				rxheader_flag = 0;
-    				rxpsize = 0;
-    				P3OUT &= 0xbf;*/ // nRTS to 0 (UART Rx enable)
-    				//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-    			//}
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
+                    state = S_DEBUG;
+                }
     		}
     		break;
 
@@ -980,21 +859,9 @@ int main(void) {
 			if (rxheader_flag == 0){
 				parse_header();
 			}else{
-				//if (rxctr >= (rxpsize + 4)){
-
-					//if (parse_atres('C','H',&atres_status,rxbuf,rxpsize)){
-					if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', &atres_status)){
-					//if (j == 1){
-						state = NS_DCHRES;
-					}
-
-					// Reset buffer
-					/*rxctr = 0;
-					rxheader_flag = 0;
-					rxpsize = 0;
-					P3OUT &= 0xbf;*/ // nRTS to 0 (UART Rx enable)
-					//rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
-				//}
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', &atres_status)){
+                    state = S_DEBUG;
+                }
 			}
 			break;
 
@@ -1085,23 +952,6 @@ int main(void) {
 
 	    /* State: Debug Transmit Query parameter response - Transmit status */
 	    case S_DQRES4:
-
-	        /*if (rxheader_flag == 0){
-	            parse_header();
-	        }else{
-
-	            j = rx_txstat(&rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
-
-	            if (j == 1){
-	                state = S_DEBUG;
-	            }else if (j != 0){
-	                state = S_DQRES3; // re-transmit Query response
-	            }
-	        }
-
-	        */
-	        /*j = parse_header();
-	        if (rxheader_flag == 1){*/
 	        if (parse_header()){
 	            j = rx_txstat(&rxheader_flag, &rxctr, &rxpsize, rxbuf, &sensetx_fail, &sensetx);
                 if (j == 1){
