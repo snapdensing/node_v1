@@ -33,6 +33,7 @@ void atcom_ch_set(int val);
 void atcom_query(int param);
 void atcom_set(int param, char *value); //buggy
 void atcom_id_set(unsigned int val);
+void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
 
 void detect_sensor(unsigned int *sensor_flagp);
 
@@ -247,7 +248,8 @@ int main(void) {
     		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_RTS2;
-    		atcom_enrts();
+    		//atcom_enrts();
+    		atcom('D', '6', parsedparam, 0, txbuf);
 
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     		break;

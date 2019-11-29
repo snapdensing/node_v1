@@ -10,6 +10,7 @@
 
 void uarttx_xbee(char *txbuf, unsigned int length);
 unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
+unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *txbuf);
 
 /* AT Command: SH/SL
  * -> 1: SH
@@ -526,4 +527,23 @@ void atcom_id_set(unsigned int val){
     UCA0TXBUF = checksum_c;
     while (!(IFG2&UCA0TXIFG));
 
+}
+
+/* Transmit AT command
+ * Arguments:
+ *   com0,com1 - AT parameter
+ *   paramvalue - string of parameter value (for set)
+ *   paramlen - paramvalue length. Equal to 0 for query
+ *   txbuf - transmit buffer
+ */
+void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf){
+
+    unsigned int i;
+    char atcom[2];
+
+    atcom[0] = com0;
+    atcom[1] = com1;
+
+    i = assemble_atcom(atcom, paramvalue, paramlen, txbuf);
+    uarttx_xbee(txbuf, i);
 }

@@ -160,7 +160,37 @@ unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txb
     }
 
     return length;
-
 }
 
+/* UART assemble AT command frame
+ * Arguments:
+ *   atcom - 2-byte AT Command
+ *   paramvalue - parameter value in string
+ *   paramlen - parameter length
+ *   txbuf - tx data buffer
+ * Returns:
+ *   length of assembled payload
+ */
+unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *txbuf){
+    unsigned int i, length;
+
+    /* Frame type */
+    txbuf[0] = 0x08;
+
+    /* Frame ID */
+    txbuf[1] = 0x01;
+
+    /* AT command */
+    txbuf[2] = atcom[0];
+    txbuf[3] = atcom[1];
+    length = 4;
+
+    /* Parameter value */
+    for (i=0; i<paramlen; i++){
+        txbuf[4+i] = paramvalue[i];
+        length++;
+    }
+
+    return length;
+}
 
