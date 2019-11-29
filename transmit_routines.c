@@ -16,7 +16,7 @@ unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *t
  * -> 1: SH
  * -> 2: SL
  */
-void atcom_shsl(int sel){
+/*void atcom_shsl(int sel){
 	int checksum;
 	char checksum_c;
 
@@ -65,7 +65,7 @@ void atcom_shsl(int sel){
 		UCA0TXBUF = checksum_c;
 		while (!(IFG2&UCA0TXIFG));
 	}
-}
+}*/
 
 // Transmit Request
 //void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc){
@@ -143,7 +143,7 @@ void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf){
 }
 
 /* Enable UART RTS control */
-void atcom_enrts(void){
+/*void atcom_enrts(void){
 	int checksum;
 	char checksum_c;
 
@@ -189,12 +189,12 @@ void atcom_enrts(void){
 	UCA0TXBUF = checksum_c;
 	while (!(IFG2&UCA0TXIFG));
 
-}
+}*/
 
 /* Set AT Command PL
  * - make sure val is within 1 byte representation (no error correction yet)
  */
-void atcom_pl_set(unsigned int val){
+/*void atcom_pl_set(unsigned int val){
 	int checksum;
 	char checksum_c;
 
@@ -240,11 +240,11 @@ void atcom_pl_set(unsigned int val){
 	UCA0TXBUF = checksum_c;
 	while (!(IFG2&UCA0TXIFG));
 
-}
+}*/
 
 /* Set AT Command CH
  */
-void atcom_ch_set(unsigned int val){
+/*void atcom_ch_set(unsigned int val){
 	int checksum;
 	char checksum_c;
 
@@ -290,7 +290,7 @@ void atcom_ch_set(unsigned int val){
 	UCA0TXBUF = checksum_c;
 	while (!(IFG2&UCA0TXIFG));
 
-}
+}*/
 
 /* AT command query
  * - Query local AT command parameter value
@@ -372,7 +372,7 @@ void buildQueryResponse(int param, char *txdata, char *value){
 /* AT command set
  * - Query local AT command parameter value
  */
-void atcom_set(int param, char *value){
+/*void atcom_set(int param, char *value){
     int checksum;
     char checksum_c;
     char atparam[2];
@@ -400,14 +400,14 @@ void atcom_set(int param, char *value){
         length[1] = 0x06;
         break;
 
-    /*case PARAM_CH:
+    case PARAM_CH:
         length[0] = 0x00;
         length[1] = 0x05;
 
     default:
         length[0] = 0x00;
         length[1] = 0x04;
-        break;*/
+        break;
     }
     UCA0TXBUF = length[0];
     while (!(IFG2&UCA0TXIFG))
@@ -431,7 +431,7 @@ void atcom_set(int param, char *value){
         atparam[1] = 'D';
         break;
 
-   /* case PARAM_CH:
+    case PARAM_CH:
         atparam[0] = 'C';
         atparam[1] = 'H';
         break;
@@ -439,7 +439,7 @@ void atcom_set(int param, char *value){
     default:
         atparam[0] = 0x00;
         atparam[1] = 0x00;
-        break;*/
+        break;
     }
     UCA0TXBUF = atparam[0];
     checksum += (int)atparam[0];
@@ -460,11 +460,11 @@ void atcom_set(int param, char *value){
         while (!(IFG2&UCA0TXIFG));
         break;
 
-    /*case PARAM_CH: // CH (1 byte)
+    case PARAM_CH: // CH (1 byte)
         UCA0TXBUF = value[0];
         checksum += (int)value[0];
         while (!(IFG2&UCA0TXIFG));
-        break;*/
+        break;
 
     }
 
@@ -474,11 +474,11 @@ void atcom_set(int param, char *value){
     UCA0TXBUF = checksum_c;
     while (!(IFG2&UCA0TXIFG));
 
-}
+}*/
 
 /* Set AT Command ID
  */
-void atcom_id_set(unsigned int val){
+/*void atcom_id_set(unsigned int val){
     int checksum;
     char checksum_c;
 
@@ -527,7 +527,7 @@ void atcom_id_set(unsigned int val){
     UCA0TXBUF = checksum_c;
     while (!(IFG2&UCA0TXIFG));
 
-}
+}*/
 
 /* Transmit AT command
  * Arguments:

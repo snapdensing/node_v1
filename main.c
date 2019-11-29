@@ -25,14 +25,14 @@ unsigned int Battery_supply_nonreg(void);
 int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 #endif
 
-void atcom_shsl(int sel);
+//void atcom_shsl(int sel);
 void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
-void atcom_enrts(void);
-void atcom_pl_set(int val);
-void atcom_ch_set(int val);
+//void atcom_enrts(void);
+//void atcom_pl_set(int val);
+//void atcom_ch_set(int val);
 void atcom_query(int param);
-void atcom_set(int param, char *value); //buggy
-void atcom_id_set(unsigned int val);
+//void atcom_set(int param, char *value); //buggy
+//void atcom_id_set(unsigned int val);
 void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
 
 void detect_sensor(unsigned int *sensor_flagp);
@@ -245,7 +245,7 @@ int main(void) {
     	/** State: Enable RTS control (AT Command Send) **/
     	case S_RTS1:
 
-    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+    		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_RTS2;
     		//atcom_enrts();
@@ -269,12 +269,13 @@ int main(void) {
     	/** State: Get Address (AT Command Send Upper) **/
     	case S_ADDR1:
 
-    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+    		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_ADDR2;
-    		atcom_shsl(1);
+    		//atcom_shsl(1);
+    		atcom('S', 'H', parsedparam, 0, txbuf);
 
-    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
     		break;
 
@@ -293,12 +294,13 @@ int main(void) {
     	/** State: Get Address (AT Command Send Lower) **/
     	case S_ADDR3:
 
-    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+    		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_ADDR4;
-    		atcom_shsl(2);
+    		//atcom_shsl(2);
+    		atcom('S', 'L', parsedparam, 0, txbuf);
 
-    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
     		break;
 
@@ -316,7 +318,7 @@ int main(void) {
 
     	/** State: Bootup - set ID **/
     	case S_BOOTUP1:
-    	    P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
+    	    //P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
 
     	    state = S_BOOTUP2;
     	    /* Get value from flash if it exists */
@@ -328,9 +330,10 @@ int main(void) {
     	        panid[0] = (char)(temp_uint >> 8);
     	        panid[1] = (char)(temp_uint & 0x00ff);
     	    }
-    	    atcom_id_set(temp_uint);
+    	    //atcom_id_set(temp_uint);
+    	    atcom('I', 'D', panid, 2, txbuf);
 
-    	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
+    	    //P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
     	    break;
 
     	/** State: Bootup - set ID response **/
@@ -347,7 +350,7 @@ int main(void) {
 
         /** State: Bootup - set CH **/
         case S_BOOTUP3:
-            P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
+            //P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
 
             state = S_BOOTUP4;
             /* Get value from flash if it exists */
@@ -357,9 +360,10 @@ int main(void) {
                 channel = (char)XBEE_CH;
                 temp_uint = XBEE_CH;
             }
-            atcom_ch_set(temp_uint);
+            //atcom_ch_set(temp_uint);
+            atcom('C', 'H', &channel, 1, txbuf);
 
-            P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
+            //P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
             break;
 
         /** State: Bootup - set CH response **/
@@ -625,18 +629,21 @@ int main(void) {
     					// Change PL
     					case CHGPL:
     					    state = S_DPLRES;
-    			    		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-    			    		atcom_pl_set(temp_uint);
-    			    		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    			    		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+    			    		//atcom_pl_set(temp_uint);
+    			    		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    					    parsedparam[0] = (char)(temp_uint & 0x00ff);
+    					    atcom('P', 'L', parsedparam, 1, txbuf);
     			    		break;
 
     					// Change CH
     					case CHGCH:
     						state = S_DCHRES;
     					    channel = (char)(temp_uint & 0x00ff);
-    						P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-							atcom_ch_set(temp_uint);
-							P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    						//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
+							//atcom_ch_set(temp_uint);
+							//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
+    					    atcom('C', 'H', &channel, 1, txbuf);
 							break;
 
     					// Start sensing
