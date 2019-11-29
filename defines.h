@@ -5,7 +5,7 @@
  *      Author: Snap
  */
 
-#define MODE_DEBUG
+//#define MODE_DEBUG
 //#define DEBUG_CHARGING
 
 /* Sensor Configuration */
@@ -68,7 +68,6 @@
 #define NS_WINBRK	S_STOP
 #define NS_STOP		S_DEBUG
 
-#ifdef MODE_DEBUG
 #define NS_DEBUG1	S_DBRD
 #define NS_DEBUG2	S_DUNI
 #define NS_DEBUG3	S_DEBUG
@@ -80,7 +79,6 @@
 #define NS_DUNIBRK	S_DEBUG
 #define NS_DPLRES	S_DEBUG
 #define NS_DCHRES	S_DEBUG
-#endif
 
 /* Timer-relative periods */
 /** Sensing Period **/

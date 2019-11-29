@@ -12,13 +12,11 @@ int parse_ack(char *packet, unsigned int length, char *base_addr);
 int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
 int parse_stop(char *packet, unsigned int length, char *origin);
 
-#ifdef MODE_DEBUG
 int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
 void parse_setaddr(char *packet, char *address);
 void parse_srcaddr(char *packet, char *address);
 int parse_atcom_query(char *packet, unsigned int length, int parameter, char *parsedparam);
 unsigned int parse_setnodeid(char *packet, char *node_id);
-#endif
 
 #ifdef SENSOR_BATT
 int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
@@ -28,7 +26,6 @@ int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 #endif
 
 void atcom_shsl(int sel);
-//void transmitreq(char *tx_data_loc, int tx_data_len_loc, char *tx_dest_loc);
 void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
 void atcom_enrts(void);
 void atcom_pl_set(int val);
@@ -37,11 +34,6 @@ void atcom_query(int param);
 void atcom_set(int param, char *value); //buggy
 void atcom_id_set(unsigned int val);
 
-/*unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
-void uarttx_xbee(char *txbuf, unsigned int length);*/
-
-int check_sensor(int sensor_id);
-//unsigned int detect_sensor(void);
 void detect_sensor(unsigned int *sensor_flagp);
 
 void flash_erase(char *addr);
@@ -69,14 +61,6 @@ unsigned int timer_flag;
 
 /** State Encoding **/
 int state;
-
-/** Constant Addresses **/
-//static char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
-//static char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
-
-/** Constant messages **/
-//char stopACK[] = "XA"; // Stop command acknowledge
-//char startACK[] = "SA"; // Start command acknowledge
 
 /* Main */
 
@@ -113,7 +97,6 @@ int main(void) {
 	char tx_data[MAXDATA]; // Data buffer, data to transmit
 	char txbuf[MAXPAYLOAD]; // Transmit buffer, payload only (w/o headers and checksum)
 	unsigned int tx_count;
-#ifdef MODE_DEBUG
 	unsigned int temp_uint;
 	char atres_status;
 	int parameter;
@@ -130,7 +113,6 @@ int main(void) {
     unsigned int test_id_len;
     unsigned int test_loc_len;
     char test_id[31], test_loc[31];
-#endif
 
 
 	/** Configuration and flags **/
@@ -666,7 +648,7 @@ int main(void) {
 
     	    break;
 
-#ifdef MODE_DEBUG
+
     	/** State: Debug mode entrypoint **/
     	case S_DEBUG:
 
@@ -1138,7 +1120,7 @@ int main(void) {
 	            P3OUT &= 0x7f; // low to wakeup XBee
 	        }
 	        break;
-#endif
+
     	}
     }
 }

@@ -139,7 +139,6 @@ int parse_stop(char *packet, unsigned int length, char *origin){
 	return success;
 }
 
-#ifdef MODE_DEBUG
 /* Parse Debug mode broadcast signal
  * - Return range: 0 - 15
  */
@@ -343,7 +342,6 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
 
     return paramlen;
 }
-#endif
 
 /* Parse Transmit Status
  * length - header + payload + checksum (3 + x + 1)
