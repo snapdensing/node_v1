@@ -360,11 +360,14 @@ int main(void) {
 
             state = S_BOOTUP4;
             /* Get value from flash if it exists */
-            if (!(valid_segC & 0x80)){
+            /*if (!(valid_segC & 0x80)){
                 temp_uint = channel;
             }else{
                 channel = (char)XBEE_CH;
                 temp_uint = XBEE_CH;
+            }*/
+            if (valid_segC & 0x80){
+                channel = (char)XBEE_CH;
             }
             //atcom_ch_set(temp_uint);
             atcom('C', 'H', &channel, 1, txbuf);
@@ -592,6 +595,7 @@ int main(void) {
 
     			if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
+    			    temp_uint = sample_period; // Need to initialize in case command is Start retain ('S', no args)
     				j = parse_debugpacket(rxbuf, rxpsize, &temp_uint);
     				tx_count = 0;
 
