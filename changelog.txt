@@ -1,3 +1,7 @@
+Branch v1.7
+(2 Dec 2019)
+- Massive overhaul of code to decrease memory requirements.
+
 Branch v1.6
 (19 Nov 2019)
 - Supports 0, 1, and 2 byte arguments to start command. On a start with 0

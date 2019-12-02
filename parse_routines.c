@@ -51,7 +51,6 @@ int parse_atres(char com0, char com1, char *returndata, char *rxbuf){
 			else if ((com0 == 'P') && (com1 == 'L')){
 				// Extract PL parameter value
 				returndata[0] = rxbuf[7];
-				//*returndata = rxbuf[7];
 				return 1;
 			}
 
@@ -72,7 +71,7 @@ int parse_atres(char com0, char com1, char *returndata, char *rxbuf){
 }
 
 // Parse Acknowledge signal from base station
-int parse_ack(char *packet, unsigned int length, char *base_addr){
+/*int parse_ack(char *packet, unsigned int length, char *base_addr){
 	int success = 0;
 	int j;
 
@@ -90,10 +89,10 @@ int parse_ack(char *packet, unsigned int length, char *base_addr){
 	}
 
 	return success;
-}
+}*/
 
 // Parse (Sensing) start signal from base station
-int parse_start(char *packet, unsigned int length, unsigned int *sample_period){
+/*int parse_start(char *packet, unsigned int length, unsigned int *sample_period){
 	int success = 0;
 
 	// Check frame type
@@ -107,7 +106,7 @@ int parse_start(char *packet, unsigned int length, unsigned int *sample_period){
 	}
 
 	return success;
-}
+}*/
 
 /* Parse (Sensing) stop signal from base station
  * - Does not authenticate stop signal yet

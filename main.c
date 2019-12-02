@@ -6,10 +6,8 @@
 
 int parse_header(void);
 
-//int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length);
-
-int parse_ack(char *packet, unsigned int length, char *base_addr);
-int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
+//int parse_ack(char *packet, unsigned int length, char *base_addr);
+//int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
 int parse_stop(char *packet, unsigned int length, char *origin);
 
 int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
@@ -25,14 +23,7 @@ unsigned int Battery_supply_nonreg(void);
 int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 #endif
 
-//void atcom_shsl(int sel);
 void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
-//void atcom_enrts(void);
-//void atcom_pl_set(int val);
-//void atcom_ch_set(int val);
-//void atcom_query(int param);
-//void atcom_set(int param, char *value); //buggy
-//void atcom_id_set(unsigned int val);
 void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
 
 void detect_sensor(unsigned int *sensor_flagp);
@@ -394,17 +385,17 @@ int main(void) {
 #ifdef SENSOR_BATT
    			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 
+   			/* Append node_id */
    			tx_data[j] = 0x07;
    			j++;
-   			/* Append node_id */
    			for (i=0; i<node_id_len; i++){
    			    tx_data[j] = node_id[i];
    			    j++;
    			}
-   			tx_data[j] = ':';
-   			j++;
 
    			/* Append node_loc */
+            tx_data[j] = ':';
+            j++;
    			for (i=0; i<node_loc_len; i++){
    			    tx_data[j] = node_loc[i];
    			    j++;
@@ -423,14 +414,12 @@ int main(void) {
 #ifdef SENSOR_BATT
             /* Charging state */
             if (charge_flag == 0){ // Discharging
-                //if (batt < BATT_VTHLO){
                 if (batt < batt_lo){
                     charge_flag = 1;
                     P1OUT |= 0x20; // Set P1.5 to enable charging
                 }
             }
             else{ // Charging
-                //if (batt > BATT_VTHHI){
                 if (batt > batt_hi){
                     charge_flag = 0;
                     P1OUT &= 0xdf; // Reset P1.5 to disable charging
@@ -447,9 +436,6 @@ int main(void) {
 
    			/* Update Transmit Counter */
     		tx_count++;
-
-   			/* Reset Timer flag */
-    		//timer_flag = 0;
 
    			P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
@@ -479,17 +465,12 @@ int main(void) {
     		if (rxheader_flag == 0){
     		    parse_header();
     		}else{
+
     		    if (rxctr >= (rxpsize + 4)){
-
     		        P3OUT |= 0x40; // (UART Rx disable)
-
     		        stop_flag = parse_stop(rxbuf, rxpsize, origin_addr);
 
     		        // Reset buffer
-    		        /*rxctr = 0;
-    		        rxheader_flag = 0;
-    		        rxpsize = 0;
-    		        P3OUT &= 0xbf;*/ // (UART Rx enable)
     		        rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     		    }
     		}
@@ -513,10 +494,8 @@ int main(void) {
     		P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_STOPRES;
-
     		/* Transmit */
    			transmitreq(stopACK, 2, origin_addr, txbuf);
-
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
     		break;
@@ -540,13 +519,10 @@ int main(void) {
     	/** State: Start signal acknowledge **/
     	case S_START:
     	    P3OUT |= 0x40;  // nRTS to 1 (UART Rx disable)
-
-    	    //state = S_SENSE;
     	    state = S_STARTRES;
 
     	    /* Transmit */
     	    transmitreq(startACK, 2, origin_addr, txbuf);
-
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
     	    break;
 
@@ -603,7 +579,6 @@ int main(void) {
     			if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
     				j = parse_debugpacket(rxbuf, rxpsize, &temp_uint);
-
     				tx_count = 0;
 
     				switch(j){
@@ -630,9 +605,6 @@ int main(void) {
     					// Change PL
     					case CHGPL:
     					    state = S_DPLRES;
-    			    		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-    			    		//atcom_pl_set(temp_uint);
-    			    		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     					    parsedparam[0] = (char)(temp_uint & 0x00ff);
     					    atcom('P', 'L', parsedparam, 1, txbuf);
     			    		break;
@@ -641,9 +613,6 @@ int main(void) {
     					case CHGCH:
     						state = S_DCHRES;
     					    channel = (char)(temp_uint & 0x00ff);
-    						//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
-							//atcom_ch_set(temp_uint);
-							//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     					    atcom('C', 'H', &channel, 1, txbuf);
 							break;
 
@@ -669,7 +638,6 @@ int main(void) {
 
     					// Query unicast address
     					case QUESINK:
-    					//else if (j == QUESINK){
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
     					    tx_data[0] = 'Q';
@@ -678,7 +646,6 @@ int main(void) {
     					        tx_data[i+2] = unicast_addr[i];
     					    j = 10; // tx_data length
     					    break;
-    					//}
 
     					// Query sampling period
     					case QUEPER:
@@ -694,42 +661,33 @@ int main(void) {
 
     					// Commit radio settings to NVM
     					case COMMIT:
-    					//else if (j == COMMIT){
     					    state = S_DQRES1;
     					    parameter = PARAM_WR;
     					    parse_srcaddr(rxbuf,origin_addr);
     					    break;
-    					//}
 
     					// Change node ID
     					case CHGID:
-    					//else if (j == CHGID){
     					    state = S_DEBUG;
     					    node_id_len = parse_setnodeid(rxbuf,node_id);
     					    break;
-    					//}
 
     					// Change node loc
     					case CHGLOC:
-    					//else if (j == CHGLOC){
     					    state = S_DEBUG;
     					    node_loc_len = parse_setnodeid(rxbuf,node_loc);
     					    break;
-    					//}
 
     					// Enter timed sleep
     					case SLPTIMED:
-    					//else if (j == SLPTIMED){
     					    state = S_SLEEP1;
     					    sleep_time = temp_uint;
     					    timer_flag = 0;
     					    P3OUT |= 0x80; // high to sleep XBee
     					    break;
-    					//}
 
     					// Query statistics
     					case QUESTAT:
-    					//else if (j == QUESTAT){
     					    state = S_DQRES3;
                             parse_srcaddr(rxbuf,origin_addr);
                             tx_data[0] = 'Q';
@@ -742,15 +700,9 @@ int main(void) {
                             tx_data[5] = (char)(sensetx_fail & 0x00ff);
                             j = 6; // tx_data length
                             break;
-    					//}
     				}
-    				//}
 
     				// Reset buffer
-    				/*rxctr = 0;
-    				rxheader_flag = 0;
-    				rxpsize = 0;
-    				P3OUT &= 0xbf;*/ // nRTS to 0 (UART enable)
     				rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
     			}
 
@@ -877,11 +829,8 @@ int main(void) {
 
 		/* State: Debug Query parameter */
 		case S_DQRES1:
-		    //P3OUT |= 0x40; // UART Rx disable
-		    //atcom_query(parameter);
 		    param_to_atcom(parameter, &parsedparam[0], &parsedparam[1]);
 		    atcom(parsedparam[0], parsedparam[1], &parsedparam[2], 0, txbuf);
-		    //P3OUT &= 0xbf; // UART Rx enable
 		    state = S_DQRES2;
 		    break;
 
@@ -924,10 +873,6 @@ int main(void) {
 		            }
 
 		            // Reset buffer
-		            /*rxctr = 0;
-		            rxheader_flag = 0;
-		            rxpsize = 0;
-		            P3OUT &= 0xbf;*/ // UART Rx enable
 		            rst_rxbuf(&rxheader_flag, &rxctr, &rxpsize);
 		        }
 		    }
@@ -949,15 +894,7 @@ int main(void) {
                 segment_wr(flash_addr, flash_data);
             }
 
-	        //P3OUT |= 0x40; // UART Rx disable
-	        //transmitreq(tx_data, j, origin_addr);
-	        /*i = assemble_txreq(origin_addr, tx_data, j, txbuf);
-	        uarttx_xbee(txbuf, i);*/
-
             transmitreq(tx_data, j, origin_addr, txbuf);
-	        //P3OUT &= 0xbf; // UART Rx enable
-
-	        //state = S_DEBUG;
 	        state = S_DQRES4;
 
 	        break;
@@ -993,28 +930,6 @@ int main(void) {
 // UART Rx ISR
 #pragma vector=USCIAB0RX_VECTOR
 __interrupt void USCI0RX_ISR(void){
-
-	/*if (rxbuf_overflow == 0){
-		if (rxctr == 0){
-			if (UCA0RXBUF == 0x7e){
-				rxbuf[0] = 0x7e;
-				rxctr++;
-			}
-		}else{
-			rxbuf[rxctr] = UCA0RXBUF;
-			rxctr++;
-
-			// Disable UART Tx when whole packet is received
-			// -> Re-enable in main function
-			if (rxctr >= (rxpsize + 4)){
-				P3OUT |= 0x40;	// nRTS to 0 (UART Rx disable)
-			}
-		}
-	}
-
-	if (rxctr == RXBUF_MAX){
-		rxbuf_overflow = 1;
-	}*/
 
     if (rxctr < RXBUF_MAX){
         if (rxctr == 0){
