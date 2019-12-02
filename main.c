@@ -30,7 +30,7 @@ void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
 //void atcom_enrts(void);
 //void atcom_pl_set(int val);
 //void atcom_ch_set(int val);
-void atcom_query(int param);
+//void atcom_query(int param);
 //void atcom_set(int param, char *value); //buggy
 //void atcom_id_set(unsigned int val);
 void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
@@ -47,6 +47,7 @@ void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned i
 void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p);
 int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
 int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata);
+void param_to_atcom(int param, char *com0, char *com1);
 
 /* Global Variables */
 
@@ -876,9 +877,11 @@ int main(void) {
 
 		/* State: Debug Query parameter */
 		case S_DQRES1:
-		    P3OUT |= 0x40; // UART Rx disable
-		    atcom_query(parameter);
-		    P3OUT &= 0xbf; // UART Rx enable
+		    //P3OUT |= 0x40; // UART Rx disable
+		    //atcom_query(parameter);
+		    param_to_atcom(parameter, &parsedparam[0], &parsedparam[1]);
+		    atcom(parsedparam[0], parsedparam[1], &parsedparam[2], 0, txbuf);
+		    //P3OUT &= 0xbf; // UART Rx enable
 		    state = S_DQRES2;
 		    break;
 

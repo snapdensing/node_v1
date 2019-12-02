@@ -194,3 +194,21 @@ unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *t
     return length;
 }
 
+/* Parameter to AT command LUT
+ *
+ */
+
+void param_to_atcom(int param, char *com0, char *com1){
+
+    switch(param){
+    case PARAM_PL:
+        *com0 = 'P';
+        *com1 = 'L';
+        break;
+
+    case PARAM_WR:
+        *com0 = 'W';
+        *com1 = 'R';
+        break;
+    }
+}

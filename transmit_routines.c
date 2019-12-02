@@ -295,7 +295,7 @@ void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf){
 /* AT command query
  * - Query local AT command parameter value
  */
-void atcom_query(int param){
+/*void atcom_query(int param){
     int checksum;
     char checksum_c;
     char atparam[2];
@@ -354,7 +354,7 @@ void atcom_query(int param){
     UCA0TXBUF = checksum_c;
     while (!(IFG2&UCA0TXIFG));
 
-}
+}*/
 
 /* Debug Query parameter build response
  */
