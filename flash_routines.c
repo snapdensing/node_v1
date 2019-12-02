@@ -86,14 +86,16 @@ void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsign
     node_id_len = (unsigned int)data[0];
     *node_id_lenp = node_id_len;
     //for (i=0; i<node_id_len; i++){
-    for (i=0; i<31; i++){
+    //for (i=0; i<31; i++){
+    for (i=0; i<MAXIDLEN; i++){
         node_id[i] = data[i+1];
     }
 
     node_loc_len = (unsigned int)data[32];
     *node_loc_lenp = node_loc_len;
     //for (i=0; i<node_loc_len; i++){
-    for (i=0; i<31; i++){
+    //for (i=0; i<31; i++){
+    for (i=0; i<MAXLOCLEN; i++){
         node_loc[i] = data[i+33];
     }
 }

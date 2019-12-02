@@ -103,9 +103,9 @@ int main(void) {
 	char flash_data[64];
 	char *flash_addr;
 	char valid_segC;
-    unsigned int test_id_len;
-    unsigned int test_loc_len;
-    char test_id[31], test_loc[31];
+    //unsigned int test_id_len;
+    //unsigned int test_loc_len;
+    //char test_id[31], test_loc[31];
 
 
 	/** Configuration and flags **/
@@ -189,10 +189,11 @@ int main(void) {
     sample_period = SAMPLE_PERIOD;
 
     /* Initialize Node ID/Loc */
-    read_segD(test_id, &test_id_len, test_loc, &test_loc_len);
+    //read_segD(test_id, &test_id_len, test_loc, &test_loc_len);
+    read_segD(node_id, &node_id_len, node_loc, &node_loc_len);
 
     // Node ID
-    if (test_id_len < MAXIDLEN){ // Get from flash
+    /*if (test_id_len < MAXIDLEN){ // Get from flash
         node_id_len = test_id_len;
         for (i=0; i<node_id_len; i++)
             node_id[i] = test_id[i];
@@ -200,13 +201,26 @@ int main(void) {
         node_id_len = node_id_len_default;
         for (i=0; i<node_id_len_default; i++)
             node_id[i] = node_id_default[i];
+    }*/
+    if (node_id_len > MAXIDLEN){
+        // Use programming defaults
+        node_id_len = node_id_len_default;
+        for (i=0; i<node_id_len_default; i++)
+            node_id[i] = node_id_default[i];
     }
+
     // Node Loc
-    if (test_loc_len < MAXLOCLEN){ // Get from flash
+    /*if (test_loc_len < MAXLOCLEN){ // Get from flash
         node_loc_len = test_loc_len;
         for (i=0; i<node_loc_len; i++)
             node_loc[i] = test_loc[i];
     }else{
+        node_loc_len = node_loc_len_default;
+        for (i=0; i<node_loc_len_default; i++)
+            node_loc[i] = node_loc_default[i];
+    }*/
+    if (node_loc_len > MAXIDLEN){
+        // Use programming defaults
         node_loc_len = node_loc_len_default;
         for (i=0; i<node_loc_len_default; i++)
             node_loc[i] = node_loc_default[i];
