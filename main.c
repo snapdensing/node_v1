@@ -245,6 +245,9 @@ int main(void) {
     /** Enable Interrupts **/
     __bis_SR_register(GIE);
 
+    /** Start up delay **/
+    while(timer_flag < BOOTDELAY);
+
     while(1){
     	switch(state){
 
