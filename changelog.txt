@@ -1,3 +1,9 @@
+Branch v1.7.1
+(17 Jan 2020)
+- Added autostart sensing (through ctrl_flag). Query/change using
+'QF'/'DF'[flag value]
+- Added FW version information. Query using 'QV'
+
 Branch v1.7
 (2 Dec 2019)
 - Massive overhaul of code to decrease memory requirements.
