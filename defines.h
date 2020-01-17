@@ -97,6 +97,8 @@
 #define QUEPER   10
 #define START    6
 #define SLPTIMED 14
+#define CHGFLAG  16
+#define QUEFLAG  17
 
 /** Battery charging thresholds **/
 #define BATT_VTHLO 0x02e0 // 3.6V

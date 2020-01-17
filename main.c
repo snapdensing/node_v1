@@ -32,8 +32,8 @@ void flash_erase(char *addr);
 void segment_wr(char *base_addr, char *data);
 void flash_assemble_segD(char *data, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len);
 void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsigned int *node_loc_lenp);
-void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling);
-void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp);
+void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling, char *ctrl_flag);
+void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp, char *ctrl_flag);
 
 void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p);
 int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
@@ -112,6 +112,9 @@ int main(void) {
 	unsigned int sample_period;
 	int stop_flag;
 	unsigned int sensor_flag;
+	// Control flag (enabled if 0)
+	// [7] - autostart sensing on boot
+	char ctrl_flag;
 
 	/* Peripheral Setup */
 
@@ -193,15 +196,6 @@ int main(void) {
     read_segD(node_id, &node_id_len, node_loc, &node_loc_len);
 
     // Node ID
-    /*if (test_id_len < MAXIDLEN){ // Get from flash
-        node_id_len = test_id_len;
-        for (i=0; i<node_id_len; i++)
-            node_id[i] = test_id[i];
-    }else{ // Use programming defaults
-        node_id_len = node_id_len_default;
-        for (i=0; i<node_id_len_default; i++)
-            node_id[i] = node_id_default[i];
-    }*/
     if (node_id_len > MAXIDLEN){
         // Use programming defaults
         node_id_len = node_id_len_default;
@@ -210,15 +204,6 @@ int main(void) {
     }
 
     // Node Loc
-    /*if (test_loc_len < MAXLOCLEN){ // Get from flash
-        node_loc_len = test_loc_len;
-        for (i=0; i<node_loc_len; i++)
-            node_loc[i] = test_loc[i];
-    }else{
-        node_loc_len = node_loc_len_default;
-        for (i=0; i<node_loc_len_default; i++)
-            node_loc[i] = node_loc_default[i];
-    }*/
     if (node_loc_len > MAXIDLEN){
         // Use programming defaults
         node_loc_len = node_loc_len_default;
@@ -235,7 +220,8 @@ int main(void) {
     }
 
     /* Flash Segment C read for initialization */
-    read_segC(&valid_segC, panid, &channel, unicast_addr, &sample_period);
+    ctrl_flag = 0xff;
+    read_segC(&valid_segC, panid, &channel, unicast_addr, &sample_period, &ctrl_flag);
 
     /** Check sensors **/
     detect_sensor(&sensor_flag);
@@ -320,7 +306,11 @@ int main(void) {
     		}
     		else{
                 if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'L', node_address)){
-                    state = S_DEBUG;
+                    if (ctrl_flag & 0x80){ // ctrl_flag[7] == '1'
+                        state = S_DEBUG;
+                    }else{ // autostart
+                        state = S_SENSE;
+                    }
                 }
     		}
     		break;
@@ -721,6 +711,23 @@ int main(void) {
                             tx_data[5] = (char)(sensetx_fail & 0x00ff);
                             j = 6; // tx_data length
                             break;
+
+                        // Change Autostart flag
+    					case CHGFLAG:
+    					    state = S_DEBUG;
+    					    ctrl_flag = (char)(temp_uint & 0x00ff);
+    					    break;
+
+    					// Query Autostart flag
+    					case QUEFLAG:
+    					    state = S_DQRES3;
+    					    parse_srcaddr(rxbuf,origin_addr);
+    					    tx_data[0] = 'Q';
+    					    tx_data[1] = 'F';
+    					    // parameter: control flag
+    					    tx_data[2] = ctrl_flag;
+    					    j = 3; // tx_data length
+    					    break;
     				}
 
     				// Reset buffer
@@ -909,7 +916,7 @@ int main(void) {
                 flash_erase(flash_addr);
                 segment_wr(flash_addr, flash_data);
 
-                flash_assemble_segC(flash_data, &channel, panid, unicast_addr, sample_period);
+                flash_assemble_segC(flash_data, &channel, panid, unicast_addr, sample_period, &ctrl_flag);
                 flash_addr = (char *)SEG_C;
                 flash_erase(flash_addr);
                 segment_wr(flash_addr, flash_data);

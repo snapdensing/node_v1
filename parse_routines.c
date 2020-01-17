@@ -200,6 +200,11 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 			if (length == 14)
 				success = COMMIT;
 			break;
+
+		case 'F':
+		    success = CHGFLAG;
+		    *num = (unsigned int) packet[17];
+		    break;
 		}
 
 		break;
@@ -228,6 +233,9 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 				success = QUEPER;
 			break;
 
+		case 'F':
+		    success = QUEFLAG;
+		    break;
 		}
 
 		break;

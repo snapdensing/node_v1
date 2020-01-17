@@ -107,8 +107,9 @@ void read_segD(char *node_id, unsigned int *node_id_lenp, char *node_loc, unsign
  *   ID (XBee)    (2 byte)
  *   Aggregator   (8 bytes)
  *   Sampling     (2 bytes)
+ *   ctrl_flag    (1 byte)
  */
-void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling){
+void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, unsigned int sampling, char *ctrl_flag){
 
     unsigned int i;
 
@@ -122,8 +123,9 @@ void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, un
      * bit 6 - pan ID
      * bit 5 - aggregator
      * bit 4 - sampling
+     * bit 3 - ctrl_flag
      */
-    data[0] = 0x0f;
+    data[0] = 0x07;
 
     /* Channel */
     data[1] = *channel;
@@ -141,6 +143,9 @@ void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, un
     data[12] = (char)(sampling >> 8);
     data[13] = (char)(sampling & 0x00ff);
 
+    /* Control flag */
+    data[14] = *ctrl_flag;
+
 }
 
 /* Read segment C data
@@ -149,8 +154,9 @@ void flash_assemble_segC(char *data, char *channel, char *panid, char *aggre, un
  * - channel
  * - aggre
  * - sampling
+ * - ctrl_flag
  */
-void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp){
+void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned int *samplingp, char *ctrl_flag){
     unsigned int i, sampling;
     char valid;
 
@@ -182,6 +188,11 @@ void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned i
         sampling = (unsigned int)data[12];
         sampling = (sampling << 8) + (unsigned int)data[13];
         *samplingp = sampling;
+    }
+
+    /* Control flag */
+    if (!(valid & 0x08)){
+        *ctrl_flag = data[14];
     }
 
 }
