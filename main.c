@@ -728,6 +728,18 @@ int main(void) {
     					    tx_data[2] = ctrl_flag;
     					    j = 3; // tx_data length
     					    break;
+
+    					// Query FW version
+    					case QUEVER:
+    					    state = S_DQRES3;
+    					    parse_srcaddr(rxbuf,origin_addr);
+    					    tx_data[0] = 'Q';
+    					    tx_data[1] = 'V';
+    					    for (i=0; i<FWVERLEN; i++){
+    					        tx_data[i+2] = fwver[i];
+    					    }
+    					    j = 2 + FWVERLEN; // tx_data length
+    					    break;
     				}
 
     				// Reset buffer

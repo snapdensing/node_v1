@@ -236,6 +236,10 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 		case 'F':
 		    success = QUEFLAG;
 		    break;
+
+		case 'V':
+		    success = QUEVER;
+		    break;
 		}
 
 		break;
