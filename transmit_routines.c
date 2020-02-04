@@ -9,7 +9,8 @@
 #include "defines.h"
 
 void uarttx_xbee(char *txbuf, unsigned int length);
-unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
+//unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
+unsigned int assemble_txreq(char *dest_addr, int data_len, char *txbuf);
 unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *txbuf);
 
 void transmitreq(int tx_data_len, char *dest_addr, char *txbuf){

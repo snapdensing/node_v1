@@ -13,8 +13,8 @@ unsigned int node_loc_len_default = 7; // length of node_loc string
 /* XBee parameter defaults */
 //char default_id[] = "\x7f\xff";
 #define XBEE_ID 0x7fff;
-#define XBEE_CH 0x14;
+#define XBEE_CH 0x0c;
 
 /* Firmware version (DO NOT edit) */
-const char *fwver = "1.7.1";
-#define FWVERLEN 5
+const char *fwver = "1.7.1_prod1";
+#define FWVERLEN 11

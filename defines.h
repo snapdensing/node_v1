@@ -118,7 +118,7 @@
 
 /** Buffers **/
 #define MAXDATA 32
-#define MAXPAYLOAD 46
+#define MAXPAYLOAD 55
 
 /** Initialization **/
 #define BOOTDELAY 5
