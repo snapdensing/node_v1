@@ -17,13 +17,16 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
 unsigned int parse_setnodeid(char *packet, char *node_id);
 
 #ifdef SENSOR_BATT
-int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
+//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
+int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
 unsigned int Battery_supply_nonreg(void);
 #else
-int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
+//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
+int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count);
 #endif
 
-void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
+//void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
+void transmitreq(int tx_data_len, char *dest_addr, char *txbuf);
 void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
 
 void detect_sensor(unsigned int *sensor_flagp);
@@ -393,7 +396,8 @@ int main(void) {
 
    			/* Assemble Packet Data */
 #ifdef SENSOR_BATT
-   			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
+   			//j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
+   			j = buildSense(txbuf,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 
    			/* Append node_id */
    			tx_data[j] = 0x07;
@@ -418,7 +422,8 @@ int main(void) {
 #endif
 
 #else
-   			j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+   			//j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+   			j = buildSense(txbuf,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
 
 #ifdef SENSOR_BATT
@@ -439,9 +444,11 @@ int main(void) {
 
    			/* Transmit */
 #ifdef BROADCAST
-   			transmitreq(tx_data, j, broadcast_addr, txbuf);
+   			//transmitreq(tx_data, j, broadcast_addr, txbuf);
+            transmitreq(j, broadcast_addr, txbuf);
 #else
-   			transmitreq(tx_data, j, unicast_addr, txbuf);
+   			//transmitreq(tx_data, j, unicast_addr, txbuf);
+            transmitreq(j, unicast_addr, txbuf);
 #endif
 
    			/* Update Transmit Counter */
@@ -505,7 +512,10 @@ int main(void) {
 
     		state = S_STOPRES;
     		/* Transmit */
-   			transmitreq(stopACK, 2, origin_addr, txbuf);
+   			//transmitreq(stopACK, 2, origin_addr, txbuf);
+    		txbuf[14] = 'X';
+    		txbuf[15] = 'A';
+    		transmitreq(2, origin_addr, txbuf);
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
     		break;
@@ -532,7 +542,10 @@ int main(void) {
     	    state = S_STARTRES;
 
     	    /* Transmit */
-    	    transmitreq(startACK, 2, origin_addr, txbuf);
+    	    //transmitreq(startACK, 2, origin_addr, txbuf);
+    	    txbuf[14] = 'S';
+    	    txbuf[15] = 'A';
+    	    transmitreq(2, origin_addr, txbuf);
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
     	    break;
 
@@ -765,9 +778,11 @@ int main(void) {
 
     			/* Assemble Packet Data */
 #ifdef SENSOR_BATT
-    			j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
+    			//j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
+    			j = buildSense(txbuf,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 #else
-                j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+                //j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+                j = buildSense(txbuf,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
 
                 /* Append node_id */
@@ -787,7 +802,8 @@ int main(void) {
                 }
 
     			/* Transmit */
-    			transmitreq(tx_data, j, broadcast_addr, txbuf);
+    			//transmitreq(tx_data, j, broadcast_addr, txbuf);
+                transmitreq(j, broadcast_addr, txbuf);
 
     			/* Reset Timer flag */
     			timer_flag = 0;
@@ -812,9 +828,11 @@ int main(void) {
 
     		    /* Assemble Packet Data */
 #ifdef SENSOR_BATT
-    		    j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
+    		    //j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
+    		    j = buildSense(txbuf,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 #else
-    		    j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+    		    //j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
+    		    j = buildSense(txbuf,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
 
                 /* Append node_id */
@@ -834,7 +852,8 @@ int main(void) {
                 }
 
     		    /* Transmit */
-    		    transmitreq(tx_data, j, origin_addr, txbuf);
+    		    //transmitreq(tx_data, j, origin_addr, txbuf);
+                transmitreq(j, origin_addr, txbuf);
 
     		    /* Reset Timer flag */
     		    timer_flag = 0;
@@ -934,7 +953,8 @@ int main(void) {
                 segment_wr(flash_addr, flash_data);
             }
 
-            transmitreq(tx_data, j, origin_addr, txbuf);
+            //transmitreq(tx_data, j, origin_addr, txbuf);
+            transmitreq(j, origin_addr, txbuf);
 	        state = S_DQRES4;
 
 	        break;

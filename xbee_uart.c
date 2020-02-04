@@ -128,7 +128,8 @@ void uarttx_xbee(char *txbuf, unsigned int length){
  * Returns:
  *   length of assembled payload
  */
-unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf){
+unsigned int assemble_txreq(char *dest_addr, int data_len, char *txbuf){
+//unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf){
     unsigned int i, length;
 
     /* Frame type */
@@ -153,11 +154,14 @@ unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txb
     txbuf[13] = 0x00;
 
     /* Data */
-    length = 14; //initial length (no data yet)
+    /*length = 14; //initial length (no data yet)
     for (i=0; i<data_len; i++){
         txbuf[14+i] = data[i];
         length++;
-    }
+    }*/
+
+    /* Data - already assembled prior */
+    length = 14 + data_len;
 
     return length;
 }

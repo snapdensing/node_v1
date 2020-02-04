@@ -19,9 +19,11 @@ unsigned int Battery_supply_nonreg(void);
  */
 
 #ifdef SENSOR_BATT
-int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out){
+int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out){
+//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out){
 #else
-int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count){
+int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count){
+//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count){
 #endif
 
 	int temp_int;
@@ -87,58 +89,58 @@ int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count){
 #endif
 
 	/* Payload Assembly */
-	int i=2;
+	int i=16;
 	int j;
-	tx_data[0] = (char)'D';
-	tx_data[1] = (char)tx_count;
+	txbuf[14] = (char)'D';
+	txbuf[15] = (char)tx_count;
 
 	/** Unregulated Battery Voltage **/
 	if (sensor_flag & 1){
-		tx_data[i++] = 0x00;
-		tx_data[i++] = (char)(batt >> 8);
-		tx_data[i++] = (char)(batt & 0x00ff); //replace with battery voltage
+		txbuf[i++] = 0x00;
+		txbuf[i++] = (char)(batt >> 8);
+		txbuf[i++] = (char)(batt & 0x00ff); //replace with battery voltage
 	}
 
 	/** Internal Temperature **/
 	if (sensor_flag & 2){
-		tx_data[i++] = 0x01;
-		tx_data[i++] = (char)(temp_int >> 8);
-		tx_data[i++] = (char)(temp_int & 0x00ff);
+		txbuf[i++] = 0x01;
+		txbuf[i++] = (char)(temp_int >> 8);
+		txbuf[i++] = (char)(temp_int & 0x00ff);
 	}
 
 	/** DHT 11 Temperature **/
 	if (sensor_flag & 4){
-		tx_data[i++] = 0x02;
-		tx_data[i++] = 0x00; //zero-padded
-		tx_data[i++] = (char)dht11_temp;
+		txbuf[i++] = 0x02;
+		txbuf[i++] = 0x00; //zero-padded
+		txbuf[i++] = (char)dht11_temp;
 	}
 
 	/** DHT 11 Humidity **/
 	if (sensor_flag & 8){
-		tx_data[i++] = 0x03;
-		tx_data[i++] = 0x00; //zero-padded
-		tx_data[i++] = (char)dht11_rh;
+		txbuf[i++] = 0x03;
+		txbuf[i++] = 0x00; //zero-padded
+		txbuf[i++] = (char)dht11_rh;
 	}
 
 	/** DHT 22 Temperature **/
 	if (sensor_flag & 16){
-		tx_data[i++] = 0x04;
-		tx_data[i++] = dht22_temp[0];
-		tx_data[i++] = dht22_temp[1];
+		txbuf[i++] = 0x04;
+		txbuf[i++] = dht22_temp[0];
+		txbuf[i++] = dht22_temp[1];
 	}
 
 	/** DHT 22 Humidity **/
 	if (sensor_flag & 32){
-		tx_data[i++] = 0x05;
-		tx_data[i++] = dht22_rh[0];
-		tx_data[i++] = dht22_rh[1];
+		txbuf[i++] = 0x05;
+		txbuf[i++] = dht22_rh[0];
+		txbuf[i++] = dht22_rh[1];
 	}
 
 	/** Current sensor **/
 	if (sensor_flag & 64){
-		tx_data[i++] = 0x06;
+		txbuf[i++] = 0x06;
 		for (j=0; j<17; j++)
-			tx_data[i++] = current[j];
+			txbuf[i++] = current[j];
 	}
 
 	*batt_out = batt;
