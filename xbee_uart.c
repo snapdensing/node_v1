@@ -128,9 +128,10 @@ void uarttx_xbee(char *txbuf, unsigned int length){
  * Returns:
  *   length of assembled payload
  */
-unsigned int assemble_txreq(char *dest_addr, int data_len, char *txbuf){
+void assemble_txreq(char *dest_addr, char *txbuf){
 //unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf){
-    unsigned int i, length;
+    //unsigned int i, length;
+    unsigned int i;
 
     /* Frame type */
     txbuf[0] = 0x10;
@@ -161,9 +162,9 @@ unsigned int assemble_txreq(char *dest_addr, int data_len, char *txbuf){
     }*/
 
     /* Data - already assembled prior */
-    length = 14 + data_len;
+    //length = data_len;
 
-    return length;
+    //return length;
 }
 
 /* UART assemble AT command frame

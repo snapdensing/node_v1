@@ -10,17 +10,17 @@
 
 void uarttx_xbee(char *txbuf, unsigned int length);
 //unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
-unsigned int assemble_txreq(char *dest_addr, int data_len, char *txbuf);
+void assemble_txreq(char *dest_addr, char *txbuf);
 unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *txbuf);
 
 void transmitreq(int tx_data_len, char *dest_addr, char *txbuf){
 //void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf){
 
-    unsigned int i;
+    //unsigned int i;
 
     //i = assemble_txreq(dest_addr, tx_data, tx_data_len, txbuf);
-    i = assemble_txreq(dest_addr, tx_data_len, txbuf);
-    uarttx_xbee(txbuf, i);
+    assemble_txreq(dest_addr, txbuf);
+    uarttx_xbee(txbuf, tx_data_len);
 }
 
 /* Transmit AT command
