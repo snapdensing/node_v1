@@ -67,8 +67,8 @@ int main(void) {
     static char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
 
     /** Constant messages **/
-    static char stopACK[] = "XA"; // Stop command acknowledge
-    static char startACK[] = "SA"; // Start command acknowledge
+    //static char stopACK[] = "XA"; // Stop command acknowledge
+    //static char startACK[] = "SA"; // Start command acknowledge
 
 	/* Global Variables */
 
@@ -90,7 +90,7 @@ int main(void) {
 	unsigned int sleep_time;
 
 	/** Transmit buffer **/
-	char tx_data[MAXDATA]; // Data buffer, data to transmit
+	//char tx_data[MAXDATA]; // Data buffer, data to transmit
 	char txbuf[MAXPAYLOAD]; // Transmit buffer, payload only (w/o headers and checksum)
 	unsigned int tx_count;
 	unsigned int temp_uint;
@@ -400,24 +400,29 @@ int main(void) {
    			j = buildSense(txbuf,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 
    			/* Append node_id */
-   			tx_data[j] = 0x07;
+   			//tx_data[j] = 0x07;
+   			txbuf[j] = 0x07;
    			j++;
    			for (i=0; i<node_id_len; i++){
-   			    tx_data[j] = node_id[i];
+   			    //tx_data[j] = node_id[i];
+   			    txbuf[j] = node_id[i];
    			    j++;
    			}
 
    			/* Append node_loc */
-            tx_data[j] = ':';
+            //tx_data[j] = ':';
+   			txbuf[j] = ':';
             j++;
    			for (i=0; i<node_loc_len; i++){
-   			    tx_data[j] = node_loc[i];
+   			    //tx_data[j] = node_loc[i];
+   			    txbuf[j] = node_loc[i];
    			    j++;
    			}
 
 #ifdef DEBUG_CHARGING
    			/* Append charge_flag to packet */
-   			tx_data[j] = (char)(charge_flag & 0x00ff);
+   			//tx_data[j] = (char)(charge_flag & 0x00ff);
+   			txbuf[j] = (char)(charge_flag & 0x00ff);
    			j++;
 #endif
 
@@ -664,10 +669,13 @@ int main(void) {
     					case QUESINK:
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    tx_data[0] = 'Q';
-    					    tx_data[1] = 'A';
+    					    //tx_data[0] = 'Q';
+    					    //tx_data[1] = 'A';
+    					    txbuf[14] = 'Q';
+    					    txbuf[15] = 'A';
     					    for (i=0; i<8; i++)
-    					        tx_data[i+2] = unicast_addr[i];
+    					        //tx_data[i+2] = unicast_addr[i];
+    					        txbuf[i+16] = unicast_addr[i];
     					    j = 10; // tx_data length
     					    break;
 
@@ -676,9 +684,12 @@ int main(void) {
     					//else if (j == QUEPER){
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    tx_data[0] = 'Q';
-    					    tx_data[1] = 'T';
-    					    tx_data[2] = (char)sample_period; //assumes period is only 8-bits
+    					    //tx_data[0] = 'Q';
+    					    //tx_data[1] = 'T';
+    					    txbuf[14] = 'Q';
+    					    txbuf[15] = 'T';
+    					    //tx_data[2] = (char)sample_period; //assumes period is only 8-bits
+    					    txbuf[16] = (char)sample_period;
     					    j = 3; // tx_data length
     					    break;
     					//}
@@ -714,14 +725,20 @@ int main(void) {
     					case QUESTAT:
     					    state = S_DQRES3;
                             parse_srcaddr(rxbuf,origin_addr);
-                            tx_data[0] = 'Q';
-                            tx_data[1] = 'S';
+                            //tx_data[0] = 'Q';
+                            //tx_data[1] = 'S';
+                            txbuf[14] = 'Q';
+                            txbuf[15] = 'S';
                             // 1st parameter: sensetx
-                            tx_data[2] = (char)(sensetx >> 8);
-                            tx_data[3] = (char)(sensetx & 0x00ff);
+                            //tx_data[2] = (char)(sensetx >> 8);
+                            //tx_data[3] = (char)(sensetx & 0x00ff);
+                            txbuf[16] = (char)(sensetx >> 8);
+                            txbuf[17] = (char)(sensetx & 0x00ff);
                             // 2nd parameter: sensetx_fail
-                            tx_data[4] = (char)(sensetx_fail >> 8);
-                            tx_data[5] = (char)(sensetx_fail & 0x00ff);
+                            //tx_data[4] = (char)(sensetx_fail >> 8);
+                            //tx_data[5] = (char)(sensetx_fail & 0x00ff);
+                            txbuf[18] = (char)(sensetx_fail >> 8);
+                            txbuf[19] = (char)(sensetx_fail & 0x00ff);
                             j = 6; // tx_data length
                             break;
 
@@ -735,10 +752,13 @@ int main(void) {
     					case QUEFLAG:
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    tx_data[0] = 'Q';
-    					    tx_data[1] = 'F';
+    					    //tx_data[0] = 'Q';
+    					    //tx_data[1] = 'F';
+    					    txbuf[14] = 'Q';
+    					    txbuf[15] = 'F';
     					    // parameter: control flag
-    					    tx_data[2] = ctrl_flag;
+    					    //tx_data[2] = ctrl_flag;
+                            txbuf[16] = ctrl_flag;
     					    j = 3; // tx_data length
     					    break;
 
@@ -746,10 +766,13 @@ int main(void) {
     					case QUEVER:
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    tx_data[0] = 'Q';
-    					    tx_data[1] = 'V';
+    					    //tx_data[0] = 'Q';
+    					    //tx_data[1] = 'V';
+                            txbuf[14] = 'Q';
+                            txbuf[15] = 'V';
     					    for (i=0; i<FWVERLEN; i++){
-    					        tx_data[i+2] = fwver[i];
+    					        //tx_data[i+2] = fwver[i];
+                                txbuf[i+16] = fwver[i];
     					    }
     					    j = 2 + FWVERLEN; // tx_data length
     					    break;
@@ -786,18 +809,22 @@ int main(void) {
 #endif
 
                 /* Append node_id */
-                tx_data[j] = 0x07;
+                //tx_data[j] = 0x07;
+                txbuf[j] = 0x07;
                 j++;
                 for (i=0; i<node_id_len; i++){
-                    tx_data[j] = node_id[i];
+                    //tx_data[j] = node_id[i];
+                    txbuf[j] = node_id[i];
                     j++;
                 }
-                tx_data[j] = ':';
+                //tx_data[j] = ':';
+                txbuf[j] = ':';
                 j++;
 
                 /* Append node_loc */
                 for (i=0; i<node_loc_len; i++){
-                    tx_data[j] = node_loc[i];
+                    //tx_data[j] = node_loc[i];
+                    txbuf[j] = node_loc[i];
                     j++;
                 }
 
@@ -836,18 +863,22 @@ int main(void) {
 #endif
 
                 /* Append node_id */
-    		    tx_data[j] = 0x07;
+    		    //tx_data[j] = 0x07;
+                txbuf[j] = 0x07;
     		    j++;
                 for (i=0; i<node_id_len; i++){
-                    tx_data[j] = node_id[i];
+                    //tx_data[j] = node_id[i];
+                    txbuf[j] = node_id[i];
                     j++;
                 }
-                tx_data[j] = ':';
+                //tx_data[j] = ':';
+                txbuf[j] = ':';
                 j++;
 
                 /* Append node_loc */
                 for (i=0; i<node_loc_len; i++){
-                    tx_data[j] = node_loc[i];
+                    //tx_data[j] = node_loc[i];
+                    txbuf[j] = node_loc[i];
                     j++;
                 }
 
@@ -905,20 +936,27 @@ int main(void) {
 
 		            j = parse_atcom_query(rxbuf, rxpsize, parameter, parsedparam); // j is parsed parameter length
 		            if (j > 0){
-		                tx_data[0] = 'Q';
+		                //tx_data[0] = 'Q';
+                        txbuf[14] = 'Q';
 		                switch(parameter){
 		                case PARAM_PL:
-		                    tx_data[1] = 'P';
-		                    tx_data[2] = 'L';
-		                    tx_data[3] = parsedparam[0];
+		                    //tx_data[1] = 'P';
+		                    //tx_data[2] = 'L';
+		                    //tx_data[3] = parsedparam[0];
+                            txbuf[15] = 'P';
+                            txbuf[16] = 'L';
+                            txbuf[17] = parsedparam[0];
 		                    j = 4; // length of tx_data
 	                        state = S_DQRES3;
 		                    break;
 
 		                case PARAM_WR:
-		                    tx_data[1] = 'W';
-		                    tx_data[2] = 'R';
-		                    tx_data[3] = parsedparam[0];
+		                    //tx_data[1] = 'W';
+		                    //tx_data[2] = 'R';
+		                    //tx_data[3] = parsedparam[0];
+                            txbuf[15] = 'W';
+                            txbuf[16] = 'R';
+                            txbuf[17] = parsedparam[0];
 		                    j = 4;
 		                    state = S_DQRES3;
 		                    break;
