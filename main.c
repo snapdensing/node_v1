@@ -520,7 +520,7 @@ int main(void) {
    			//transmitreq(stopACK, 2, origin_addr, txbuf);
     		txbuf[14] = 'X';
     		txbuf[15] = 'A';
-    		transmitreq(2, origin_addr, txbuf);
+    		transmitreq(16, origin_addr, txbuf);
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
     		break;
@@ -550,7 +550,7 @@ int main(void) {
     	    //transmitreq(startACK, 2, origin_addr, txbuf);
     	    txbuf[14] = 'S';
     	    txbuf[15] = 'A';
-    	    transmitreq(2, origin_addr, txbuf);
+    	    transmitreq(16, origin_addr, txbuf);
     	    P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
     	    break;
 
@@ -676,7 +676,8 @@ int main(void) {
     					    for (i=0; i<8; i++)
     					        //tx_data[i+2] = unicast_addr[i];
     					        txbuf[i+16] = unicast_addr[i];
-    					    j = 10; // tx_data length
+    					    //j = 10; // tx_data length
+                            j = 24; // tx_data length
     					    break;
 
     					// Query sampling period
@@ -690,7 +691,8 @@ int main(void) {
     					    txbuf[15] = 'T';
     					    //tx_data[2] = (char)sample_period; //assumes period is only 8-bits
     					    txbuf[16] = (char)sample_period;
-    					    j = 3; // tx_data length
+    					    //j = 3; // tx_data length
+                            j = 17; // tx_data length
     					    break;
     					//}
 
@@ -739,7 +741,8 @@ int main(void) {
                             //tx_data[5] = (char)(sensetx_fail & 0x00ff);
                             txbuf[18] = (char)(sensetx_fail >> 8);
                             txbuf[19] = (char)(sensetx_fail & 0x00ff);
-                            j = 6; // tx_data length
+                            //j = 6; // tx_data length
+                            j = 20; // tx_data length
                             break;
 
                         // Change Autostart flag
@@ -759,7 +762,8 @@ int main(void) {
     					    // parameter: control flag
     					    //tx_data[2] = ctrl_flag;
                             txbuf[16] = ctrl_flag;
-    					    j = 3; // tx_data length
+    					    //j = 3; // tx_data length
+                            j = 17; // tx_data length
     					    break;
 
     					// Query FW version
@@ -774,7 +778,8 @@ int main(void) {
     					        //tx_data[i+2] = fwver[i];
                                 txbuf[i+16] = fwver[i];
     					    }
-    					    j = 2 + FWVERLEN; // tx_data length
+    					    //j = 2 + FWVERLEN; // tx_data length
+                            j = 16 + FWVERLEN; // tx_data length
     					    break;
     				}
 
@@ -946,7 +951,8 @@ int main(void) {
                             txbuf[15] = 'P';
                             txbuf[16] = 'L';
                             txbuf[17] = parsedparam[0];
-		                    j = 4; // length of tx_data
+		                    //j = 4; // length of tx_data
+                            j = 20; // length of tx_data
 	                        state = S_DQRES3;
 		                    break;
 
@@ -957,7 +963,8 @@ int main(void) {
                             txbuf[15] = 'W';
                             txbuf[16] = 'R';
                             txbuf[17] = parsedparam[0];
-		                    j = 4;
+		                    //j = 4;
+                            j = 20;
 		                    state = S_DQRES3;
 		                    break;
 
