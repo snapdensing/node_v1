@@ -41,3 +41,34 @@ void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf){
     i = assemble_atcom(atcom, paramvalue, paramlen, txbuf);
     uarttx_xbee(txbuf, i);
 }
+
+/* Append node_loc and node_id to transmit packet
+ * Arguments:
+ *   txbuf - transmit buffer
+ *   txbuf_i - transmit buffer tail pointer
+ *   node_id - node ID pointer
+ *   node_id_len - length
+ *   node_loc - node loc pointer
+ *   node_loc_len - length
+ */
+void append_nodeinfo(char *txbuf, unsigned int *txbuf_i,
+        char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len){
+
+    unsigned int i;
+
+    txbuf[*txbuf_i] = 0x07;
+    (*txbuf_i)++;
+    for (i=0; i<node_id_len; i++){
+        txbuf[*txbuf_i] = node_id[i];
+        (*txbuf_i)++;
+    }
+
+    /* Append node_loc */
+    //tx_data[j] = ':';
+    txbuf[*txbuf_i] = ':';
+    (*txbuf_i)++;
+    for (i=0; i<node_loc_len; i++){
+        txbuf[*txbuf_i] = node_loc[i];
+        (*txbuf_i)++;
+    }
+}

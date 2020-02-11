@@ -2,6 +2,7 @@ Branch v1.7.2
 (11 Feb 2020)
 - Merged tx_data and txbuf buffers to save on memory
 - Fixed bug on query transmit period for periods >255
+- Replaced appending of node ID and loc with a function
 
 Branch v1.7.1
 (17 Jan 2020)

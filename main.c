@@ -28,6 +28,7 @@ int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count);
 //void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
 void transmitreq(int tx_data_len, char *dest_addr, char *txbuf);
 void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
+void append_nodeinfo(char *txbuf, unsigned int *txbuf_i, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len);
 
 void detect_sensor(unsigned int *sensor_flagp);
 
@@ -73,7 +74,7 @@ int main(void) {
 	/* Global Variables */
 
 	/** Local counters **/
-	int i,j;
+	unsigned int i,j;
 
 	/** Address Storage **/
 	char node_address[8]; // Node XBee address
@@ -401,23 +402,25 @@ int main(void) {
 
    			/* Append node_id */
    			//tx_data[j] = 0x07;
-   			txbuf[j] = 0x07;
+   			/*txbuf[j] = 0x07;
    			j++;
    			for (i=0; i<node_id_len; i++){
    			    //tx_data[j] = node_id[i];
    			    txbuf[j] = node_id[i];
    			    j++;
-   			}
+   			}*/
 
    			/* Append node_loc */
             //tx_data[j] = ':';
-   			txbuf[j] = ':';
+   			/*txbuf[j] = ':';
             j++;
    			for (i=0; i<node_loc_len; i++){
    			    //tx_data[j] = node_loc[i];
    			    txbuf[j] = node_loc[i];
    			    j++;
-   			}
+   			}*/
+
+   			append_nodeinfo(txbuf, &j, node_id, node_id_len, node_loc, node_loc_len);
 
 #ifdef DEBUG_CHARGING
    			/* Append charge_flag to packet */
@@ -821,7 +824,7 @@ int main(void) {
 
                 /* Append node_id */
                 //tx_data[j] = 0x07;
-                txbuf[j] = 0x07;
+                /*txbuf[j] = 0x07;
                 j++;
                 for (i=0; i<node_id_len; i++){
                     //tx_data[j] = node_id[i];
@@ -830,14 +833,16 @@ int main(void) {
                 }
                 //tx_data[j] = ':';
                 txbuf[j] = ':';
-                j++;
+                j++;*/
 
                 /* Append node_loc */
-                for (i=0; i<node_loc_len; i++){
+                /*for (i=0; i<node_loc_len; i++){
                     //tx_data[j] = node_loc[i];
                     txbuf[j] = node_loc[i];
                     j++;
-                }
+                }*/
+
+                append_nodeinfo(txbuf, &j, node_id, node_id_len, node_loc, node_loc_len);
 
     			/* Transmit */
     			//transmitreq(tx_data, j, broadcast_addr, txbuf);
@@ -875,7 +880,7 @@ int main(void) {
 
                 /* Append node_id */
     		    //tx_data[j] = 0x07;
-                txbuf[j] = 0x07;
+                /*txbuf[j] = 0x07;
     		    j++;
                 for (i=0; i<node_id_len; i++){
                     //tx_data[j] = node_id[i];
@@ -884,14 +889,16 @@ int main(void) {
                 }
                 //tx_data[j] = ':';
                 txbuf[j] = ':';
-                j++;
+                j++;*/
 
                 /* Append node_loc */
-                for (i=0; i<node_loc_len; i++){
+                /*for (i=0; i<node_loc_len; i++){
                     //tx_data[j] = node_loc[i];
                     txbuf[j] = node_loc[i];
                     j++;
-                }
+                }*/
+
+                append_nodeinfo(txbuf, &j, node_id, node_id_len, node_loc, node_loc_len);
 
     		    /* Transmit */
     		    //transmitreq(tx_data, j, origin_addr, txbuf);
