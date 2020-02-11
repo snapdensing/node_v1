@@ -690,9 +690,15 @@ int main(void) {
     					    txbuf[14] = 'Q';
     					    txbuf[15] = 'T';
     					    //tx_data[2] = (char)sample_period; //assumes period is only 8-bits
-    					    txbuf[16] = (char)sample_period;
-    					    //j = 3; // tx_data length
-                            j = 17; // tx_data length
+    					    if (sample_period < 256){
+    					        txbuf[16] = (char)sample_period;
+    					        //j = 3; // tx_data length
+    					        j = 17; // tx_data length
+    					    }else{
+    					        txbuf[16] = (char)(sample_period >> 8);
+    					        txbuf[17] = (char)(sample_period & 0x00ff);
+    					        j = 18;
+    					    }
     					    break;
     					//}
 
