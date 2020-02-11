@@ -20,6 +20,7 @@ unsigned int parse_setnodeid(char *packet, char *node_id);
 //int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
 int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
 unsigned int Battery_supply_nonreg(void);
+void batt_charge(int *charge_flagp, unsigned int batt, unsigned int batt_lo, unsigned int batt_hi);
 #else
 //int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count);
@@ -436,7 +437,7 @@ int main(void) {
 
 #ifdef SENSOR_BATT
             /* Charging state */
-            if (charge_flag == 0){ // Discharging
+            /*if (charge_flag == 0){ // Discharging
                 if (batt < batt_lo){
                     charge_flag = 1;
                     P1OUT |= 0x20; // Set P1.5 to enable charging
@@ -447,7 +448,9 @@ int main(void) {
                     charge_flag = 0;
                     P1OUT &= 0xdf; // Reset P1.5 to disable charging
                 }
-            }
+            }*/
+
+            batt_charge(&charge_flag, batt, batt_lo, batt_hi);
 #endif
 
    			/* Transmit */
@@ -587,7 +590,8 @@ int main(void) {
     			batt = Battery_supply_nonreg();
     			timer_flag = 0; // Reset timer flag
     		}
-    		if (charge_flag == 0){ // Discharging
+
+    		/*if (charge_flag == 0){ // Discharging
     		    if (batt < batt_lo){
     		        charge_flag = 1;
     		        P1OUT |= 0x20; // Set P1.5 to enable charging
@@ -598,7 +602,9 @@ int main(void) {
     		        charge_flag = 0;
     		        P1OUT &= 0xdf; // Reset P1.5 to disable charging
     		    }
-    		}
+    		}*/
+
+    		batt_charge(&charge_flag, batt, batt_lo, batt_hi);
 #endif
 
     		/* Process packet received */

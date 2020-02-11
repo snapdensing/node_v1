@@ -288,3 +288,25 @@ int senseDHT(unsigned char *p)
     return 0;                                                   // Good read
 }
 #endif
+
+/* Battery charging state
+ * Arguments:
+ *   charge_flagp - Pointer to charge_flag
+ *   batt - Battery level
+ *   batt_lo - Low threshold
+ *   batt_hi - High threshold
+ */
+void batt_charge(int *charge_flagp, unsigned int batt, unsigned int batt_lo, unsigned int batt_hi){
+    if (*charge_flagp == 0){ // Discharging
+        if (batt < batt_lo){
+            *charge_flagp = 1;
+            P1OUT |= 0x20; // Set P1.5 to enable charging
+        }
+    }
+    else{ // Charging
+        if (batt > batt_hi){
+            *charge_flagp = 0;
+            P1OUT &= 0xdf; // Reset P1.5 to disable charging
+        }
+    }
+}
