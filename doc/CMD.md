@@ -4,7 +4,7 @@ This section lists the supported remote commands for configuration and operation
 
 - Query commands
     - [Power level](#query_pl)
-    - Aggregator address
+    - [Aggregator address](#query_aggre)
     - Sampling period
     - Statistics
     - Control flag
@@ -13,7 +13,7 @@ This section lists the supported remote commands for configuration and operation
     - Transmit period
     - [Power level](#config_pl)
     - Radio channel
-    - Aggregator address
+    - [Aggregator address](#config_aggre)
     - Commit radio settings to NVM
     - Node Info: Node ID
     - Node Info: Node Location
@@ -25,6 +25,16 @@ This section lists the supported remote commands for configuration and operation
     - Debug Unicast
     - Debug Broadcast
 
+<a name="query_aggre"></a>
+# Query Aggregator address
+Queries the Aggregator (sink) address of where the remote node must send its sensing data. Node must be in standby state.
+
+Packet format: `'QA' (0x5141)`
+
+Node returns: `'QA'[Aggregator address] (0x5141[Aggregator address])`
+
+- `[Aggregator address]` is an 8-byte value of the aggregator's address.
+
 <a name="query_pl"></a>
 # Query Power Level
 Queries the XBee power level of remote node. Node must be in standby state.
@@ -34,6 +44,14 @@ Packet format: `'QP' (0x5150)`
 Node returns: `'QP'[Power Level] (0x5150[Power Level])`
 
 - `[Power Level]` is a 1-byte value corresponding to the XBee power level. Range of values is from 0x00 to 0x04.
+
+<a name="config_aggre"></a>
+# Change Aggregator address
+Changes the Aggregator (sink) address of where the remote node must send its sensing data. Node must be in standby state.
+
+Packet format: `'DA'[Aggregator address] (0x5141[Aggregator address])`
+
+- `[Aggregator address]` is an 8-byte value of the aggregator's address.
 
 <a name="config_pl"></a>
 # Change Power Level
