@@ -10,11 +10,12 @@ int parse_header(void);
 //int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
 int parse_stop(char *packet, unsigned int length, char *origin);
 
-int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
+unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
 void parse_setaddr(char *packet, char *address);
 void parse_srcaddr(char *packet, char *address);
 int parse_atcom_query(char *packet, unsigned int length, int parameter, char *parsedparam);
 unsigned int parse_setnodeid(char *packet, char *node_id);
+unsigned int set_parsedparam(int chgparam, unsigned int paramval, char *parsedparam);
 
 #ifdef SENSOR_BATT
 //int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
@@ -99,6 +100,7 @@ int main(void) {
 	char atres_status;
 	int parameter;
 	char parsedparam[8];
+	unsigned int parsedparam_len;
 	char channel; // XBee channel
 	char panid[2]; // XBee ID
 
@@ -643,8 +645,10 @@ int main(void) {
     					// Change PL
     					case CHGPL:
     					    state = S_DPLRES;
-    					    parsedparam[0] = (char)(temp_uint & 0x00ff);
-    					    atcom('P', 'L', parsedparam, 1, txbuf);
+    					    //parsedparam[0] = (char)(temp_uint & 0x00ff);
+    					    //atcom('P', 'L', parsedparam, 1, txbuf);
+    					    parsedparam_len = set_parsedparam(j, temp_uint, parsedparam);
+    					    atcom(parsedparam[0], parsedparam[1], (parsedparam + 2), parsedparam_len, txbuf);
     			    		break;
 
     					// Change CH

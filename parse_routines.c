@@ -141,7 +141,7 @@ int parse_stop(char *packet, unsigned int length, char *origin){
 /* Parse Debug mode broadcast signal
  * - Return range: 0 - 15
  */
-int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
+unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
         int success = 0;
 
         switch(packet[15]){
@@ -376,3 +376,33 @@ int parse_txstat(char *packet, unsigned int length, char *delivery_p){
     }
 }
 
+/* Parsed Parameter Set
+ * chgparam (int) - Change AT parameter type
+ * paramval (uint) - parameter value
+ * parsedparam - parameter value (first 2 bytes AT command, succeeding bytes parameter)
+ * returns parsedparam length (sans first 2 elements)
+ */
+unsigned int set_parsedparam(int chgparam, unsigned int paramval, char *parsedparam){
+
+    unsigned int parsedparam_len = 0;
+
+    switch(chgparam){
+
+    case CHGPL:
+        parsedparam_len = 1;
+        parsedparam[0] = 'P';
+        parsedparam[1] = 'L';
+        parsedparam[2] = (char)(paramval & 0x00ff);
+        break;
+
+    case CHGCH:
+        parsedparam_len = 1;
+        parsedparam[0] = 'C';
+        parsedparam[1] = 'H';
+        parsedparam[2] = (char)(paramval & 0x00ff);
+        break;
+
+    }
+
+    return parsedparam_len;
+}
