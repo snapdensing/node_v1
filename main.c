@@ -927,7 +927,8 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
+                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, parsedparam[0], parsedparam[1], &atres_status)){
                     state = S_DEBUG;
                 }
     		}
