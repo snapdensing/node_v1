@@ -644,7 +644,9 @@ int main(void) {
 
     					// Change PL
     					case CHGPL:
-    					    state = S_DPLRES;
+    					case CHGCH:
+                            //state = S_DPLRES;
+    					    state = S_DATRES;
     					    //parsedparam[0] = (char)(temp_uint & 0x00ff);
     					    //atcom('P', 'L', parsedparam, 1, txbuf);
     					    parsedparam_len = set_parsedparam(j, temp_uint, parsedparam);
@@ -652,11 +654,11 @@ int main(void) {
     			    		break;
 
     					// Change CH
-    					case CHGCH:
+    					/*case CHGCH:
     						state = S_DCHRES;
     					    channel = (char)(temp_uint & 0x00ff);
     					    atcom('C', 'H', &channel, 1, txbuf);
-							break;
+							break;*/
 
     					// Start sensing
     					case START:
@@ -922,7 +924,8 @@ int main(void) {
     		break;
 
     	/* State: Debug wait for PL AT command response */
-    	case S_DPLRES:
+    	//case S_DPLRES:
+        case S_DATRES:
 
     		if (rxheader_flag == 0){
     			parse_header();
@@ -935,7 +938,7 @@ int main(void) {
     		break;
 
 		/* State: Debug wait for CH AT command response */
-		case S_DCHRES:
+		/*case S_DCHRES:
 
 			if (rxheader_flag == 0){
 				parse_header();
@@ -944,7 +947,7 @@ int main(void) {
                     state = S_DEBUG;
                 }
 			}
-			break;
+			break;*/
 
 		/* State: Debug Query parameter */
 		case S_DQRES1:

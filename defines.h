@@ -47,8 +47,9 @@
 #define S_DEBUG		12
 #define S_DBRD		13
 #define S_DUNI		14
-#define S_DPLRES	15
-#define S_DCHRES	16
+//#define S_DPLRES	15
+#define S_DATRES    15
+//#define S_DCHRES	16
 #define S_DQRES1	18
 #define S_DQRES2    19
 #define S_DQRES3    20
