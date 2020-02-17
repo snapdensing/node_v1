@@ -971,7 +971,7 @@ int main(void) {
                             txbuf[16] = 'L';
                             txbuf[17] = parsedparam[0];
 		                    //j = 4; // length of tx_data
-                            j = 20; // length of tx_data
+                            j = 18; // length of tx_data
 	                        state = S_DQRES3;
 		                    break;
 
@@ -983,7 +983,7 @@ int main(void) {
                             txbuf[16] = 'R';
                             txbuf[17] = parsedparam[0];
 		                    //j = 4;
-                            j = 20;
+                            j = 18;
 		                    state = S_DQRES3;
 		                    break;
 
