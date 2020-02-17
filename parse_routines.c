@@ -178,6 +178,10 @@ int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 			if (length == 15){
 				success = CHGPER;
 				*num = (unsigned int) packet[17];
+			}else if (length == 16){
+			    success = CHGPER;
+			    *num = (unsigned int)(packet[17] << 8);
+			    *num += (unsigned int)packet[18];
 			}
 			break;
 			
