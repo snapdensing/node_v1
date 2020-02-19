@@ -366,8 +366,7 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
         case PARAM_MR:
             if ((packet[5] == 'M') && (packet[6] == 'R')){
                 parsedparam[0] = packet[8];
-                parsedparam[1] = packet[9];
-                paramlen = 2;
+                paramlen = 1;
             }
             break;
         }
