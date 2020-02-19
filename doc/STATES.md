@@ -7,8 +7,7 @@ List of states:
 - [`S_DQRES2`](#S_DQRES2)
 - [`S_DQRES3`](#S_DQRES3)
 - [`S_DQRES4`](#S_DQRES4)
-- [`S_DCHRES`](#S_DCHRES)
-- [`S_DPLRES`](#S_DPLRES)
+- [`S_DATRES`](#S_DATRES)
 
 <a name='S_DEBUG'></a>
 ## S_DEBUG: Standby/Debug
@@ -33,10 +32,16 @@ Transmits the query parameter response packet back to the requesting node. For M
 ## S_DQRES4: Query Parameter Response 4
 Catches the transmit request response made in [`S_DQRES3`](#S_DQRES3). Transitions to state [`S_DEBUG`](#S_DEBUG) unless the response is invalid, in which case the MCU retransmits the query parameter response by going back to [`S_DQRES3`](#S_DQRES3).
 
-<a name='S_DPLRES'></a>
-## S_DPLRES: Change Power Level Response
-Catches the response for the AT Command Request made in [`S_DEBUG`](#S_DEBUG) when changing XBee power level. Loops into this state indefinitely until appropriate response is received, after which the node reverts back to state [`S_DEBUG`](#S_DEBUG).
+<a name='S_DATRES'></a>
+## S_DATRES: Change AT Parameter Response
+Catches the response for the AT Command Request made in [`S_DEBUG`](#S_DEBUG) when changing XBee AT Parameters. Loops into this state indefinitely until appropriate response is received, after which the node reverts back to state [`S_DEBUG`](#S_DEBUG).
 
-<a name='S_DCHRES'></a>
-## S_DPLRES: Change Channel Response
-Catches the response for the AT Command Request made in [`S_DEBUG`](#S_DEBUG) when changing XBee channel. Loops into this state indefinitely until appropriate response is received, after which the node reverts back to state [`S_DEBUG`](#S_DEBUG).
+# Modification Notes
+
+## Adding AT command support for queries
+When adding new AT commands for query, you will need to edit the following files/functions:
+
+- `defines.h`: Add parameter encoding (`PARAM_XX`) and corresponding debug parse return values (for `parse_debugpacket()`).
+- `parse_debugpacket() (in parse_routines.c)`: Add coresponding return value.
+- `parse_atcom_query() (in parse_routines.c)`: Add AT command response parameter.
+- `param_to_atcom() (in xbee_uart.c)`: Add AT command to lookup table.
