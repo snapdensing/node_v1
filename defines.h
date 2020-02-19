@@ -21,6 +21,9 @@
 /* Broadcast */
 //#define BROADCAST
 
+/* Enable Debug unicast and Debug broadcast */
+//#define DEBUGTX_ENABLE
+
 /* State encoding */
 
 #define	S_RTS1		10
@@ -81,6 +84,7 @@
 #define PARAM_WR    1
 #define PARAM_ID    2
 #define PARAM_CH    3
+#define PARAM_MR    4
 
 /** Debug parse return values **/
 #define CHGSINK  7
@@ -101,6 +105,7 @@
 #define CHGFLAG  16
 #define QUEFLAG  17
 #define QUEVER   18
+#define QUEMR    19
 
 /** Battery charging thresholds **/
 #define BATT_VTHLO 0x02e0 // 3.6V

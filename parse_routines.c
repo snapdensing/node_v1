@@ -142,10 +142,10 @@ int parse_stop(char *packet, unsigned int length, char *origin){
  * - Return range: 0 - 15
  */
 unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
-        int success = 0;
+    int success = 0;
 
-        switch(packet[15]){
-        case 'D': 
+    switch(packet[15]){
+    case 'D':
 		switch(packet[16]){
 
 		case 'A':
@@ -225,6 +225,8 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 		case 'P':
 			if (length == 14)
 				success = QUEPL;
+			else if ((length == 15) && (packet[17] == 'L'))
+			    success = QUEPL;
 			break;
 			
 		case 'S':
@@ -238,11 +240,18 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 			break;
 
 		case 'F':
-		    success = QUEFLAG;
+		    if (length == 14)
+		        success = QUEFLAG;
 		    break;
 
 		case 'V':
-		    success = QUEVER;
+		    if (length == 14)
+		        success = QUEVER;
+		    break;
+
+		case 'M':
+		    if ((length == 15) && (packet[17] == 'R'))
+		        success = QUEMR;
 		    break;
 		}
 
@@ -352,6 +361,15 @@ int parse_atcom_query(char *packet, unsigned int length, int parameter, char *pa
                 parsedparam[1] = packet[9];
                 paramlen = 2;
             }
+            break;
+
+        case PARAM_MR:
+            if ((packet[5] == 'M') && (packet[6] == 'R')){
+                parsedparam[0] = packet[8];
+                parsedparam[1] = packet[9];
+                paramlen = 2;
+            }
+            break;
         }
     }
 

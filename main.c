@@ -624,6 +624,7 @@ int main(void) {
     				switch(j){
 
     					// Debug Broadcast
+#ifdef DEBUGTX_ENABLE
     					case DBRD:
     						timer_flag = 0; // Reset timer flag
     						state = S_DBRD;
@@ -635,6 +636,7 @@ int main(void) {
     						state = S_DUNI;
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
+#endif
 
     					// Change Period
     					case CHGPER:
@@ -673,10 +675,17 @@ int main(void) {
     						parse_setaddr(rxbuf,unicast_addr);
     						break;
 
-    					// Query power level
+    					// Query XBee AT parameters
     					case QUEPL:
+    					case QUEMR:
     						state = S_DQRES1;
-    						parameter = PARAM_PL;
+    						switch (j){
+    						case QUEPL:
+    						    parameter = PARAM_PL; break;
+    						case QUEMR:
+    						    parameter = PARAM_MR; break;
+
+    						}
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
 
@@ -811,6 +820,7 @@ int main(void) {
     		}
     		break;
 
+#ifdef DEBUGTX_ENABLE
     	/** State: Debug mode Broadcast **/
     	case S_DBRD:
     		if (timer_flag > sample_period){
@@ -922,6 +932,7 @@ int main(void) {
     		    P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     		}
     		break;
+#endif
 
     	/* State: Debug wait for PL AT command response */
     	//case S_DPLRES:
@@ -968,30 +979,61 @@ int main(void) {
 
 		            j = parse_atcom_query(rxbuf, rxpsize, parameter, parsedparam); // j is parsed parameter length
 		            if (j > 0){
-		                //tx_data[0] = 'Q';
                         txbuf[14] = 'Q';
+
+                        /* Set txbuf[15:16] */
 		                switch(parameter){
 		                case PARAM_PL:
-		                    //tx_data[1] = 'P';
-		                    //tx_data[2] = 'L';
-		                    //tx_data[3] = parsedparam[0];
                             txbuf[15] = 'P';
                             txbuf[16] = 'L';
-                            txbuf[17] = parsedparam[0];
-		                    //j = 4; // length of tx_data
-                            j = 18; // length of tx_data
-	                        state = S_DQRES3;
+                            //txbuf[17] = parsedparam[0];
+                            //j = 18; // length of tx_data
+	                        //state = S_DQRES3;
 		                    break;
 
 		                case PARAM_WR:
-		                    //tx_data[1] = 'W';
-		                    //tx_data[2] = 'R';
-		                    //tx_data[3] = parsedparam[0];
                             txbuf[15] = 'W';
                             txbuf[16] = 'R';
-                            txbuf[17] = parsedparam[0];
-		                    //j = 4;
-                            j = 18;
+                            //txbuf[17] = parsedparam[0];
+                            //j = 18;
+		                    //state = S_DQRES3;
+		                    break;
+
+		                case PARAM_MR:
+		                    txbuf[15] = 'M';
+		                    txbuf[16] = 'R';
+		                    break;
+
+		                }
+
+		                /* Set parsed parameter (txbuf[17:]) */
+		                switch(parameter){
+
+		                // 1-byte
+		                case PARAM_PL:
+		                case PARAM_WR:
+		                case PARAM_MR:
+		                    txbuf[17] = parsedparam[0];
+		                    j = 18;
+		                    break;
+
+		                // 2-bytes:
+		                //case PARAM_MR:
+		                //    txbuf[17] = parsedparam[0];
+		                //    txbuf[18] = parsedparam[1];
+		                //    j = 19;
+		                //    break;
+
+		                default:
+		                    j = 17;
+		                    break;
+		                }
+
+		                /* Set next state */
+		                switch(parameter){
+		                case PARAM_PL:
+		                case PARAM_WR:
+		                case PARAM_MR:
 		                    state = S_DQRES3;
 		                    break;
 
@@ -999,6 +1041,7 @@ int main(void) {
 		                    state = S_DEBUG;
 		                    break;
 		                }
+
 		            }else{
 		                state = S_DEBUG;
 		            }
