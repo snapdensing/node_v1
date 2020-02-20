@@ -652,12 +652,12 @@ int main(void) {
     						sample_period = temp_uint;
     						break;
 
-    					// Change PL
+    					// Change AT parameter 1 byte
     					case CHGPL:
     					case CHGCH:
                             //state = S_DPLRES;
     					    state = S_DATRES;
-    					    //parsedparam[0] = (char)(temp_uint & 0x00ff);
+    					    parsedparam[0] = (char)(temp_uint & 0x00ff);
     					    //atcom('P', 'L', parsedparam, 1, txbuf);
     					    atcom(parameter, parsedparam, 1, txbuf);
     					    //parsedparam_len = set_parsedparam(j, temp_uint, parsedparam);
