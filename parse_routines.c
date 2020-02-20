@@ -141,7 +141,8 @@ int parse_stop(char *packet, unsigned int length, char *origin){
 /* Parse Debug mode broadcast signal
  * - Return range: 0 - 15
  */
-unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
+//unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
+unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num, int *parameter){
     int success = 0;
 
     switch(packet[15]){
@@ -164,6 +165,7 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 			if (length == 15){
 				success = CHGCH;
 				*num = (unsigned int) packet[17];
+				*parameter = PARAM_CH;
 			}
 			break;
 
@@ -171,6 +173,7 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 			if (length == 15){
 				success = CHGPL;
 				*num = (unsigned int) packet[17];
+				*parameter = PARAM_PL;
 			}
 			break;
 
@@ -203,6 +206,7 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 		case 'W':
 			if (length == 14)
 				success = COMMIT;
+			    *parameter = PARAM_WR;
 			break;
 
 		case 'F':
@@ -223,10 +227,13 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 			break;
 
 		case 'P':
-			if (length == 14)
+			if (length == 14){
 				success = QUEPL;
-			else if ((length == 15) && (packet[17] == 'L'))
+			    *parameter = PARAM_PL;
+			}else if ((length == 15) && (packet[17] == 'L')){
 			    success = QUEPL;
+			    *parameter = PARAM_PL;
+			}
 			break;
 			
 		case 'S':
@@ -252,6 +259,7 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 		case 'M':
 		    if ((length == 15) && (packet[17] == 'R'))
 		        success = QUEMR;
+		        *parameter = PARAM_MR;
 		    break;
 		}
 
@@ -422,4 +430,76 @@ unsigned int set_parsedparam(int chgparam, unsigned int paramval, char *parsedpa
     }
 
     return parsedparam_len;
+}
+
+/* Converts integer-encoded AT parameter into string
+ *
+ */
+void parameter_to_str(int parameter, char *atcom){
+    /* First byte */
+    switch(parameter){
+    case PARAM_CH:
+        atcom[0] = 'C';
+        break;
+
+    case PARAM_D6:
+        atcom[0] = 'D';
+        break;
+
+    case PARAM_ID:
+        atcom[0] = 'I';
+        break;
+
+    case PARAM_MR:
+        atcom[0] = 'M';
+        break;
+
+    case PARAM_PL:
+        atcom[0] = 'P';
+        break;
+
+    case PARAM_SH:
+    case PARAM_SL:
+        atcom[0] = 'S';
+        break;
+
+    case PARAM_WR:
+        atcom[0] = 'W';
+        break;
+
+    default:
+        atcom[0] = 0x00;
+        break;
+    }
+
+    /* Second byte */
+    switch(parameter){
+
+    case PARAM_ID:
+        atcom[1] = 'D';
+        break;
+
+    case PARAM_CH:
+    case PARAM_SH:
+        atcom[1] = 'H';
+        break;
+
+    case PARAM_PL:
+    case PARAM_SL:
+        atcom[1] = 'L';
+        break;
+
+    case PARAM_WR:
+    case PARAM_MR:
+        atcom[1] = 'R';
+        break;
+
+    case PARAM_D6:
+        atcom[1] = '6';
+        break;
+
+    default:
+        atcom[1] = 0x00;
+        break;
+    }
 }

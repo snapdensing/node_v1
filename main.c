@@ -10,12 +10,14 @@ int parse_header(void);
 //int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
 int parse_stop(char *packet, unsigned int length, char *origin);
 
-unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
+//unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
+unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num, int *parameter);
 void parse_setaddr(char *packet, char *address);
 void parse_srcaddr(char *packet, char *address);
 int parse_atcom_query(char *packet, unsigned int length, int parameter, char *parsedparam);
 unsigned int parse_setnodeid(char *packet, char *node_id);
 unsigned int set_parsedparam(int chgparam, unsigned int paramval, char *parsedparam);
+void parameter_to_str(int parameter, char *atcom);
 
 #ifdef SENSOR_BATT
 //int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
@@ -29,7 +31,8 @@ int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count);
 
 //void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
 void transmitreq(int tx_data_len, char *dest_addr, char *txbuf);
-void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
+//void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
+void atcom(int parameter, char *paramvalue, int paramlen, char *txbuf);
 void append_nodeinfo(char *txbuf, unsigned int *txbuf_i, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len);
 
 void detect_sensor(unsigned int *sensor_flagp);
@@ -251,7 +254,8 @@ int main(void) {
 
     		state = S_RTS2;
     		//atcom_enrts();
-    		atcom('D', '6', parsedparam, 0, txbuf);
+    		//atcom('D', '6', parsedparam, 0, txbuf);
+    		atcom(PARAM_D6, parsedparam, 0, txbuf);
 
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
     		break;
@@ -275,7 +279,8 @@ int main(void) {
 
     		state = S_ADDR2;
     		//atcom_shsl(1);
-    		atcom('S', 'H', parsedparam, 0, txbuf);
+    		//atcom('S', 'H', parsedparam, 0, txbuf);
+    		atcom(PARAM_SH, parsedparam, 0, txbuf);
 
     		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
@@ -300,7 +305,8 @@ int main(void) {
 
     		state = S_ADDR4;
     		//atcom_shsl(2);
-    		atcom('S', 'L', parsedparam, 0, txbuf);
+    		//atcom('S', 'L', parsedparam, 0, txbuf);
+    		atcom(PARAM_SL, parsedparam, 0, txbuf);
 
     		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
 
@@ -337,7 +343,8 @@ int main(void) {
     	        panid[1] = (char)(temp_uint & 0x00ff);
     	    }
     	    //atcom_id_set(temp_uint);
-    	    atcom('I', 'D', panid, 2, txbuf);
+    	    //atcom('I', 'D', panid, 2, txbuf);
+    	    atcom(PARAM_ID, panid, 2, txbuf);
 
     	    //P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
     	    break;
@@ -370,7 +377,8 @@ int main(void) {
                 channel = (char)XBEE_CH;
             }
             //atcom_ch_set(temp_uint);
-            atcom('C', 'H', &channel, 1, txbuf);
+            //atcom('C', 'H', &channel, 1, txbuf);
+            atcom(PARAM_CH, &channel, 1, txbuf);
 
             //P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
             break;
@@ -618,7 +626,7 @@ int main(void) {
     			if (rxctr >= (rxpsize + 4)){ // Entire packet received
 
     			    temp_uint = sample_period; // Need to initialize in case command is Start retain ('S', no args)
-    				j = parse_debugpacket(rxbuf, rxpsize, &temp_uint);
+    				j = parse_debugpacket(rxbuf, rxpsize, &temp_uint, &parameter);
     				tx_count = 0;
 
     				switch(j){
@@ -651,8 +659,9 @@ int main(void) {
     					    state = S_DATRES;
     					    //parsedparam[0] = (char)(temp_uint & 0x00ff);
     					    //atcom('P', 'L', parsedparam, 1, txbuf);
-    					    parsedparam_len = set_parsedparam(j, temp_uint, parsedparam);
-    					    atcom(parsedparam[0], parsedparam[1], (parsedparam + 2), parsedparam_len, txbuf);
+    					    atcom(parameter, parsedparam, 1, txbuf);
+    					    //parsedparam_len = set_parsedparam(j, temp_uint, parsedparam);
+    					    //atcom(parsedparam[0], parsedparam[1], (parsedparam + 2), parsedparam_len, txbuf);
     			    		break;
 
     					// Change CH
@@ -679,13 +688,13 @@ int main(void) {
     					case QUEPL:
     					case QUEMR:
     						state = S_DQRES1;
-    						switch (j){
+    						/*switch (j){
     						case QUEPL:
     						    parameter = PARAM_PL; break;
     						case QUEMR:
     						    parameter = PARAM_MR; break;
 
-    						}
+    						}*/
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
 
@@ -729,7 +738,7 @@ int main(void) {
     					// Commit radio settings to NVM
     					case COMMIT:
     					    state = S_DQRES1;
-    					    parameter = PARAM_WR;
+    					    //parameter = PARAM_WR;
     					    parse_srcaddr(rxbuf,origin_addr);
     					    break;
 
@@ -942,6 +951,7 @@ int main(void) {
     			parse_header();
     		}else{
                 //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
+    		    parameter_to_str(parameter, parsedparam);
                 if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, parsedparam[0], parsedparam[1], &atres_status)){
                     state = S_DEBUG;
                 }
@@ -962,8 +972,9 @@ int main(void) {
 
 		/* State: Debug Query parameter */
 		case S_DQRES1:
-		    param_to_atcom(parameter, &parsedparam[0], &parsedparam[1]);
-		    atcom(parsedparam[0], parsedparam[1], &parsedparam[2], 0, txbuf);
+		    //param_to_atcom(parameter, &parsedparam[0], &parsedparam[1]);
+		    //atcom(parsedparam[0], parsedparam[1], &parsedparam[2], 0, txbuf);
+		    atcom(parameter, parsedparam, 0, txbuf);
 		    state = S_DQRES2;
 		    break;
 

@@ -12,6 +12,7 @@ void uarttx_xbee(char *txbuf, unsigned int length);
 //unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf);
 void assemble_txreq(char *dest_addr, char *txbuf);
 unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *txbuf);
+void parameter_to_str(int parameter, char *atcom);
 
 void transmitreq(int tx_data_len, char *dest_addr, char *txbuf){
 //void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf){
@@ -30,13 +31,16 @@ void transmitreq(int tx_data_len, char *dest_addr, char *txbuf){
  *   paramlen - paramvalue length. Equal to 0 for query
  *   txbuf - transmit buffer
  */
-void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf){
+//void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf){
+void atcom(int parameter, char *paramvalue, int paramlen, char *txbuf){
 
     unsigned int i;
     char atcom[2];
 
-    atcom[0] = com0;
-    atcom[1] = com1;
+    //atcom[0] = com0;
+    //atcom[1] = com1;
+
+    parameter_to_str(parameter, atcom);
 
     i = assemble_atcom(atcom, paramvalue, paramlen, txbuf);
     uarttx_xbee(txbuf, i);

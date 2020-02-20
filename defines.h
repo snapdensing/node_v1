@@ -85,6 +85,9 @@
 #define PARAM_ID    2
 #define PARAM_CH    3
 #define PARAM_MR    4
+#define PARAM_D6    5
+#define PARAM_SH    6
+#define PARAM_SL    7
 
 /** Debug parse return values **/
 #define CHGSINK  7
