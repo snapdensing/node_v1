@@ -47,7 +47,7 @@ void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned i
 void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p);
 int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
 int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata);
-void param_to_atcom(int param, char *com0, char *com1);
+//void param_to_atcom(int param, char *com0, char *com1);
 
 /* Global Variables */
 

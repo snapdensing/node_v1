@@ -16,5 +16,5 @@ unsigned int node_loc_len_default = 7; // length of node_loc string
 #define XBEE_CH 0x0c;
 
 /* Firmware version (DO NOT edit) */
-const char *fwver = "1.7.2";
+const char *fwver = "1.7.3";
 #define FWVERLEN 5
