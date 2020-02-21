@@ -11,15 +11,7 @@
 void parameter_to_str(int parameter, char *atcom);
 
 /* Parse AT Command Response
- * Currently supported AT command responses
- * - SH (Upper address)
- * - SL (Lower address)
- * - D6
- * - PL
- * - CH
  */
-//int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length){
-//int parse_atres(char com0, char com1, char *returndata, char *rxbuf){
 int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *parsedparam_len){
 	int j, success;
 	char atcom[2];
@@ -66,90 +58,10 @@ int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *pars
 		        *parsedparam_len = 1;
 		        break;
 		    }
-
-			// Parameter SH
-			//if ((com0 == 'S') && (com1 == 'H')){
-				// Extract upper byte of address
-				//for (j=0; j<4; j++){
-					//returndata[j] = rxbuf[j+8];
-				//}
-				//return 1;
-			//}
-
-			// Parameter SL
-			//else if ((com0 == 'S') && (com1 == 'L')){
-				// Extract lower byte of address
-				//for (j=0; j<4; j++){
-					//returndata[j+4] = rxbuf[j+8];
-				//}
-				//return 1;
-			//}
-
-			// Parameter D6
-			//else if ((com0 == 'D') && (com1 == '6')){
-			//	return 1;
-			//}
-
-			// Parameter PL
-			//else if ((com0 == 'P') && (com1 == 'L')){
-				// Extract PL parameter value
-				//returndata[0] = rxbuf[7];
-				//return 1;
-			//}
-
-			// Parameter CH
-			//else if ((com0 == 'C') && (com1 == 'H')){
-				// Extract CH parameter value
-				//returndata[0] = rxbuf[7];
-				//return 1;
-			//}
-
-			// Parameter ID
-			//else if ((com0 == 'I') && (com1 == 'D')){
-			    //return 1;
-			//}
 		}
 	}
 	return success;
 }
-
-// Parse Acknowledge signal from base station
-/*int parse_ack(char *packet, unsigned int length, char *base_addr){
-	int success = 0;
-	int j;
-
-	// Check frame type
-	if (packet[3]==0x90){
-
-		// Check data
-		if ((packet[15] == 'A') && (length == 13)){
-			success = 1;
-			// Extract base address
-			for (j=0; j<8; j++){
-				base_addr[j] = packet[j+4];
-			}
-		}
-	}
-
-	return success;
-}*/
-
-// Parse (Sensing) start signal from base station
-/*int parse_start(char *packet, unsigned int length, unsigned int *sample_period){
-	int success = 0;
-
-	// Check frame type
-	if (packet[3]==0x90){
-
-		// Check data
-		if ((packet[15] == 'S') && (length == 14)){
-			success = 1;
-			*sample_period = (unsigned int) packet[16]; // 1-byte sample period
-		}
-	}
-
-	return success;
-}*/
 
 /* Parse (Sensing) stop signal from base station
  * - Does not authenticate stop signal yet
@@ -184,7 +96,6 @@ int parse_stop(char *packet, unsigned int length, char *origin){
 /* Parse Debug mode broadcast signal
  * - Return range: 0 - 15
  */
-//unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num){
 unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num, int *parameter){
     int success = 0;
 
@@ -397,51 +308,6 @@ unsigned int parse_setnodeid(char *packet, char *node_id){
     return length;
 }
 
-/* Parse AT Command Query response
- */
-int parse_atcom_query(char *packet, unsigned int length, int parameter, char *parsedparam){
-    int paramlen = 0;
-
-    // Check frame type
-    if ((packet[3] == 0x88) && (length >= 5)){
-
-        // Check AT parameter
-        // - packet[8] onwards
-        switch(parameter){
-        case PARAM_PL:
-            if ((packet[5] == 'P') && (packet[6] == 'L')){
-                parsedparam[0] = packet[8];
-                paramlen = 1;
-            }
-            break;
-
-        case PARAM_WR:
-            if ((packet[5] == 'W') && (packet[6] == 'R')){
-                parsedparam[0] = packet[7]; //command status
-                paramlen = 1;
-            }
-            break;
-
-        case PARAM_ID:
-            if ((packet[5] == 'I') && (packet[6] == 'D')){
-                parsedparam[0] = packet[8];
-                parsedparam[1] = packet[9];
-                paramlen = 2;
-            }
-            break;
-
-        case PARAM_MR:
-            if ((packet[5] == 'M') && (packet[6] == 'R')){
-                parsedparam[0] = packet[8];
-                paramlen = 1;
-            }
-            break;
-        }
-    }
-
-    return paramlen;
-}
-
 /* Parse Transmit Status
  * length - header + payload + checksum (3 + x + 1)
  * returns 1 on success
@@ -458,37 +324,6 @@ int parse_txstat(char *packet, unsigned int length, char *delivery_p){
     }else{
         return 0;
     }
-}
-
-/* Parsed Parameter Set
- * chgparam (int) - Change AT parameter type
- * paramval (uint) - parameter value
- * parsedparam - parameter value (first 2 bytes AT command, succeeding bytes parameter)
- * returns parsedparam length (sans first 2 elements)
- */
-unsigned int set_parsedparam(int chgparam, unsigned int paramval, char *parsedparam){
-
-    unsigned int parsedparam_len = 0;
-
-    switch(chgparam){
-
-    case CHGPL:
-        parsedparam_len = 1;
-        parsedparam[0] = 'P';
-        parsedparam[1] = 'L';
-        parsedparam[2] = (char)(paramval & 0x00ff);
-        break;
-
-    case CHGCH:
-        parsedparam_len = 1;
-        parsedparam[0] = 'C';
-        parsedparam[1] = 'H';
-        parsedparam[2] = (char)(paramval & 0x00ff);
-        break;
-
-    }
-
-    return parsedparam_len;
 }
 
 /* Converts integer-encoded AT parameter into string

@@ -5,12 +5,7 @@
 /* Function Prototypes */
 
 int parse_header(void);
-
-//int parse_ack(char *packet, unsigned int length, char *base_addr);
-//int parse_start(char *packet, unsigned int length, unsigned int *sample_period);
 int parse_stop(char *packet, unsigned int length, char *origin);
-
-//unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num);
 unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *num, int *parameter);
 void parse_setaddr(char *packet, char *address);
 void parse_srcaddr(char *packet, char *address);
@@ -20,18 +15,14 @@ unsigned int set_parsedparam(int chgparam, unsigned int paramval, char *parsedpa
 void parameter_to_str(int parameter, char *atcom);
 
 #ifdef SENSOR_BATT
-//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
 int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out);
 unsigned int Battery_supply_nonreg(void);
 void batt_charge(int *charge_flagp, unsigned int batt, unsigned int batt_lo, unsigned int batt_hi);
 #else
-//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count);
 int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count);
 #endif
 
-//void transmitreq(char *tx_data, int tx_data_len, char *dest_addr, char *txbuf);
 void transmitreq(int tx_data_len, char *dest_addr, char *txbuf);
-//void atcom(char com0, char com1, char *paramvalue, int paramlen, char *txbuf);
 void atcom(int parameter, char *paramvalue, int paramlen, char *txbuf);
 void append_nodeinfo(char *txbuf, unsigned int *txbuf_i, char *node_id, unsigned int node_id_len, char *node_loc, unsigned int node_loc_len);
 
@@ -46,9 +37,7 @@ void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned i
 
 void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p);
 int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
-//int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata);
 int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, int parameter, char *returndata);
-//void param_to_atcom(int param, char *com0, char *com1);
 int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *parsedparam_len);
 
 /* Global Variables */
@@ -76,19 +65,13 @@ int main(void) {
 #endif
     static char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
 
-    /** Constant messages **/
-    //static char stopACK[] = "XA"; // Stop command acknowledge
-    //static char startACK[] = "SA"; // Start command acknowledge
-
-	/* Global Variables */
-
 	/** Local counters **/
 	unsigned int i,j;
 
 	/** Address Storage **/
 	char node_address[8]; // Node XBee address
 	char unicast_addr[8]; // Base station address
-	char origin_addr[8]; //
+	char origin_addr[8];
 
 	/** Node ID **/
 	char node_id[MAXIDLEN];
@@ -100,7 +83,6 @@ int main(void) {
 	unsigned int sleep_time;
 
 	/** Transmit buffer **/
-	//char tx_data[MAXDATA]; // Data buffer, data to transmit
 	char txbuf[MAXPAYLOAD]; // Transmit buffer, payload only (w/o headers and checksum)
 	unsigned int tx_count;
 	unsigned int temp_uint;
@@ -118,15 +100,13 @@ int main(void) {
 	char flash_data[64];
 	char *flash_addr;
 	char valid_segC;
-    //unsigned int test_id_len;
-    //unsigned int test_loc_len;
-    //char test_id[31], test_loc[31];
-
 
 	/** Configuration and flags **/
+
 	unsigned int sample_period;
 	int stop_flag;
 	unsigned int sensor_flag;
+
 	// Control flag (enabled if 0)
 	// [7] - autostart sensing on boot
 	char ctrl_flag;
@@ -207,7 +187,6 @@ int main(void) {
     sample_period = SAMPLE_PERIOD;
 
     /* Initialize Node ID/Loc */
-    //read_segD(test_id, &test_id_len, test_loc, &test_loc_len);
     read_segD(node_id, &node_id_len, node_loc, &node_loc_len);
 
     // Node ID
@@ -258,8 +237,6 @@ int main(void) {
     		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_RTS2;
-    		//atcom_enrts();
-    		//atcom('D', '6', parsedparam, 0, txbuf);
     		atcom(PARAM_D6, parsedparam, 0, txbuf);
 
     		P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
@@ -271,7 +248,6 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'D', '6', node_address)){
                 if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_D6, node_address)){
                     state = S_BOOTUP1;
                 }
@@ -284,8 +260,6 @@ int main(void) {
     		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_ADDR2;
-    		//atcom_shsl(1);
-    		//atcom('S', 'H', parsedparam, 0, txbuf);
     		atcom(PARAM_SH, parsedparam, 0, txbuf);
 
     		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
@@ -298,8 +272,7 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-    		    //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'H', node_address)){
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_SH, node_address)){
+    		    if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_SH, node_address)){
                     state = S_ADDR3;
                 }
     		}
@@ -311,8 +284,6 @@ int main(void) {
     		//P3OUT |= 0x40;	// nRTS to 1 (UART Rx disable)
 
     		state = S_ADDR4;
-    		//atcom_shsl(2);
-    		//atcom('S', 'L', parsedparam, 0, txbuf);
     		atcom(PARAM_SL, parsedparam, 0, txbuf);
 
     		//P3OUT &= 0xbf;	// nRTS to 0 (UART Rx enable)
@@ -325,8 +296,7 @@ int main(void) {
     			parse_header();
     		}
     		else{
-    		    //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'L', node_address)){
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_SL, node_address)){
+    		    if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_SL, node_address)){
                     if (ctrl_flag & 0x80){ // ctrl_flag[7] == '1'
                         state = S_DEBUG;
                     }else{ // autostart
@@ -350,8 +320,6 @@ int main(void) {
     	        panid[0] = (char)(temp_uint >> 8);
     	        panid[1] = (char)(temp_uint & 0x00ff);
     	    }
-    	    //atcom_id_set(temp_uint);
-    	    //atcom('I', 'D', panid, 2, txbuf);
     	    atcom(PARAM_ID, panid, 2, txbuf);
 
     	    //P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
@@ -363,7 +331,6 @@ int main(void) {
                 parse_header();
             }
             else{
-                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'I', 'D', node_address)){
                 if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_ID, node_address)){
                     state = S_BOOTUP3;
                 }
@@ -376,17 +343,9 @@ int main(void) {
 
             state = S_BOOTUP4;
             /* Get value from flash if it exists */
-            /*if (!(valid_segC & 0x80)){
-                temp_uint = channel;
-            }else{
-                channel = (char)XBEE_CH;
-                temp_uint = XBEE_CH;
-            }*/
             if (valid_segC & 0x80){
                 channel = (char)XBEE_CH;
             }
-            //atcom_ch_set(temp_uint);
-            //atcom('C', 'H', &channel, 1, txbuf);
             atcom(PARAM_CH, &channel, 1, txbuf);
 
             //P3OUT &= 0xbf;  // nRTS to 0 (UART Rx enable)
@@ -398,7 +357,6 @@ int main(void) {
                 parse_header();
             }
             else{
-                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', node_address)){
                 if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_CH, node_address)){
                     state = S_ADDR1;
                 }
@@ -421,61 +379,25 @@ int main(void) {
    			//j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
    			j = buildSense(txbuf,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 
-   			/* Append node_id */
-   			//tx_data[j] = 0x07;
-   			/*txbuf[j] = 0x07;
-   			j++;
-   			for (i=0; i<node_id_len; i++){
-   			    //tx_data[j] = node_id[i];
-   			    txbuf[j] = node_id[i];
-   			    j++;
-   			}*/
-
-   			/* Append node_loc */
-            //tx_data[j] = ':';
-   			/*txbuf[j] = ':';
-            j++;
-   			for (i=0; i<node_loc_len; i++){
-   			    //tx_data[j] = node_loc[i];
-   			    txbuf[j] = node_loc[i];
-   			    j++;
-   			}*/
-
    			append_nodeinfo(txbuf, &j, node_id, node_id_len, node_loc, node_loc_len);
 
 #ifdef DEBUG_CHARGING
    			/* Append charge_flag to packet */
-   			//tx_data[j] = (char)(charge_flag & 0x00ff);
    			txbuf[j] = (char)(charge_flag & 0x00ff);
    			j++;
 #endif
 
 #else
-   			//j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
    			j = buildSense(txbuf,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
 
 #ifdef SENSOR_BATT
             /* Charging state */
-            /*if (charge_flag == 0){ // Discharging
-                if (batt < batt_lo){
-                    charge_flag = 1;
-                    P1OUT |= 0x20; // Set P1.5 to enable charging
-                }
-            }
-            else{ // Charging
-                if (batt > batt_hi){
-                    charge_flag = 0;
-                    P1OUT &= 0xdf; // Reset P1.5 to disable charging
-                }
-            }*/
-
             batt_charge(&charge_flag, batt, batt_lo, batt_hi);
 #endif
 
    			/* Transmit */
 #ifdef BROADCAST
-   			//transmitreq(tx_data, j, broadcast_addr, txbuf);
             transmitreq(j, broadcast_addr, txbuf);
 #else
    			//transmitreq(tx_data, j, unicast_addr, txbuf);
@@ -543,7 +465,6 @@ int main(void) {
 
     		state = S_STOPRES;
     		/* Transmit */
-   			//transmitreq(stopACK, 2, origin_addr, txbuf);
     		txbuf[14] = 'X';
     		txbuf[15] = 'A';
     		transmitreq(16, origin_addr, txbuf);
@@ -573,7 +494,6 @@ int main(void) {
     	    state = S_STARTRES;
 
     	    /* Transmit */
-    	    //transmitreq(startACK, 2, origin_addr, txbuf);
     	    txbuf[14] = 'S';
     	    txbuf[15] = 'A';
     	    transmitreq(16, origin_addr, txbuf);
@@ -610,19 +530,6 @@ int main(void) {
     			batt = Battery_supply_nonreg();
     			timer_flag = 0; // Reset timer flag
     		}
-
-    		/*if (charge_flag == 0){ // Discharging
-    		    if (batt < batt_lo){
-    		        charge_flag = 1;
-    		        P1OUT |= 0x20; // Set P1.5 to enable charging
-    		    }
-    		}
-    		else{ // Charging
-    		    if (batt > batt_hi){
-    		        charge_flag = 0;
-    		        P1OUT &= 0xdf; // Reset P1.5 to disable charging
-    		    }
-    		}*/
 
     		batt_charge(&charge_flag, batt, batt_lo, batt_hi);
 #endif
@@ -666,21 +573,10 @@ int main(void) {
     					case CHGPL:
     					case CHGCH:
     					case CHGMR:
-                            //state = S_DPLRES;
     					    state = S_DATRES;
     					    parsedparam[0] = (char)(temp_uint & 0x00ff);
-    					    //atcom('P', 'L', parsedparam, 1, txbuf);
     					    atcom(parameter, parsedparam, 1, txbuf);
-    					    //parsedparam_len = set_parsedparam(j, temp_uint, parsedparam);
-    					    //atcom(parsedparam[0], parsedparam[1], (parsedparam + 2), parsedparam_len, txbuf);
-    			    		break;
-
-    					// Change CH
-    					/*case CHGCH:
-    						state = S_DCHRES;
-    					    channel = (char)(temp_uint & 0x00ff);
-    					    atcom('C', 'H', &channel, 1, txbuf);
-							break;*/
+    					    break;
 
     					// Start sensing
     					case START:
@@ -699,13 +595,6 @@ int main(void) {
     					case QUEPL:
     					case QUEMR:
     						state = S_DQRES1;
-    						/*switch (j){
-    						case QUEPL:
-    						    parameter = PARAM_PL; break;
-    						case QUEMR:
-    						    parameter = PARAM_MR; break;
-
-    						}*/
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
 
@@ -713,30 +602,21 @@ int main(void) {
     					case QUESINK:
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    //tx_data[0] = 'Q';
-    					    //tx_data[1] = 'A';
     					    txbuf[14] = 'Q';
     					    txbuf[15] = 'A';
     					    for (i=0; i<8; i++)
-    					        //tx_data[i+2] = unicast_addr[i];
     					        txbuf[i+16] = unicast_addr[i];
-    					    //j = 10; // tx_data length
                             j = 24; // tx_data length
     					    break;
 
     					// Query sampling period
     					case QUEPER:
-    					//else if (j == QUEPER){
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    //tx_data[0] = 'Q';
-    					    //tx_data[1] = 'T';
     					    txbuf[14] = 'Q';
     					    txbuf[15] = 'T';
-    					    //tx_data[2] = (char)sample_period; //assumes period is only 8-bits
     					    if (sample_period < 256){
     					        txbuf[16] = (char)sample_period;
-    					        //j = 3; // tx_data length
     					        j = 17; // tx_data length
     					    }else{
     					        txbuf[16] = (char)(sample_period >> 8);
@@ -744,12 +624,10 @@ int main(void) {
     					        j = 18;
     					    }
     					    break;
-    					//}
 
     					// Commit radio settings to NVM
     					case COMMIT:
     					    state = S_DQRES1;
-    					    //parameter = PARAM_WR;
     					    parse_srcaddr(rxbuf,origin_addr);
     					    break;
 
@@ -777,21 +655,14 @@ int main(void) {
     					case QUESTAT:
     					    state = S_DQRES3;
                             parse_srcaddr(rxbuf,origin_addr);
-                            //tx_data[0] = 'Q';
-                            //tx_data[1] = 'S';
                             txbuf[14] = 'Q';
                             txbuf[15] = 'S';
                             // 1st parameter: sensetx
-                            //tx_data[2] = (char)(sensetx >> 8);
-                            //tx_data[3] = (char)(sensetx & 0x00ff);
                             txbuf[16] = (char)(sensetx >> 8);
                             txbuf[17] = (char)(sensetx & 0x00ff);
                             // 2nd parameter: sensetx_fail
-                            //tx_data[4] = (char)(sensetx_fail >> 8);
-                            //tx_data[5] = (char)(sensetx_fail & 0x00ff);
                             txbuf[18] = (char)(sensetx_fail >> 8);
                             txbuf[19] = (char)(sensetx_fail & 0x00ff);
-                            //j = 6; // tx_data length
                             j = 20; // tx_data length
                             break;
 
@@ -805,14 +676,9 @@ int main(void) {
     					case QUEFLAG:
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    //tx_data[0] = 'Q';
-    					    //tx_data[1] = 'F';
     					    txbuf[14] = 'Q';
     					    txbuf[15] = 'F';
-    					    // parameter: control flag
-    					    //tx_data[2] = ctrl_flag;
                             txbuf[16] = ctrl_flag;
-    					    //j = 3; // tx_data length
                             j = 17; // tx_data length
     					    break;
 
@@ -820,15 +686,11 @@ int main(void) {
     					case QUEVER:
     					    state = S_DQRES3;
     					    parse_srcaddr(rxbuf,origin_addr);
-    					    //tx_data[0] = 'Q';
-    					    //tx_data[1] = 'V';
                             txbuf[14] = 'Q';
                             txbuf[15] = 'V';
     					    for (i=0; i<FWVERLEN; i++){
-    					        //tx_data[i+2] = fwver[i];
                                 txbuf[i+16] = fwver[i];
     					    }
-    					    //j = 2 + FWVERLEN; // tx_data length
                             j = 16 + FWVERLEN; // tx_data length
     					    break;
     				}
@@ -857,38 +719,15 @@ int main(void) {
 
     			/* Assemble Packet Data */
 #ifdef SENSOR_BATT
-    			//j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
     			j = buildSense(txbuf,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 #else
-                //j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
                 j = buildSense(txbuf,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
-
-                /* Append node_id */
-                //tx_data[j] = 0x07;
-                /*txbuf[j] = 0x07;
-                j++;
-                for (i=0; i<node_id_len; i++){
-                    //tx_data[j] = node_id[i];
-                    txbuf[j] = node_id[i];
-                    j++;
-                }
-                //tx_data[j] = ':';
-                txbuf[j] = ':';
-                j++;*/
-
-                /* Append node_loc */
-                /*for (i=0; i<node_loc_len; i++){
-                    //tx_data[j] = node_loc[i];
-                    txbuf[j] = node_loc[i];
-                    j++;
-                }*/
 
                 append_nodeinfo(txbuf, &j, node_id, node_id_len, node_loc, node_loc_len);
 
     			/* Transmit */
-    			//transmitreq(tx_data, j, broadcast_addr, txbuf);
-                transmitreq(j, broadcast_addr, txbuf);
+    			transmitreq(j, broadcast_addr, txbuf);
 
     			/* Reset Timer flag */
     			timer_flag = 0;
@@ -913,38 +752,14 @@ int main(void) {
 
     		    /* Assemble Packet Data */
 #ifdef SENSOR_BATT
-    		    //j = buildSense(tx_data,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
     		    j = buildSense(txbuf,sensor_flag,tx_count,&batt); //10-byte data: {'D', tx_count, 8-byte data}
 #else
-    		    //j = buildSense(tx_data,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
     		    j = buildSense(txbuf,sensor_flag,tx_count); //10-byte data: {'D', tx_count, 8-byte data}
 #endif
-
-                /* Append node_id */
-    		    //tx_data[j] = 0x07;
-                /*txbuf[j] = 0x07;
-    		    j++;
-                for (i=0; i<node_id_len; i++){
-                    //tx_data[j] = node_id[i];
-                    txbuf[j] = node_id[i];
-                    j++;
-                }
-                //tx_data[j] = ':';
-                txbuf[j] = ':';
-                j++;*/
-
-                /* Append node_loc */
-                /*for (i=0; i<node_loc_len; i++){
-                    //tx_data[j] = node_loc[i];
-                    txbuf[j] = node_loc[i];
-                    j++;
-                }*/
-
-                append_nodeinfo(txbuf, &j, node_id, node_id_len, node_loc, node_loc_len);
+    		    append_nodeinfo(txbuf, &j, node_id, node_id_len, node_loc, node_loc_len);
 
     		    /* Transmit */
-    		    //transmitreq(tx_data, j, origin_addr, txbuf);
-                transmitreq(j, origin_addr, txbuf);
+    		    transmitreq(j, origin_addr, txbuf);
 
     		    /* Reset Timer flag */
     		    timer_flag = 0;
@@ -954,38 +769,20 @@ int main(void) {
     		break;
 #endif
 
-    	/* State: Debug wait for PL AT command response */
-    	//case S_DPLRES:
-        case S_DATRES:
+    	/* State: Debug wait for AT command response */
+    	case S_DATRES:
 
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
-    		    //parameter_to_str(parameter, parsedparam);
-    		    //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, parsedparam[0], parsedparam[1], &atres_status)){
                 if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, parameter, &atres_status)){
                     state = S_DEBUG;
                 }
     		}
     		break;
 
-		/* State: Debug wait for CH AT command response */
-		/*case S_DCHRES:
-
-			if (rxheader_flag == 0){
-				parse_header();
-			}else{
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', &atres_status)){
-                    state = S_DEBUG;
-                }
-			}
-			break;*/
-
 		/* State: Debug Query parameter */
 		case S_DQRES1:
-		    //param_to_atcom(parameter, &parsedparam[0], &parsedparam[1]);
-		    //atcom(parsedparam[0], parsedparam[1], &parsedparam[2], 0, txbuf);
 		    atcom(parameter, parsedparam, 0, txbuf);
 		    state = S_DQRES2;
 		    break;
@@ -1000,10 +797,7 @@ int main(void) {
 
 		            P3OUT |= 0x40; // UART Rx disable
 
-		            //j = parse_atcom_query(rxbuf, rxpsize, parameter, parsedparam); // j is parsed parameter length
 		            if (parse_atres(parameter, parsedparam, rxbuf, &parsedparam_len)){
-
-		            //if (j > 0){
                         txbuf[14] = 'Q';
 
                         /* Set txbuf[15:16] */
@@ -1056,7 +850,6 @@ int main(void) {
                 segment_wr(flash_addr, flash_data);
             }
 
-            //transmitreq(tx_data, j, origin_addr, txbuf);
             transmitreq(j, origin_addr, txbuf);
 	        state = S_DQRES4;
 

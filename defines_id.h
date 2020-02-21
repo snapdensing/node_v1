@@ -11,7 +11,6 @@ unsigned int node_id_len_default = 6; // length of node_id string
 unsigned int node_loc_len_default = 7; // length of node_loc string
 
 /* XBee parameter defaults */
-//char default_id[] = "\x7f\xff";
 #define XBEE_ID 0x7fff;
 #define XBEE_CH 0x0c;
 

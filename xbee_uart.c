@@ -9,8 +9,6 @@
 #include "defines.h"
 
 int parse_txstat(char *packet, unsigned int length, char *delivery_p);
-//int parse_atres(char com0, char com1, char *returndata, char *rxbuf);
-//int parse_atres(int parameter, char *returndata, char *rxbuf);
 int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *parsedparam_len);
 
 /* Reset receive buffer
@@ -36,8 +34,6 @@ int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_
 
     if (*rxctr_p >= (*rxpsize_p + 4)){
         P3OUT |= 0x40; // UART Rx disable
-        //success = parse_atres(com0, com1, returndata, rxbuf);
-        //success = parse_atres(parameter, returndata, rxbuf);
         success = parse_atres(parameter, returndata, rxbuf, &parsedparam_len);
 
         // Reset buffer
@@ -68,7 +64,6 @@ int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize
         parsed_txstat = parse_txstat(rxbuf, *rxpsize_p, &delivery);
 
         if (parsed_txstat == 1){
-            //*state_p = next_state;
             *tx_ctr_p = *tx_ctr_p + 1;
 
             /* Failed transmit ctr */
@@ -82,10 +77,6 @@ int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize
 
         // Reset buffer
         rst_rxbuf(rxheader_flag_p, rxctr_p, rxpsize_p);
-        /**rxctr_p = 0;
-        *rxheader_flag_p = 0;
-        *rxpsize_p = 0;
-        P3OUT &= 0xbf;*/ // UART Rx Enable
 
     }
 
@@ -113,13 +104,11 @@ void uarttx_xbee(char *txbuf, unsigned int length){
     /* Send payload and Compute checksum */
     for (i=0; i<length; i++){
         UCA0TXBUF = txbuf[i];
-        //checksum += (unsigned int)txbuf[i];
         checksum += txbuf[i];
         while (!(IFG2 & UCA0TXIFG));
     }
 
     /* Send checksum */
-    //checksum_c = 0xff - (char)(checksum & 0xff);
     checksum_c = 0xff - checksum;
     UCA0TXBUF = checksum_c;
     while (!(IFG2 & UCA0TXIFG));
@@ -135,8 +124,6 @@ void uarttx_xbee(char *txbuf, unsigned int length){
  *   length of assembled payload
  */
 void assemble_txreq(char *dest_addr, char *txbuf){
-//unsigned int assemble_txreq(char *dest_addr, char *data, int data_len, char *txbuf){
-    //unsigned int i, length;
     unsigned int i;
 
     /* Frame type */
@@ -160,17 +147,7 @@ void assemble_txreq(char *dest_addr, char *txbuf){
     /* Transmit options */
     txbuf[13] = 0x00;
 
-    /* Data */
-    /*length = 14; //initial length (no data yet)
-    for (i=0; i<data_len; i++){
-        txbuf[14+i] = data[i];
-        length++;
-    }*/
-
-    /* Data - already assembled prior */
-    //length = data_len;
-
-    //return length;
+    /* Data - already assembled prior to function call */
 }
 
 /* UART assemble AT command frame
@@ -204,35 +181,3 @@ unsigned int assemble_atcom(char *atcom, char *paramvalue, int paramlen, char *t
 
     return length;
 }
-
-/* Parameter to AT command LUT
- *
- */
-
-/*void param_to_atcom(int param, char *com0, char *com1){
-
-    switch(param){
-    case PARAM_PL:
-        *com0 = 'P';
-        break;
-
-    case PARAM_WR:
-        *com0 = 'W';
-        break;
-
-    case PARAM_MR:
-        *com0 = 'M';
-        break;
-    }
-
-    switch(param){
-    case PARAM_PL:
-        *com1 = 'L';
-        break;
-
-    case PARAM_WR:
-    case PARAM_MR:
-        *com1 = 'R';
-        break;
-    }
-}*/

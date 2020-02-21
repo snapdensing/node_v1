@@ -20,10 +20,8 @@ unsigned int Battery_supply_nonreg(void);
 
 #ifdef SENSOR_BATT
 int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out){
-//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count, unsigned int *batt_out){
 #else
 int buildSense(char *txbuf, unsigned int sensor_flag, unsigned int tx_count){
-//int buildSense(char *tx_data, unsigned int sensor_flag, unsigned int tx_count){
 #endif
 
 	int temp_int;
