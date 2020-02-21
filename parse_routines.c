@@ -8,6 +8,8 @@
 #include <msp430.h>
 #include "defines.h"
 
+void parameter_to_str(int parameter, char *atcom);
+
 /* Parse AT Command Response
  * Currently supported AT command responses
  * - SH (Upper address)
@@ -213,6 +215,12 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 				success = CHGPL;
 				*num = (unsigned int) packet[17];
 				*parameter = PARAM_PL;
+			}else if (length == 16){
+			    if (packet[17] == 'L'){
+			        success = CHGPL;
+			        *num = (unsigned int) packet[18];
+			        *parameter = PARAM_PL;
+			    }
 			}
 			break;
 
