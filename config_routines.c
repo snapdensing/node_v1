@@ -18,7 +18,6 @@
  */
 //unsigned int detect_sensor(void){
 void detect_sensor(unsigned int *sensor_flagp){
-	//unsigned int sensor;
 
 	*sensor_flagp = 0;
 
