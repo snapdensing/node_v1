@@ -86,6 +86,7 @@
 #define PARAM_D6    5
 #define PARAM_SH    6
 #define PARAM_SL    7
+#define PARAM_NH    8
 
 /** Debug parse return values **/
 #define CHGSINK  7
@@ -108,6 +109,8 @@
 #define QUEVER   18
 #define QUEMR    19
 #define CHGMR    20
+#define CHGNH    21
+#define QUENH    22
 
 /** Battery charging thresholds **/
 #define BATT_VTHLO 0x02e0 // 3.6V

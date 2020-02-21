@@ -34,6 +34,7 @@ int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *pars
 		    case PARAM_D6:
 		    case PARAM_SH:
 		    case PARAM_SL:
+		    case PARAM_NH:
 		        success = 1;
 		        break;
 		    }
@@ -54,6 +55,7 @@ int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *pars
 		    case PARAM_PL:
 		    case PARAM_CH:
 		    case PARAM_MR:
+		    case PARAM_NH:
 		        returndata[0] = rxbuf[8];
 		        *parsedparam_len = 1;
 		        break;
@@ -122,6 +124,16 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 				*parameter = PARAM_CH;
 			}
 			break;
+
+		case 'N':
+		    if (length == 16){
+		        if (packet[17] == 'H'){
+		            success = CHGNH;
+		            *num = (unsigned int) packet[18];
+		            *parameter = PARAM_NH;
+		        }
+		    }
+		    break;
 
 		case 'P':
 			if (length == 15){
@@ -195,6 +207,15 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 			if (length == 14)
 				success = QUESINK;
 			break;
+
+		case 'N':
+		    if (length == 15){
+		        if (packet[17] == 'H'){
+		            success = QUENH;
+		            *parameter = PARAM_NH;
+		        }
+		    }
+		    break;
 
 		case 'P':
 			if (length == 14){
@@ -348,6 +369,10 @@ void parameter_to_str(int parameter, char *atcom){
         atcom[0] = 'M';
         break;
 
+    case PARAM_NH:
+        atcom[0] = 'N';
+        break;
+
     case PARAM_PL:
         atcom[0] = 'P';
         break;
@@ -375,6 +400,7 @@ void parameter_to_str(int parameter, char *atcom){
 
     case PARAM_CH:
     case PARAM_SH:
+    case PARAM_NH:
         atcom[1] = 'H';
         break;
 

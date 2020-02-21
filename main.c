@@ -573,6 +573,7 @@ int main(void) {
     					case CHGPL:
     					case CHGCH:
     					case CHGMR:
+    					case CHGNH:
     					    state = S_DATRES;
     					    parsedparam[0] = (char)(temp_uint & 0x00ff);
     					    atcom(parameter, parsedparam, 1, txbuf);
@@ -594,6 +595,7 @@ int main(void) {
     					// Query XBee AT parameters
     					case QUEPL:
     					case QUEMR:
+    					case QUENH:
     						state = S_DQRES1;
     						parse_srcaddr(rxbuf,origin_addr);
     						break;
@@ -816,6 +818,7 @@ int main(void) {
 		                case PARAM_PL:
 		                case PARAM_WR:
 		                case PARAM_MR:
+		                case PARAM_NH:
 		                    state = S_DQRES3;
 		                    break;
 
