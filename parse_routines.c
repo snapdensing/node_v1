@@ -17,57 +17,96 @@
  * - CH
  */
 //int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length){
-int parse_atres(char com0, char com1, char *returndata, char *rxbuf){
-	int j;
+//int parse_atres(char com0, char com1, char *returndata, char *rxbuf){
+int parse_atres(int parameter, char *returndata, char *rxbuf){
+	int j, success;
+	char atcom[2];
+
+	success = 0;
+	parameter_to_str(parameter, atcom);
+
 	if (rxbuf[3]==0x88){
 
-		// Match received with parameter (ignore otherwise)
-		if ((rxbuf[5] == com0) && (rxbuf[6] == com1)){
+		// Command status OK and Match received with parameter (ignore otherwise)
+		if ((rxbuf[7] == 0x00) && (rxbuf[5] == atcom[0]) && (rxbuf[6] == atcom[1])){
+
+		    // Success return
+		    switch(parameter){
+		    case PARAM_PL:
+		    case PARAM_WR:
+		    case PARAM_ID:
+		    case PARAM_CH:
+		    case PARAM_MR:
+		    case PARAM_D6:
+		    case PARAM_SH:
+		    case PARAM_SL:
+		        success = 1;
+		        break;
+		    }
+
+		    // Return data for queries (ignored by caller if set)
+		    switch(parameter){
+
+		    // 4-byte parameter
+		    case PARAM_SH:
+		    case PARAM_SL:
+		        for (j=0; j<4; j++){
+                    returndata[j] = rxbuf[j+8];
+                }
+		        break;
+
+		    // 1-byte parameter
+		    case PARAM_PL:
+		    case PARAM_CH:
+		    case PARAM_MR:
+		        returndata[0] = rxbuf[8];
+		        break;
+		    }
 
 			// Parameter SH
-			if ((com0 == 'S') && (com1 == 'H')){
+			//if ((com0 == 'S') && (com1 == 'H')){
 				// Extract upper byte of address
-				for (j=0; j<4; j++){
-					returndata[j] = rxbuf[j+8];
-				}
-				return 1;
-			}
+				//for (j=0; j<4; j++){
+					//returndata[j] = rxbuf[j+8];
+				//}
+				//return 1;
+			//}
 
 			// Parameter SL
-			else if ((com0 == 'S') && (com1 == 'L')){
+			//else if ((com0 == 'S') && (com1 == 'L')){
 				// Extract lower byte of address
-				for (j=0; j<4; j++){
-					returndata[j+4] = rxbuf[j+8];
-				}
-				return 1;
-			}
+				//for (j=0; j<4; j++){
+					//returndata[j+4] = rxbuf[j+8];
+				//}
+				//return 1;
+			//}
 
 			// Parameter D6
-			else if ((com0 == 'D') && (com1 == '6')){
-				return 1;
-			}
+			//else if ((com0 == 'D') && (com1 == '6')){
+			//	return 1;
+			//}
 
 			// Parameter PL
-			else if ((com0 == 'P') && (com1 == 'L')){
+			//else if ((com0 == 'P') && (com1 == 'L')){
 				// Extract PL parameter value
-				returndata[0] = rxbuf[7];
-				return 1;
-			}
+				//returndata[0] = rxbuf[7];
+				//return 1;
+			//}
 
 			// Parameter CH
-			else if ((com0 == 'C') && (com1 == 'H')){
+			//else if ((com0 == 'C') && (com1 == 'H')){
 				// Extract CH parameter value
-				returndata[0] = rxbuf[7];
-				return 1;
-			}
+				//returndata[0] = rxbuf[7];
+				//return 1;
+			//}
 
 			// Parameter ID
-			else if ((com0 == 'I') && (com1 == 'D')){
-			    return 1;
-			}
+			//else if ((com0 == 'I') && (com1 == 'D')){
+			    //return 1;
+			//}
 		}
 	}
-	return 0;
+	return success;
 }
 
 // Parse Acknowledge signal from base station
@@ -212,6 +251,16 @@ unsigned int parse_debugpacket(char *packet, unsigned int length, unsigned int *
 		case 'F':
 		    success = CHGFLAG;
 		    *num = (unsigned int) packet[17];
+		    break;
+
+		case 'M':
+		    if (length == 16){
+		        if (packet[17] == 'R'){
+		            success = CHGMR;
+		            *num = (unsigned int) packet[18];
+		            *parameter = PARAM_MR;
+		        }
+		    }
 		    break;
 		}
 

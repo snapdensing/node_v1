@@ -46,7 +46,8 @@ void read_segC(char *validp, char *panid, char *channel, char *aggre, unsigned i
 
 void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p);
 int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, unsigned int *fail_ctr_p, unsigned int *tx_ctr_p);
-int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata);
+//int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata);
+int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, int parameter, char *returndata);
 //void param_to_atcom(int param, char *com0, char *com1);
 
 /* Global Variables */
@@ -69,7 +70,9 @@ int state;
 int main(void) {
 
     /** Constant Addresses **/
+#ifdef DEBUGTX_ENABLE
     static char broadcast_addr[] = "\x00\x00\x00\x00\x00\x00\xff\xff"; //broadcast
+#endif
     static char unicast_addr_default[]   = "\x00\x13\xA2\x00\x40\x9A\x0A\x81"; //unicast address (test)
 
     /** Constant messages **/
@@ -103,7 +106,7 @@ int main(void) {
 	char atres_status;
 	int parameter;
 	char parsedparam[8];
-	unsigned int parsedparam_len;
+	//unsigned int parsedparam_len;
 	char channel; // XBee channel
 	char panid[2]; // XBee ID
 
@@ -266,7 +269,8 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'D', '6', node_address)){
+                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'D', '6', node_address)){
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_D6, node_address)){
                     state = S_BOOTUP1;
                 }
     		}
@@ -292,7 +296,8 @@ int main(void) {
     		if (rxheader_flag == 0){
     			parse_header();
     		}else{
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'H', node_address)){
+    		    //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'H', node_address)){
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_SH, node_address)){
                     state = S_ADDR3;
                 }
     		}
@@ -318,7 +323,8 @@ int main(void) {
     			parse_header();
     		}
     		else{
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'L', node_address)){
+    		    //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'S', 'L', node_address)){
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_SL, node_address)){
                     if (ctrl_flag & 0x80){ // ctrl_flag[7] == '1'
                         state = S_DEBUG;
                     }else{ // autostart
@@ -355,7 +361,8 @@ int main(void) {
                 parse_header();
             }
             else{
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'I', 'D', node_address)){
+                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'I', 'D', node_address)){
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_ID, node_address)){
                     state = S_BOOTUP3;
                 }
             }
@@ -389,7 +396,8 @@ int main(void) {
                 parse_header();
             }
             else{
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', node_address)){
+                //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'C', 'H', node_address)){
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, PARAM_CH, node_address)){
                     state = S_ADDR1;
                 }
             }
@@ -655,6 +663,7 @@ int main(void) {
     					// Change AT parameter 1 byte
     					case CHGPL:
     					case CHGCH:
+    					case CHGMR:
                             //state = S_DPLRES;
     					    state = S_DATRES;
     					    parsedparam[0] = (char)(temp_uint & 0x00ff);
@@ -951,8 +960,9 @@ int main(void) {
     			parse_header();
     		}else{
                 //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, 'P', 'L', &atres_status)){
-    		    parameter_to_str(parameter, parsedparam);
-                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, parsedparam[0], parsedparam[1], &atres_status)){
+    		    //parameter_to_str(parameter, parsedparam);
+    		    //if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, parsedparam[0], parsedparam[1], &atres_status)){
+                if (rx_atres(&rxheader_flag, &rxctr, &rxpsize, rxbuf, parameter, &atres_status)){
                     state = S_DEBUG;
                 }
     		}

@@ -109,6 +109,7 @@
 #define QUEFLAG  17
 #define QUEVER   18
 #define QUEMR    19
+#define CHGMR    20
 
 /** Battery charging thresholds **/
 #define BATT_VTHLO 0x02e0 // 3.6V
