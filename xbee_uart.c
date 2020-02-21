@@ -10,7 +10,8 @@
 
 int parse_txstat(char *packet, unsigned int length, char *delivery_p);
 //int parse_atres(char com0, char com1, char *returndata, char *rxbuf);
-int parse_atres(int parameter, char *returndata, char *rxbuf);
+//int parse_atres(int parameter, char *returndata, char *rxbuf);
+int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *parsedparam_len);
 
 /* Reset receive buffer
  * - Includes UART Rx enable
@@ -30,12 +31,14 @@ void rst_rxbuf(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsiz
 //int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata){
 int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, int parameter, char *returndata){
 
+    unsigned int parsedparam_len;
     int success = 0;
 
     if (*rxctr_p >= (*rxpsize_p + 4)){
         P3OUT |= 0x40; // UART Rx disable
         //success = parse_atres(com0, com1, returndata, rxbuf);
-        success = parse_atres(parameter, returndata, rxbuf);
+        //success = parse_atres(parameter, returndata, rxbuf);
+        success = parse_atres(parameter, returndata, rxbuf, &parsedparam_len);
 
         // Reset buffer
         rst_rxbuf(rxheader_flag_p, rxctr_p, rxpsize_p);

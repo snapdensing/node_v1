@@ -49,6 +49,7 @@ int rx_txstat(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize
 //int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, char com0, char com1, char *returndata);
 int rx_atres(int *rxheader_flag_p, unsigned int *rxctr_p, unsigned int *rxpsize_p, char *rxbuf, int parameter, char *returndata);
 //void param_to_atcom(int param, char *com0, char *com1);
+int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *parsedparam_len);
 
 /* Global Variables */
 
@@ -106,9 +107,10 @@ int main(void) {
 	char atres_status;
 	int parameter;
 	char parsedparam[8];
-	//unsigned int parsedparam_len;
+	unsigned int parsedparam_len;
 	char channel; // XBee channel
 	char panid[2]; // XBee ID
+	char atcom_str[2];
 
 	unsigned int standby_sample = STANDBY_SAMPLEBATT; // Standby (Debug state) battery sample period
 
@@ -998,57 +1000,22 @@ int main(void) {
 
 		            P3OUT |= 0x40; // UART Rx disable
 
-		            j = parse_atcom_query(rxbuf, rxpsize, parameter, parsedparam); // j is parsed parameter length
-		            if (j > 0){
+		            //j = parse_atcom_query(rxbuf, rxpsize, parameter, parsedparam); // j is parsed parameter length
+		            if (parse_atres(parameter, parsedparam, rxbuf, &parsedparam_len)){
+
+		            //if (j > 0){
                         txbuf[14] = 'Q';
 
                         /* Set txbuf[15:16] */
-		                switch(parameter){
-		                case PARAM_PL:
-                            txbuf[15] = 'P';
-                            txbuf[16] = 'L';
-                            //txbuf[17] = parsedparam[0];
-                            //j = 18; // length of tx_data
-	                        //state = S_DQRES3;
-		                    break;
-
-		                case PARAM_WR:
-                            txbuf[15] = 'W';
-                            txbuf[16] = 'R';
-                            //txbuf[17] = parsedparam[0];
-                            //j = 18;
-		                    //state = S_DQRES3;
-		                    break;
-
-		                case PARAM_MR:
-		                    txbuf[15] = 'M';
-		                    txbuf[16] = 'R';
-		                    break;
-
-		                }
+		                parameter_to_str(parameter, atcom_str);
+		                txbuf[15] = atcom_str[0];
+		                txbuf[16] = atcom_str[1];
 
 		                /* Set parsed parameter (txbuf[17:]) */
-		                switch(parameter){
-
-		                // 1-byte
-		                case PARAM_PL:
-		                case PARAM_WR:
-		                case PARAM_MR:
-		                    txbuf[17] = parsedparam[0];
-		                    j = 18;
-		                    break;
-
-		                // 2-bytes:
-		                //case PARAM_MR:
-		                //    txbuf[17] = parsedparam[0];
-		                //    txbuf[18] = parsedparam[1];
-		                //    j = 19;
-		                //    break;
-
-		                default:
-		                    j = 17;
-		                    break;
+		                for (i=0; i<parsedparam_len; i++){
+		                    txbuf[17+i] = parsedparam[i];
 		                }
+		                j = 17 + parsedparam_len;
 
 		                /* Set next state */
 		                switch(parameter){

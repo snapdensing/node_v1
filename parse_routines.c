@@ -20,7 +20,7 @@ void parameter_to_str(int parameter, char *atcom);
  */
 //int parse_atres(char com0, char com1, char *returndata, char *packet, unsigned int length){
 //int parse_atres(char com0, char com1, char *returndata, char *rxbuf){
-int parse_atres(int parameter, char *returndata, char *rxbuf){
+int parse_atres(int parameter, char *returndata, char *rxbuf, unsigned int *parsedparam_len){
 	int j, success;
 	char atcom[2];
 
@@ -55,6 +55,7 @@ int parse_atres(int parameter, char *returndata, char *rxbuf){
 		        for (j=0; j<4; j++){
                     returndata[j] = rxbuf[j+8];
                 }
+		        *parsedparam_len = 4;
 		        break;
 
 		    // 1-byte parameter
@@ -62,6 +63,7 @@ int parse_atres(int parameter, char *returndata, char *rxbuf){
 		    case PARAM_CH:
 		    case PARAM_MR:
 		        returndata[0] = rxbuf[8];
+		        *parsedparam_len = 1;
 		        break;
 		    }
 
