@@ -7,7 +7,7 @@ This section lists the supported remote commands for configuration and operation
     - [Sampling period](#query_per)
     - [Statistics](#query_stat)
     - [Control flag](#query_flag)
-    - Firmware version
+    - [Firmware version](#query_fver)
     - XBee AT Parameters:
         - [Mesh Unicast Retries (MR)](#query_mr)
         - [Network Hops (NH)](#query_nh)
@@ -15,9 +15,9 @@ This section lists the supported remote commands for configuration and operation
 - Configure commands
     - [Sampling period](#config_per)
     - [Aggregator address](#config_aggre)
-    - Commit radio settings to NVM
-    - Node Info: Node ID
-    - Node Info: Node Location
+    - [Commit radio settings to NVM](#config_wr)
+    - [Node Info: Node ID](#config_nodeid)
+    - [Node Info: Node Location](#config_nodeloc)
     - [Control flag](#config_flag)
     - XBee AT Parameters:
         - [Radio channel (CH)](#config_ch)
@@ -40,6 +40,16 @@ Packet format: `'QA' (0x5141)`
 Node returns: `'QA'[Aggregator address] (0x5141[Aggregator address])`
 
 - `[Aggregator address]` is an 8-byte value of the aggregator's address.
+
+<a name="query_fver"></a>
+# Query Firmware Version
+Queries the MCU Firmware Version Node must be in standby state.
+
+Packet format: `'QV' (0x5156)`
+
+Node returns: `'QV[Version]' (0x5156[Version])`
+
+- `[Version]` is a variable-length ASCII-encoded string of the firmware version.
 
 <a name="query_flag"></a>
 # Query Control Flag
@@ -156,6 +166,34 @@ Packet format: `'DCH'[Channel] (0x444348[Channel])`
 # Change Sampling Period
 Changes the sampling period of remote node. Node must be in standby state.
 
-Packet format: `'DT[Sampling period]' (0x4454[Sampling period])`
+Packet format: `'DT'[Sampling period] (0x4454[Sampling period])`
 
 - `[Sampling Period]` is a 1-byte unsigned integer corresponding to the sampling period. (2-byte support is in the works)
+
+<a name="config_nodeid"></a>
+# Change Node Info: Node ID
+Changes the node ID section of the node information appended in the sensing data packet.
+
+Packet format: `'DI[Node ID]' (0x4449[Node ID])`
+
+- `[Node ID]` is a variable-length ASCII-encoded string. Its maximum value is set by `MAXIDLEN` (currently set to 20)
+
+<a name="config_nodeloc"></a>
+# Change Node Info: Node Location
+Changes the node location section of the node information appended in the sensing data packet.
+
+Packet format: `'DL[Node Loc]' (0x444C[Node Loc])`
+
+- `[Node Loc]` is a variable-length ASCII-encoded string. Its maximum value is set by `MAXLOCLEN` (currently set to 20)
+
+<a name="config_wr"></a>
+# Commit Radio Settings to NVM
+Writes all current parameters to MCU flash and XBee flash. During execution, a `WR` AT Command is sent to the XBee UART. Saved parameters include:
+- All XBee AT parameters (committed to XBee flash)
+- Node ID and Location
+- XBee channel, Pan ID (committed to MCU flash for bootup purposes)
+- Aggregator address
+- Sampling period
+- Control flag
+
+Packet format: `'QWR' (0x515752)`
