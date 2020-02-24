@@ -3,21 +3,27 @@
 This section lists the supported remote commands for configuration and operation of the node.
 
 - Query commands
-    - [Power level](#query_pl)
     - [Aggregator address](#query_aggre)
     - [Sampling period](#query_per)
     - [Statistics](#query_stat)
     - [Control flag](#query_flag)
     - Firmware version
+    - XBee AT Parameters:
+        - [Mesh Unicast Retries (MR)](#query_mr)
+        - [Network Hops (NH)](#query_nh)
+        - [Power level (PL)](#query_pl)
 - Configure commands
     - [Sampling period](#config_per)
-    - [Power level](#config_pl)
-    - [Radio channel](#config_ch)
     - [Aggregator address](#config_aggre)
     - Commit radio settings to NVM
     - Node Info: Node ID
     - Node Info: Node Location
     - [Control flag](#config_flag)
+    - XBee AT Parameters:
+        - [Radio channel (CH)](#config_ch)
+        - [Mesh Unicast Retries (MR)](#config_mr)
+        - [Network Hops (NH)](#config_nh)
+        - [Power level (PL)](#config_pl)
 - Operation commands
     - Start Sensing
     - Stop Sensing
@@ -46,13 +52,33 @@ Node returns: `'QF[Flag]' (0x5146[Flag])`
 - `[Flag]` is a 1-byte value of the MCU control flag. Bit fields are described below:
     - `Bit 7` specifies what state the node enters after boot-up. If `Bit 7` is `0`, the node enters the Sense state. Otherwise, it enters the Standby/Debug state.
 
+<a name="query_mr"></a>
+# Query Mesh Unicast Retries
+Queries the XBee maximum unicast retries of remote node. Node must be in standby state.
+
+Packet format: `'QMR' (0x514D52)`
+
+Node returns: `'QMR'[Max Retries] (0x514D52[Max Retries])`
+
+- `[Max Retries]` is a 1-byte value corresponding to the XBee maximum unicast retries. Range of values is from 0x00 to 0x07.
+
+<a name="query_nh"></a>
+# Query Network Hops
+Queries the XBee maximum network hops of remote node. Node must be in standby state.
+
+Packet format: `'QNH' (0x514E48)`
+
+Node returns: `'QNH'[Max Hops] (0x514E48[Max Hops])`
+
+- `[Max Hops]` is a 1-byte value corresponding to the XBee maximum unicast retries. Range of values is from 0x01 to 0x20.
+
 <a name="query_pl"></a>
 # Query Power Level
 Queries the XBee power level of remote node. Node must be in standby state.
 
-Packet format: `'QPL' (0x5150)`
+Packet format: `'QPL' (0x51504C)`
 
-Node returns: `'QPL'[Power Level] (0x5150[Power Level])`
+Node returns: `'QPL'[Power Level] (0x51504C[Power Level])`
 
 - `[Power Level]` is a 1-byte value corresponding to the XBee power level. Range of values is from 0x00 to 0x04.
 
@@ -93,6 +119,22 @@ Packet format: `'DF[Flag]' (0x4446[Flag])`
 
 - `[Flag]` is a 1-byte value of the MCU control flag. Bit fields are described below:
     - `Bit 7` specifies what state the node enters after boot-up. If `Bit 7` is `0`, the node enters the Sense state. Otherwise, it enters the Standby/Debug state.
+
+<a name="config_mr"></a>
+# Change Mesh Unicast Retries
+Changes the XBee maximum unicast retries of remote node. Node must be in standby state.
+
+Packet format: `'DMR'[Max Retries] (0x444D52[Max Retries])`
+
+- `[Max Retries]` is a 1-byte value corresponding to the XBee maximum unicast retries. Range of values is from 0x00 to 0x07.
+
+<a name="config_nh"></a>
+# Change Network Hops
+Changes the XBee maximum network hops of remote node. Node must be in standby state.
+
+Packet format: `'DNH[Max Hops]' (0x514E48[Max Hops])`
+
+- `[Max Hops]` is a 1-byte value corresponding to the XBee maximum unicast retries. Range of values is from 0x01 to 0x20.
 
 <a name="config_pl"></a>
 # Change Power Level
