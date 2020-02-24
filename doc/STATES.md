@@ -38,10 +38,12 @@ Catches the response for the AT Command Request made in [`S_DEBUG`](#S_DEBUG) wh
 
 # Modification Notes
 
-## Adding AT command support for queries
-When adding new AT commands for query, you will need to edit the following files/functions:
+## Adding AT parameter support for queries/set
+When adding new AT commands for query/set, you will need to edit the following files/functions:
 
-- `defines.h`: Add parameter encoding (`PARAM_XX`) and corresponding debug parse return values (for `parse_debugpacket()`).
-- `parse_debugpacket() (in parse_routines.c)`: Add coresponding return value.
-- `parse_atcom_query() (in parse_routines.c)`: Add AT command response parameter.
-- `param_to_atcom() (in xbee_uart.c)`: Add AT command to lookup table.
+- `defines.h`: Add parameter encoding (`PARAM_XX`) and corresponding debug parse return values (`CHGXX, QUEXX`).
+- `parameter_to_str()` (in parse_routines.c): Lookup table for translation from parameter encoding to AT parameter string.
+- `parse_debugpacket()` (in parse_routines.c): Add corresponding return value to option `CHGXX` and `QUEXX`.
+- `parse_atres()` (in parse_routines.c): Add AT command and parsed parameter (if query).
+- `main()`, state `S_DEBUG`: Add options `CHGXX` and `QUEXX`.
+- `main()`, state `S_DQRES2`: Add AT parameter.
